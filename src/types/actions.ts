@@ -1,9 +1,9 @@
 // src/types/actions.ts
 
 // Generic type for the action result
-export type ActionResult<T = void> =
+export type ActionResult<T = never> =
   | { success: true; data: T; message?: string }
-  | { success: false; message: string; fieldErrors?: Record<string, string[]> };
+  | { success: false; message: string; data?: never; fieldErrors?: Record<string, string[]>; formData?: Record<string, unknown> };
 
 // Generic type for an action that handles form data
 export type FormAction<T = void> = (

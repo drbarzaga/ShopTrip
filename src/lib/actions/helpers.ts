@@ -18,6 +18,17 @@ export function failure(
 }
 
 /**
+ * Convierte FormData a un objeto plano
+ */
+function formDataToObject(formData: FormData): Record<string, unknown> {
+  const data: Record<string, unknown> = {};
+  for (const [key, value] of formData.entries()) {
+    data[key] = value;
+  }
+  return data;
+}
+
+/**
  * Valida FormData con un schema de Zod
  * Retorna los datos validados si tiene éxito, o un ActionResult si falla
  * Incluye los datos originales en el error para mantener el estado del formulario
@@ -26,14 +37,9 @@ export function validate<T extends z.ZodTypeAny>(
   formData: FormData,
   schema: T
 ): z.infer<T> | ActionResult<never> {
-  // Convertir FormData a objeto (siempre lo hacemos para poder retornarlo en errores)
-  const data: Record<string, unknown> = {};
-  for (const [key, value] of formData.entries()) {
-    data[key] = value;
-  }
+  const data = formDataToObject(formData);
 
   try {
-    // Validar con Zod y retornar los datos directamente
     return schema.parse(data);
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -45,9 +51,42 @@ export function validate<T extends z.ZodTypeAny>(
         }
         fieldErrors[path].push(err.message);
       });
-      // Retornar los datos originales junto con los errores
       return failure("Validation failed", fieldErrors, data);
     }
     return failure("An unexpected error occurred", undefined, data);
   }
+}
+
+/**
+ * Helper para manejar la validación en actions de forma más legible
+ * Si la validación falla, retorna el error directamente
+ * Si tiene éxito, ejecuta la función callback con los datos validados
+ */
+// Type guard para verificar si es un ActionResult
+function isActionResult(value: unknown): value is ActionResult<never> {
+  return typeof value === "object" && value !== null && "success" in value;
+}
+
+export async function withValidation<
+  T extends z.ZodTypeAny,
+  TReturn extends ActionResult<unknown>
+>(
+  formData: FormData,
+  schema: T,
+  callback: (data: z.infer<T>) => Promise<TReturn> | TReturn
+): Promise<TReturn | ActionResult<never>> {
+  const result = validate(formData, schema);
+
+  // Si es un error de validación, retornarlo directamente
+  if (isActionResult(result) && !result.success) {
+    return result;
+  }
+
+  // Ejecutar el callback con los datos validados
+  const callbackResult = callback(result as z.infer<T>);
+
+  // Manejar tanto promesas como valores directos
+  return callbackResult instanceof Promise
+    ? await callbackResult
+    : callbackResult;
 }

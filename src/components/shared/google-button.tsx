@@ -1,9 +1,19 @@
+"use client";
+
 import React from "react";
 import { Button } from "../ui/button";
+import { authClient } from "@/lib/auth-client";
 
 export default function GoogleButton() {
+  const handleSignInWithGoogle = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/dashboard",
+    });
+  };
+
   return (
-    <Button type="button" variant="outline">
+    <Button type="button" variant="outline" onClick={handleSignInWithGoogle}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="0.98em"

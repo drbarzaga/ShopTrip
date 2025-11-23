@@ -99,7 +99,9 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
   };
 
   const totalPrice =
-    item.price && item.quantity ? item.price * item.quantity : item.price;
+    item.price !== null && item.quantity
+      ? item.price * item.quantity
+      : item.price ?? 0;
 
   return (
     <Card
@@ -233,7 +235,7 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                     <span>{item.quantity}</span>
                   </Badge>
                 )}
-                {item.price && (
+                {item.price !== null && (
                   <Badge
                     variant={purchased ? "outline" : "default"}
                     className={`h-6 gap-1 px-2.5 text-xs font-semibold transition-all ${
@@ -244,8 +246,8 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                   >
                     <DollarSign className="h-3 w-3" />
                     <span>
-                      <CurrencyFormatter amount={totalPrice} />
-                      {item.quantity && item.quantity > 1 && item.price && (
+                      <CurrencyFormatter amount={totalPrice ?? 0} />
+                      {item.quantity && item.quantity > 1 && item.price !== null && (
                         <span className="ml-1.5 text-[10px] opacity-75 font-normal">
                           · <CurrencyFormatter amount={item.price} /> c/u
                         </span>

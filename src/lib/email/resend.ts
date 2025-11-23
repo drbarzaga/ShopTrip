@@ -13,8 +13,3 @@ export const resend = resendInstance;
 // Usar el dominio verificado shoptrip.app
 export const FROM_EMAIL =
   process.env.RESEND_FROM_EMAIL || "noreply@shoptrip.app";
-export const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL ||
-  (process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000");

@@ -15,7 +15,12 @@ export default async function InvitationsPage() {
     redirect("/login");
   }
 
-  const invitations = await getUserInvitations(session.user.email || "");
+  const userEmail = session.user.email;
+  if (!userEmail) {
+    console.error("User email is not available in session");
+  }
+
+  const invitations = await getUserInvitations(userEmail || "");
 
   return (
     <div className="min-h-screen bg-background pb-16">

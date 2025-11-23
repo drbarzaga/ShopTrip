@@ -197,10 +197,13 @@ export const inviteMemberAction = async (
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7); // Invitación expira en 7 días
 
+      // Normalizar el email antes de guardarlo
+      const normalizedEmail = data.email.toLowerCase().trim();
+
       await db.insert(invitation).values({
         id: invitationId,
         organizationId: data.organizationId,
-        email: data.email,
+        email: normalizedEmail,
         role: data.role || "member",
         status: "pending",
         expiresAt: expiresAt,
@@ -296,6 +299,11 @@ export async function getOrganizationInvitations(organizationId: string) {
 
 export async function getUserInvitations(userEmail: string) {
   try {
+    if (!userEmail || userEmail.trim() === "") {
+      console.warn("getUserInvitations: userEmail is empty");
+      return [];
+    }
+
     const now = new Date();
     const invitations = await db
       .select({
@@ -312,13 +320,14 @@ export async function getUserInvitations(userEmail: string) {
       .innerJoin(organization, eq(organization.id, invitation.organizationId))
       .where(
         and(
-          eq(invitation.email, userEmail),
+          eq(invitation.email, userEmail.toLowerCase().trim()),
           eq(invitation.status, "pending"),
           gt(invitation.expiresAt, now)
         )
       )
       .orderBy(invitation.createdAt);
 
+    console.log(`Found ${invitations.length} invitations for email: ${userEmail}`);
     return invitations;
   } catch (error) {
     console.error("Error getting user invitations:", error);
@@ -334,6 +343,12 @@ export async function acceptInvitationAction(invitationId: string) {
       redirect("/login");
     }
 
+    // Normalizar el email del usuario
+    const userEmail = (session.user.email || "").toLowerCase().trim();
+    if (!userEmail) {
+      return await failure("No se pudo obtener el email del usuario");
+    }
+
     // Obtener la invitación
     const invitations = await db
       .select()
@@ -341,7 +356,7 @@ export async function acceptInvitationAction(invitationId: string) {
       .where(
         and(
           eq(invitation.id, invitationId),
-          eq(invitation.email, session.user.email || ""),
+          eq(invitation.email, userEmail),
           eq(invitation.status, "pending")
         )
       )
@@ -413,6 +428,12 @@ export async function rejectInvitationAction(invitationId: string) {
       redirect("/login");
     }
 
+    // Normalizar el email del usuario
+    const userEmail = (session.user.email || "").toLowerCase().trim();
+    if (!userEmail) {
+      return await failure("No se pudo obtener el email del usuario");
+    }
+
     // Actualizar la invitación como rechazada
     await db
       .update(invitation)
@@ -420,7 +441,7 @@ export async function rejectInvitationAction(invitationId: string) {
       .where(
         and(
           eq(invitation.id, invitationId),
-          eq(invitation.email, session.user.email || "")
+          eq(invitation.email, userEmail)
         )
       );
 

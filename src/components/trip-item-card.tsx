@@ -207,19 +207,32 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
 
   const totalPrice =
     item.price && item.quantity ? item.price * item.quantity : item.price;
+  
+  const deleteButtonWidth = Math.min(swipeOffset, DELETE_THRESHOLD);
+  const isDeleteThresholdReached = swipeOffset >= DELETE_THRESHOLD;
 
   return (
-    <div className="relative">
+    <div className="relative overflow-hidden rounded-lg">
       {/* Botón de eliminar que aparece al deslizar */}
       {canEdit && swipeOffset > 0 && (
         <div
-          className="absolute right-0 top-0 bottom-0 flex items-center justify-end pr-4 bg-destructive z-10 rounded-r-lg"
+          className="absolute right-0 top-0 bottom-0 flex items-center justify-center bg-gradient-to-l from-destructive to-destructive/90 z-10 rounded-r-lg shadow-lg"
           style={{
-            width: `${Math.min(swipeOffset, DELETE_THRESHOLD)}px`,
-            transition: isSwiping ? "none" : "width 0.2s ease-out",
+            width: `${deleteButtonWidth}px`,
+            transition: isSwiping ? "none" : "width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease-out",
+            opacity: swipeOffset > 10 ? 1 : swipeOffset / 10,
           }}
         >
-          <Trash2 className="h-5 w-5 text-destructive-foreground" />
+          <div
+            className={`flex items-center justify-center transition-all duration-300 ${
+              isDeleteThresholdReached ? "scale-110 rotate-0" : "scale-100 rotate-0"
+            }`}
+            style={{
+              transform: `scale(${1 + (swipeOffset / DELETE_THRESHOLD) * 0.1})`,
+            }}
+          >
+            <Trash2 className="h-5 w-5 text-destructive-foreground drop-shadow-sm" />
+          </div>
         </div>
       )}
       
@@ -227,13 +240,24 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
         ref={cardRef}
         className={`group relative overflow-hidden border transition-all duration-300 ${
           purchased
-            ? "bg-gradient-to-r from-green-50/60 via-green-50/30 to-background dark:from-green-950/30 dark:via-green-950/15 dark:to-background border-green-200/60 dark:border-green-800/50"
-            : "bg-card hover:shadow-xl hover:border-primary/60 hover:-translate-y-0.5"
-        } ${canEdit ? "cursor-grab active:cursor-grabbing" : ""}`}
+            ? "bg-gradient-to-r from-green-50/70 via-green-50/40 to-background dark:from-green-950/40 dark:via-green-950/20 dark:to-background border-green-300/60 dark:border-green-700/50"
+            : "bg-card hover:shadow-xl hover:border-primary/60"
+        } ${canEdit ? "cursor-grab active:cursor-grabbing" : ""} ${
+          swipeOffset > 0 ? "shadow-xl" : ""
+        }`}
         style={{
-          transform: swipeOffset > 0 ? `translateX(-${swipeOffset}px)` : "translateX(0)",
-          transition: isSwiping ? "none" : "transform 0.2s ease-out",
+          transform: swipeOffset > 0
+            ? `translateX(-${swipeOffset}px) scale(${1 - swipeOffset / 1000})`
+            : purchased
+            ? "translateX(0) scale(1)"
+            : "translateX(0) scale(1)",
+          transition: isSwiping ? "none" : "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease-out",
           touchAction: canEdit ? "pan-y" : "auto",
+          boxShadow: swipeOffset > 0
+            ? `0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(239, 68, 68, 0.1)`
+            : purchased
+            ? "0 4px 12px -2px rgba(34, 197, 94, 0.15)"
+            : undefined,
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -248,63 +272,63 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
         }`}
       />
 
-      <CardContent className="p-4 relative z-10">
+      <CardContent className="p-4 sm:p-5 relative z-10">
         <div className="flex items-start gap-4">
-          {/* Checkbox */}
+          {/* Checkbox mejorado */}
           <div className="pt-1 shrink-0 relative z-20">
             <Checkbox
               checked={purchased}
               onCheckedChange={handleToggle}
               disabled={isPending || !canEdit || !hasPrice}
-              className="h-5 w-5 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 relative z-20"
+              className="h-6 w-6 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 relative z-20 transition-all duration-200"
               title={!hasPrice ? "Agrega un precio para marcar como comprado" : ""}
             />
           </div>
 
-          {/* Icono con efecto */}
+          {/* Icono con efecto mejorado */}
           <div className="relative shrink-0">
             <div
-              className={`absolute -inset-1 rounded-xl blur-lg transition-opacity duration-300 ${
+              className={`absolute -inset-1.5 rounded-xl blur-xl transition-all duration-300 ${
                 purchased
-                  ? "bg-green-400/30 opacity-100"
-                  : "bg-primary/20 opacity-0 group-hover:opacity-100"
+                  ? "bg-green-400/40 opacity-100"
+                  : "bg-primary/25 opacity-0 group-hover:opacity-100"
               }`}
             />
             <div
-              className={`relative p-2.5 rounded-xl transition-all duration-300 ${
+              className={`relative p-3 rounded-xl transition-all duration-300 border ${
                 purchased
-                  ? "bg-gradient-to-br from-green-500/20 to-green-400/10 dark:from-green-500/30 dark:to-green-600/20 shadow-lg shadow-green-500/20"
-                  : "bg-gradient-to-br from-primary/15 to-primary/5 group-hover:from-primary/20 group-hover:to-primary/10 shadow-md shadow-primary/10"
+                  ? "bg-gradient-to-br from-green-500/25 to-green-400/15 dark:from-green-500/35 dark:to-green-600/25 shadow-lg shadow-green-500/25 border-green-300/30 dark:border-green-700/30"
+                  : "bg-gradient-to-br from-primary/20 to-primary/10 group-hover:from-primary/25 group-hover:to-primary/15 shadow-md shadow-primary/15 border-primary/20 group-hover:border-primary/30"
               }`}
             >
               {renderIcon()}
             </div>
           </div>
 
-          {/* Contenido principal */}
+          {/* Contenido principal mejorado */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-3 mb-2">
+            <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex-1 min-w-0">
                 <h3
-                  className={`font-semibold text-base leading-tight mb-1 transition-all duration-300 ${
+                  className={`font-bold text-lg leading-tight mb-1.5 transition-all duration-300 ${
                     purchased
-                      ? "line-through text-muted-foreground/60"
+                      ? "line-through text-muted-foreground/50"
                       : "text-foreground group-hover:text-primary"
                   }`}
                 >
                   <span className="line-clamp-2 break-words">{item.name}</span>
                 </h3>
                 {item.description && (
-                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-1">
+                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-2">
                     {item.description}
                   </p>
                 )}
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 {purchased && (
-                  <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5" />
+                  <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400 mt-0.5 animate-in fade-in zoom-in duration-200" />
                 )}
-                {canEdit && (
+                {canEdit && swipeOffset === 0 && (
                   <>
                     <EditTripItemDialog
                       item={{
@@ -318,7 +342,7 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 opacity-70 hover:opacity-100 transition-opacity"
+                          className="h-9 w-9 p-0 opacity-70 hover:opacity-100 transition-all duration-200 hover:bg-primary/10"
                           aria-label="Editar artículo"
                         >
                           <Pencil className="h-4 w-4" />
@@ -330,7 +354,7 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 opacity-70 hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                          className="h-9 w-9 p-0 opacity-70 hover:opacity-100 transition-all duration-200 text-destructive hover:text-destructive hover:bg-destructive/10"
                           aria-label="Eliminar artículo"
                           disabled={isDeleting}
                         >
@@ -341,7 +365,7 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                         <DialogHeader>
                           <DialogTitle>¿Eliminar artículo?</DialogTitle>
                           <DialogDescription>
-                            Esta acción no se puede deshacer. El artículo "{item.name}" será eliminado permanentemente.
+                            Esta acción no se puede deshacer. El artículo &quot;{item.name}&quot; será eliminado permanentemente.
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
@@ -369,28 +393,32 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
               </div>
             </div>
 
-            {/* Metadata inferior */}
+            {/* Metadata inferior mejorada */}
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-2 flex-wrap">
                 {item.quantity && item.quantity > 1 && (
                   <Badge
                     variant="outline"
-                    className="gap-1 px-2 py-0.5 text-xs border-muted-foreground/20"
+                    className="gap-1.5 px-3 py-1 text-xs font-semibold border-muted-foreground/30 bg-muted/50"
                   >
-                    <Package className="h-3 w-3" />
-                    <span className="font-medium">{item.quantity}</span>
+                    <Package className="h-3.5 w-3.5" />
+                    <span>{item.quantity}</span>
                   </Badge>
                 )}
                 {item.price && (
                   <Badge
                     variant={purchased ? "outline" : "default"}
-                    className="gap-1.5 px-2.5 py-1 text-xs font-semibold"
+                    className={`gap-1.5 px-3 py-1.5 text-sm font-bold transition-all duration-200 ${
+                      purchased
+                        ? "border-green-300/50 bg-green-50/50 dark:bg-green-950/30"
+                        : "bg-primary text-primary-foreground shadow-md"
+                    }`}
                   >
-                    <DollarSign className="h-3.5 w-3.5" />
+                    <DollarSign className="h-4 w-4" />
                     <span>
                       <CurrencyFormatter amount={totalPrice} />
                       {item.quantity && item.quantity > 1 && item.price && (
-                        <span className="ml-1.5 text-[10px] opacity-70 font-normal">
+                        <span className="ml-2 text-xs opacity-75 font-normal">
                           · <CurrencyFormatter amount={item.price} /> c/u
                         </span>
                       )}
@@ -399,21 +427,21 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                 )}
               </div>
 
-              {/* Información del comprador */}
+              {/* Información del comprador mejorada */}
               {purchased && item.purchasedByName && (
-                <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-green-100/80 dark:bg-green-900/30 border border-green-200/60 dark:border-green-800/40">
-                  <Avatar className="h-5 w-5 border border-green-300/50 dark:border-green-700/50">
+                <div className="flex items-center gap-2.5 px-3 py-2 rounded-full bg-green-100/90 dark:bg-green-900/40 border border-green-300/60 dark:border-green-700/50 shadow-sm animate-in fade-in slide-in-from-right-2 duration-300">
+                  <Avatar className="h-6 w-6 border-2 border-green-300/60 dark:border-green-700/60 shadow-sm">
                     {item.purchasedByImage && (
                       <AvatarImage
                         src={item.purchasedByImage}
                         alt={item.purchasedByName}
                       />
                     )}
-                    <AvatarFallback className="text-[10px] font-bold bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200">
+                    <AvatarFallback className="text-xs font-bold bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200">
                       {getInitials(item.purchasedByName)}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-xs font-medium text-foreground truncate max-w-[120px]">
+                  <span className="text-xs font-semibold text-foreground truncate max-w-[120px]">
                     {item.purchasedByName}
                   </span>
                 </div>

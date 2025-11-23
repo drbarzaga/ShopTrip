@@ -22,6 +22,15 @@ export const metadata: Metadata = {
     initialScale: 1,
     maximumScale: 5,
   },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [
+      { url: "/apple-icon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default function RootLayout({

@@ -153,18 +153,35 @@ export function TripCard({ trip, canDelete = false }: TripCardProps) {
     }
   }, [isSwiping, swipeOffset, canDelete]);
 
+  const deleteButtonWidth = Math.min(swipeOffset, DELETE_THRESHOLD);
+  const isDeleteThresholdReached = swipeOffset >= DELETE_THRESHOLD;
+
   return (
-    <div className="relative">
+    <div className="relative overflow-hidden rounded-lg">
       {/* Botón de eliminar que aparece al deslizar */}
       {canDelete && swipeOffset > 0 && (
         <div
-          className="absolute right-0 top-0 bottom-0 flex items-center justify-end pr-4 bg-destructive z-10 rounded-r-lg"
+          className="absolute right-0 top-0 bottom-0 flex items-center justify-center bg-gradient-to-l from-destructive to-destructive/90 z-10 rounded-r-lg shadow-lg"
           style={{
-            width: `${Math.min(swipeOffset, DELETE_THRESHOLD)}px`,
-            transition: isSwiping ? "none" : "width 0.2s ease-out",
+            width: `${deleteButtonWidth}px`,
+            transition: isSwiping
+              ? "none"
+              : "width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease-out",
+            opacity: swipeOffset > 10 ? 1 : swipeOffset / 10,
           }}
         >
-          <Trash2 className="h-5 w-5 text-destructive-foreground" />
+          <div
+            className={`flex items-center justify-center transition-all duration-300 ${
+              isDeleteThresholdReached
+                ? "scale-110 rotate-0"
+                : "scale-100 rotate-0"
+            }`}
+            style={{
+              transform: `scale(${1 + (swipeOffset / DELETE_THRESHOLD) * 0.1})`,
+            }}
+          >
+            <Trash2 className="h-5 w-5 text-destructive-foreground drop-shadow-sm" />
+          </div>
         </div>
       )}
 
@@ -172,12 +189,22 @@ export function TripCard({ trip, canDelete = false }: TripCardProps) {
         ref={cardRef}
         className={`group relative overflow-hidden border transition-all duration-300 ${
           canDelete ? "cursor-grab active:cursor-grabbing" : ""
-        } hover:border-primary/50 hover:shadow-md touch-manipulation active:scale-[0.98]`}
+        } hover:border-primary/50 hover:shadow-lg touch-manipulation ${
+          swipeOffset > 0 ? "shadow-xl" : ""
+        }`}
         style={{
           transform:
-            swipeOffset > 0 ? `translateX(-${swipeOffset}px)` : "translateX(0)",
-          transition: isSwiping ? "none" : "transform 0.2s ease-out",
+            swipeOffset > 0
+              ? `translateX(-${swipeOffset}px) scale(${1 - swipeOffset / 1000})`
+              : "translateX(0) scale(1)",
+          transition: isSwiping
+            ? "none"
+            : "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease-out",
           touchAction: canDelete ? "pan-y" : "auto",
+          boxShadow:
+            swipeOffset > 0
+              ? `0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(239, 68, 68, 0.1)`
+              : undefined,
         }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -185,49 +212,63 @@ export function TripCard({ trip, canDelete = false }: TripCardProps) {
         onMouseDown={handleMouseDown}
         onMouseLeave={handleMouseUp}
       >
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            {/* Icono decorativo */}
+        {/* Efecto de brillo sutil */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+        <CardContent className="p-4 sm:p-5 relative z-10">
+          <div className="flex items-start gap-4">
+            {/* Icono decorativo mejorado */}
             <div className="relative shrink-0">
-              <div className="absolute inset-0 bg-primary/10 rounded-lg blur-sm group-hover:bg-primary/20 transition-colors"></div>
-              <div className="relative bg-gradient-to-br from-primary/10 to-primary/5 p-3 rounded-lg">
-                <Plane className="h-5 w-5 text-primary" />
+              <div className="absolute inset-0 bg-primary/10 rounded-xl blur-md group-hover:bg-primary/20 transition-all duration-300 group-hover:blur-lg" />
+              <div className="relative bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 p-3.5 rounded-xl border border-primary/10 group-hover:border-primary/20 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-primary/10">
+                <Plane className="h-5 w-5 text-primary transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-5deg]" />
               </div>
             </div>
 
-            {/* Contenido */}
+            {/* Contenido mejorado */}
             <div className="flex-1 min-w-0 pr-2">
-              <div className="flex items-start justify-between gap-2 mb-1.5">
-                <h3 className="font-semibold text-base sm:text-lg truncate group-hover:text-primary transition-colors">
-                  {trip.name}
-                </h3>
-                <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground shrink-0 mt-0.5 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+              <div className="flex items-start justify-between gap-3 mb-2">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-lg sm:text-xl truncate group-hover:text-primary transition-colors duration-200 mb-1">
+                    {trip.name}
+                  </h3>
+                  {trip.destination && (
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2">
+                      <MapPin className="h-4 w-4 shrink-0 text-primary/60" />
+                      <span className="truncate font-medium">
+                        {trip.destination}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <ArrowRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1 group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" />
               </div>
 
-              {trip.destination && (
-                <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground mb-2">
-                  <MapPin className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{trip.destination}</span>
+              {(trip.startDate || trip.endDate) && (
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
+                  {trip.startDate && (
+                    <div className="flex items-center gap-2 bg-muted/50 px-2.5 py-1 rounded-md">
+                      <Calendar className="h-4 w-4 shrink-0 text-primary/60" />
+                      <span className="font-medium">
+                        {formatDate(trip.startDate)}
+                      </span>
+                    </div>
+                  )}
+                  {trip.endDate && trip.startDate && (
+                    <span className="hidden sm:inline text-muted-foreground/50">
+                      →
+                    </span>
+                  )}
+                  {trip.endDate && (
+                    <div className="flex items-center gap-2 bg-muted/50 px-2.5 py-1 rounded-md">
+                      <Calendar className="h-4 w-4 shrink-0 text-primary/60" />
+                      <span className="font-medium">
+                        {formatDate(trip.endDate)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
-
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs text-muted-foreground">
-                {trip.startDate && (
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5 shrink-0" />
-                    <span>{formatDate(trip.startDate)}</span>
-                  </div>
-                )}
-                {trip.endDate && trip.startDate && (
-                  <span className="hidden sm:inline">→</span>
-                )}
-                {trip.endDate && (
-                  <div className="flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5 shrink-0" />
-                    <span>{formatDate(trip.endDate)}</span>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
 

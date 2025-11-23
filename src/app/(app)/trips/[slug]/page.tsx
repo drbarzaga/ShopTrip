@@ -17,7 +17,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
-import { TripItemCard } from "@/components/trip-item-card";
+import { ItemsList } from "@/components/items-list";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CreateTripItemDialog } from "@/components/create-trip-item-dialog";
 import { EditTripDialog } from "@/components/edit-trip-dialog";
@@ -177,11 +177,7 @@ export default async function TripDetailPage({
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-2">
-              {items.map((item) => (
-                <TripItemCard key={item.id} item={item} canEdit={canEdit} />
-              ))}
-            </div>
+            <ItemsList items={items} canEdit={canEdit} />
           )}
         </div>
       </div>

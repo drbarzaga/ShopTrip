@@ -18,20 +18,20 @@ import {
 } from "@/components/ui/dialog";
 
 interface TripCardProps {
-  trip: {
-    id: string;
-    name: string;
-    slug: string;
-    destination: string | null;
-    startDate: Date | null;
-    endDate: Date | null;
+  readonly trip: {
+    readonly id: string;
+    readonly name: string;
+    readonly slug: string;
+    readonly destination: string | null;
+    readonly startDate: Date | null;
+    readonly endDate: Date | null;
   };
-  canDelete?: boolean;
+  readonly canDelete?: boolean;
 }
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("es-ES", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -58,128 +58,118 @@ export function TripCard({ trip, canDelete = false }: TripCardProps) {
   };
 
   return (
-    <div className="relative">
-      <Card className="group relative overflow-hidden border transition-all duration-300 hover:border-primary/50 hover:shadow-lg touch-manipulation">
-        {/* Efecto de brillo sutil */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+    <Card className="group relative overflow-hidden border border-border/50 bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-md">
+      <CardContent className="p-5">
+        <div className="flex items-start gap-4">
+          {/* Icono minimalista */}
+          <div className="relative shrink-0">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary/15 group-hover:scale-105">
+              <Plane className="h-5 w-5" />
+            </div>
+          </div>
 
-        <CardContent className="p-4 sm:p-5 relative z-10">
-          <div className="flex items-start gap-4">
-            {/* Icono decorativo mejorado */}
-            <div className="relative shrink-0">
-              <div className="absolute inset-0 bg-primary/10 rounded-xl blur-md group-hover:bg-primary/20 transition-all duration-300 group-hover:blur-lg" />
-              <div className="relative bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 p-3.5 rounded-xl border border-primary/10 group-hover:border-primary/20 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-primary/10">
-                <Plane className="h-5 w-5 text-primary transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-5deg]" />
+          {/* Contenido principal */}
+          <div className="flex-1 min-w-0 space-y-3">
+            {/* Header con título y acciones */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold leading-tight text-foreground transition-colors group-hover:text-primary">
+                  {trip.name}
+                </h3>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                {canDelete && (
+                  <Dialog
+                    open={deleteDialogOpen}
+                    onOpenChange={setDeleteDialogOpen}
+                  >
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10"
+                        aria-label="Eliminar viaje"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>¿Eliminar viaje?</DialogTitle>
+                        <DialogDescription>
+                          Esta acción no se puede deshacer. El viaje &quot;
+                          {trip.name}&quot; y todos sus artículos serán
+                          eliminados permanentemente.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                        <Button
+                          variant="outline"
+                          onClick={() => setDeleteDialogOpen(false)}
+                          disabled={isDeleting}
+                          className="w-full sm:w-auto"
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={handleDelete}
+                          disabled={isDeleting}
+                          className="w-full sm:w-auto"
+                        >
+                          {isDeleting ? "Eliminando..." : "Eliminar"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                )}
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:text-primary group-hover:translate-x-1" />
               </div>
             </div>
 
-            {/* Contenido mejorado */}
-            <div className="flex-1 min-w-0 pr-2">
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-lg sm:text-xl truncate group-hover:text-primary transition-colors duration-200 mb-1">
-                    {trip.name}
-                  </h3>
-                  {trip.destination && (
-                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2">
-                      <MapPin className="h-4 w-4 shrink-0 text-primary/60" />
-                      <span className="truncate font-medium">
-                        {trip.destination}
-                      </span>
-                    </div>
-                  )}
+            {/* Información secundaria */}
+            <div className="flex flex-col gap-2">
+              {trip.destination && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <MapPin className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{trip.destination}</span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {canDelete && (
-                    <Dialog
-                      open={deleteDialogOpen}
-                      onOpenChange={setDeleteDialogOpen}
-                    >
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 opacity-70 hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
-                          aria-label="Eliminar viaje"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                          <DialogTitle>¿Eliminar viaje?</DialogTitle>
-                          <DialogDescription>
-                            Esta acción no se puede deshacer. El viaje &quot;
-                            {trip.name}&quot; y todos sus artículos serán
-                            eliminados permanentemente.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-                          <Button
-                            variant="outline"
-                            onClick={() => setDeleteDialogOpen(false)}
-                            disabled={isDeleting}
-                            className="w-full sm:w-auto"
-                          >
-                            Cancelar
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            onClick={handleDelete}
-                            disabled={isDeleting}
-                            className="w-full sm:w-auto"
-                          >
-                            {isDeleting ? "Eliminando..." : "Eliminar"}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  )}
-                  <ArrowRight className="h-5 w-5 text-muted-foreground shrink-0 mt-1 group-hover:text-primary group-hover:translate-x-1 transition-all duration-200" />
-                </div>
-              </div>
-
+              )}
               {(trip.startDate || trip.endDate) && (
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                   {trip.startDate && (
-                    <div className="flex items-center gap-2 bg-muted/50 px-2.5 py-1 rounded-md">
-                      <Calendar className="h-4 w-4 shrink-0 text-primary/60" />
-                      <span className="font-medium">
-                        {formatDate(trip.startDate)}
-                      </span>
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5 shrink-0" />
+                      <span>{formatDate(trip.startDate)}</span>
                     </div>
                   )}
                   {trip.endDate && trip.startDate && (
-                    <span className="hidden sm:inline text-muted-foreground/50">
-                      →
-                    </span>
+                    <span className="hidden sm:inline">→</span>
                   )}
                   {trip.endDate && (
-                    <div className="flex items-center gap-2 bg-muted/50 px-2.5 py-1 rounded-md">
-                      <Calendar className="h-4 w-4 shrink-0 text-primary/60" />
-                      <span className="font-medium">
-                        {formatDate(trip.endDate)}
-                      </span>
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5 shrink-0" />
+                      <span>{formatDate(trip.endDate)}</span>
                     </div>
                   )}
                 </div>
               )}
             </div>
           </div>
+        </div>
 
-          {/* Link para navegación */}
-          <Link
-            href={`/trips/${trip.slug}`}
-            className="absolute inset-0 z-0"
-            aria-label={`Ver detalles de ${trip.name}`}
-          />
-        </CardContent>
-      </Card>
-    </div>
+        {/* Link para navegación */}
+        <Link
+          href={`/trips/${trip.slug}`}
+          className="absolute inset-0 z-0"
+          aria-label={`Ver detalles de ${trip.name}`}
+        />
+      </CardContent>
+    </Card>
   );
 }

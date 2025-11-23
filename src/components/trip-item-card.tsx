@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, DollarSign, Package, Pencil, Trash2 } from "lucide-react";
+import { DollarSign, Package, Pencil, Trash2 } from "lucide-react";
 import { getItemIcon } from "@/lib/item-icons";
 import { toggleItemPurchasedAction, deleteTripItemAction } from "@/actions/trip-items";
 import { CurrencyFormatter } from "@/components/currency-formatter";
@@ -62,10 +62,10 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
     const IconComponent = getItemIcon(item.name);
     return (
       <IconComponent
-        className={`h-5 w-5 transition-all duration-300 ${
+        className={`h-4 w-4 transition-colors ${
           purchased
-            ? "text-green-700 dark:text-green-300 scale-110"
-            : "text-primary group-hover:scale-110"
+            ? "text-green-600 dark:text-green-400"
+            : "text-muted-foreground"
         }`}
       />
     );
@@ -102,82 +102,60 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
     item.price && item.quantity ? item.price * item.quantity : item.price;
 
   return (
-    <div className="relative">
-      <Card
-        className={`group relative overflow-hidden border transition-all duration-300 ${
-          purchased
-            ? "bg-gradient-to-r from-green-50/70 via-green-50/40 to-background dark:from-green-950/40 dark:via-green-950/20 dark:to-background border-green-300/60 dark:border-green-700/50"
-            : "bg-card hover:shadow-xl hover:border-primary/60"
-        }`}
-        style={{
-          boxShadow: purchased
-            ? "0 4px 12px -2px rgba(34, 197, 94, 0.15)"
-            : undefined,
-        }}
-      >
-      {/* Efecto de brillo sutil */}
-      <div
-        className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none ${
-          purchased ? "via-green-100/10" : "via-primary/5"
-        }`}
-      />
-
-      <CardContent className="p-4 sm:p-5 relative z-10">
+    <Card
+      className={`group relative overflow-hidden border transition-all duration-300 ${
+        purchased
+          ? "border-green-200/50 bg-green-50/30 dark:border-green-800/30 dark:bg-green-950/20"
+          : "border-border/50 bg-card hover:border-primary/30 hover:shadow-sm"
+      }`}
+    >
+      <CardContent className="p-5">
         <div className="flex items-start gap-4">
-          {/* Checkbox mejorado */}
-          <div className="pt-1 shrink-0 relative z-20">
+          {/* Checkbox */}
+          <div className="pt-0.5 shrink-0">
             <Checkbox
               checked={purchased}
               onCheckedChange={handleToggle}
               disabled={isPending || !canEdit || !hasPrice}
-              className="h-6 w-6 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 relative z-20 transition-all duration-200"
+              className="h-5 w-5 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
               title={!hasPrice ? "Agrega un precio para marcar como comprado" : ""}
             />
           </div>
 
-          {/* Icono con efecto mejorado */}
-          <div className="relative shrink-0">
+          {/* Icono */}
+          <div className="shrink-0">
             <div
-              className={`absolute -inset-1.5 rounded-xl blur-xl transition-all duration-300 ${
+              className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all ${
                 purchased
-                  ? "bg-green-400/40 opacity-100"
-                  : "bg-primary/25 opacity-0 group-hover:opacity-100"
-              }`}
-            />
-            <div
-              className={`relative p-3 rounded-xl transition-all duration-300 border ${
-                purchased
-                  ? "bg-gradient-to-br from-green-500/25 to-green-400/15 dark:from-green-500/35 dark:to-green-600/25 shadow-lg shadow-green-500/25 border-green-300/30 dark:border-green-700/30"
-                  : "bg-gradient-to-br from-primary/20 to-primary/10 group-hover:from-primary/25 group-hover:to-primary/15 shadow-md shadow-primary/15 border-primary/20 group-hover:border-primary/30"
+                  ? "bg-green-100 dark:bg-green-900/30"
+                  : "bg-muted/50 group-hover:bg-primary/10"
               }`}
             >
               {renderIcon()}
             </div>
           </div>
 
-          {/* Contenido principal mejorado */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-3 mb-3">
+          {/* Contenido principal */}
+          <div className="flex-1 min-w-0 space-y-2.5">
+            {/* Header con título y acciones */}
+            <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <h3
-                  className={`font-bold text-lg leading-tight mb-1.5 transition-all duration-300 ${
+                  className={`text-base font-medium leading-snug transition-all ${
                     purchased
-                      ? "line-through text-muted-foreground/50"
-                      : "text-foreground group-hover:text-primary"
+                      ? "line-through text-muted-foreground/60"
+                      : "text-foreground"
                   }`}
                 >
-                  <span className="line-clamp-2 break-words">{item.name}</span>
+                  {item.name}
                 </h3>
                 {item.description && (
-                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-2">
+                  <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
                     {item.description}
                   </p>
                 )}
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                {purchased && (
-                  <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400 mt-0.5 animate-in fade-in zoom-in duration-200" />
-                )}
                 {canEdit && (
                   <>
                     <EditTripItemDialog
@@ -191,8 +169,8 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                       trigger={
                         <Button
                           variant="ghost"
-                          size="sm"
-                          className="h-9 w-9 p-0 opacity-70 hover:opacity-100 transition-all duration-200 hover:bg-primary/10"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground transition-all hover:text-foreground hover:bg-accent"
                           aria-label="Editar artículo"
                         >
                           <Pencil className="h-4 w-4" />
@@ -203,8 +181,8 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                       <DialogTrigger asChild>
                         <Button
                           variant="ghost"
-                          size="sm"
-                          className="h-9 w-9 p-0 opacity-70 hover:opacity-100 transition-all duration-200 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground transition-all hover:text-destructive hover:bg-destructive/10"
                           aria-label="Eliminar artículo"
                           disabled={isDeleting}
                         >
@@ -243,32 +221,32 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
               </div>
             </div>
 
-            {/* Metadata inferior mejorada */}
+            {/* Metadata inferior */}
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-2 flex-wrap">
                 {item.quantity && item.quantity > 1 && (
                   <Badge
                     variant="outline"
-                    className="gap-1.5 px-3 py-1 text-xs font-semibold border-muted-foreground/30 bg-muted/50"
+                    className="h-6 gap-1 px-2 text-xs font-medium border-border/50 bg-muted/30"
                   >
-                    <Package className="h-3.5 w-3.5" />
+                    <Package className="h-3 w-3" />
                     <span>{item.quantity}</span>
                   </Badge>
                 )}
                 {item.price && (
                   <Badge
                     variant={purchased ? "outline" : "default"}
-                    className={`gap-1.5 px-3 py-1.5 text-sm font-bold transition-all duration-200 ${
+                    className={`h-6 gap-1 px-2.5 text-xs font-semibold transition-all ${
                       purchased
-                        ? "border-green-300/50 bg-green-50/50 dark:bg-green-950/30"
-                        : "bg-primary text-primary-foreground shadow-md"
+                        ? "border-green-300/50 bg-green-50/50 dark:bg-green-950/30 text-green-700 dark:text-green-300"
+                        : "bg-primary text-primary-foreground"
                     }`}
                   >
-                    <DollarSign className="h-4 w-4" />
+                    <DollarSign className="h-3 w-3" />
                     <span>
                       <CurrencyFormatter amount={totalPrice} />
                       {item.quantity && item.quantity > 1 && item.price && (
-                        <span className="ml-2 text-xs opacity-75 font-normal">
+                        <span className="ml-1.5 text-[10px] opacity-75 font-normal">
                           · <CurrencyFormatter amount={item.price} /> c/u
                         </span>
                       )}
@@ -277,21 +255,21 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                 )}
               </div>
 
-              {/* Información del comprador mejorada */}
+              {/* Información del comprador */}
               {purchased && item.purchasedByName && (
-                <div className="flex items-center gap-2.5 px-3 py-2 rounded-full bg-green-100/90 dark:bg-green-900/40 border border-green-300/60 dark:border-green-700/50 shadow-sm animate-in fade-in slide-in-from-right-2 duration-300">
-                  <Avatar className="h-6 w-6 border-2 border-green-300/60 dark:border-green-700/60 shadow-sm">
+                <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-green-100/80 dark:bg-green-900/30 border border-green-200/50 dark:border-green-800/30">
+                  <Avatar className="h-5 w-5 border border-green-300/50 dark:border-green-700/50">
                     {item.purchasedByImage && (
                       <AvatarImage
                         src={item.purchasedByImage}
                         alt={item.purchasedByName}
                       />
                     )}
-                    <AvatarFallback className="text-xs font-bold bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200">
+                    <AvatarFallback className="text-[10px] font-semibold bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200">
                       {getInitials(item.purchasedByName)}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-xs font-semibold text-foreground truncate max-w-[120px]">
+                  <span className="text-xs font-medium text-foreground truncate max-w-[100px]">
                     {item.purchasedByName}
                   </span>
                 </div>
@@ -301,6 +279,5 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
         </div>
       </CardContent>
     </Card>
-    </div>
   );
 }

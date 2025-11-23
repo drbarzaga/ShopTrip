@@ -183,12 +183,12 @@ export const inviteMemberAction = async (
         .limit(1);
 
       if (membership.length === 0) {
-        return await failure("You are not a member of this organization");
+        return await failure("No eres miembro de esta organización");
       }
 
       const userRole = membership[0].role;
       if (userRole !== "owner" && userRole !== "admin") {
-        return await failure("Only owners and admins can invite members");
+        return await failure("Solo los propietarios y administradores pueden invitar miembros");
       }
 
       // Crear invitación directamente en la base de datos
@@ -206,6 +206,30 @@ export const inviteMemberAction = async (
         expiresAt: expiresAt,
         inviterId: session.user.id,
       });
+
+      // Obtener información de la organización y el usuario que invita
+      const orgData = await db
+        .select({ name: organization.name })
+        .from(organization)
+        .where(eq(organization.id, data.organizationId))
+        .limit(1);
+
+      const inviterName = session.user.name || "Un usuario";
+
+      // Enviar email de invitación (no bloqueamos si falla)
+      try {
+        const { sendInvitationEmail } = await import("@/lib/email/send-invitation");
+        await sendInvitationEmail({
+          to: data.email,
+          organizationName: orgData[0]?.name || "una organización",
+          inviterName,
+          invitationId,
+          role: data.role || "miembro",
+        });
+      } catch (emailError) {
+        console.error("Error sending invitation email:", emailError);
+        // No fallamos la acción si el email falla, solo lo registramos
+      }
 
       return await success(undefined, "¡Invitación enviada exitosamente!");
     } catch (error) {

@@ -304,7 +304,28 @@ export async function getUserInvitations(userEmail: string) {
       return [];
     }
 
+    const normalizedEmail = userEmail.toLowerCase().trim();
+    console.log(`[getUserInvitations] Searching for invitations with email: "${normalizedEmail}"`);
+
     const now = new Date();
+    console.log(`[getUserInvitations] Current time: ${now.toISOString()}`);
+
+    // Primero, verificar si hay invitaciones sin el join para debug
+    const allInvitationsForEmail = await db
+      .select()
+      .from(invitation)
+      .where(eq(invitation.email, normalizedEmail));
+    
+    console.log(`[getUserInvitations] Total invitations found for email (before filters): ${allInvitationsForEmail.length}`);
+    if (allInvitationsForEmail.length > 0) {
+      console.log(`[getUserInvitations] Invitation statuses:`, allInvitationsForEmail.map(inv => ({
+        id: inv.id,
+        status: inv.status,
+        expiresAt: inv.expiresAt,
+        email: inv.email
+      })));
+    }
+
     const invitations = await db
       .select({
         id: invitation.id,
@@ -320,17 +341,21 @@ export async function getUserInvitations(userEmail: string) {
       .innerJoin(organization, eq(organization.id, invitation.organizationId))
       .where(
         and(
-          eq(invitation.email, userEmail.toLowerCase().trim()),
+          eq(invitation.email, normalizedEmail),
           eq(invitation.status, "pending"),
           gt(invitation.expiresAt, now)
         )
       )
       .orderBy(invitation.createdAt);
 
-    console.log(`Found ${invitations.length} invitations for email: ${userEmail}`);
+    console.log(`[getUserInvitations] Found ${invitations.length} valid invitations for email: ${normalizedEmail}`);
     return invitations;
   } catch (error) {
-    console.error("Error getting user invitations:", error);
+    console.error("[getUserInvitations] Error getting user invitations:", error);
+    if (error instanceof Error) {
+      console.error("[getUserInvitations] Error message:", error.message);
+      console.error("[getUserInvitations] Error stack:", error.stack);
+    }
     return [];
   }
 }

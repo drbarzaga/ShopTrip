@@ -4,6 +4,9 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { CheckCircle2, DollarSign, Package } from "lucide-react";
 import { getItemIcon } from "@/lib/item-icons";
 import { toggleItemPurchasedAction } from "@/actions/trip-items";
@@ -24,7 +27,20 @@ interface TripItemCardProps {
     price: number | null;
     quantity: number | null;
     purchased: boolean;
+    purchasedBy: string | null;
+    purchasedByName: string | null;
+    purchasedByImage: string | null;
   };
+}
+
+function getInitials(name: string | null | undefined): string {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 export function TripItemCard({ item }: TripItemCardProps) {
@@ -46,89 +62,125 @@ export function TripItemCard({ item }: TripItemCardProps) {
     });
   };
 
+  const totalPrice = item.price && item.quantity 
+    ? item.price * item.quantity 
+    : item.price;
+
   return (
     <Card
-      className={`border transition-all ${
+      className={`group relative overflow-hidden border transition-all duration-300 ${
         purchased
-          ? "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-800 opacity-75"
-          : "hover:bg-accent/50"
+          ? "bg-gradient-to-r from-green-50/60 via-green-50/30 to-background dark:from-green-950/30 dark:via-green-950/15 dark:to-background border-green-200/60 dark:border-green-800/50"
+          : "bg-card hover:shadow-xl hover:border-primary/60 hover:-translate-y-0.5"
       }`}
     >
-      <CardContent className="p-3 sm:p-4">
-        <div className="flex items-start gap-3">
-          {/* Checkbox y Icono */}
-          <div className="flex items-start gap-2.5 pt-0.5 shrink-0">
+      {/* Efecto de brillo sutil */}
+      <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none ${
+        purchased ? "via-green-100/10" : "via-primary/5"
+      }`} />
+      
+      <CardContent className="p-4 relative z-10">
+        <div className="flex items-start gap-4">
+          {/* Checkbox */}
+          <div className="pt-1 shrink-0 relative z-20">
             <Checkbox
               checked={purchased}
               onCheckedChange={handleToggle}
               disabled={isPending}
-              className="mt-1 h-5 w-5"
+              className="h-5 w-5 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 relative z-20"
             />
+          </div>
+
+          {/* Icono con efecto */}
+          <div className="relative shrink-0">
+            <div className={`absolute -inset-1 rounded-xl blur-lg transition-opacity duration-300 ${
+              purchased 
+                ? "bg-green-400/30 opacity-100" 
+                : "bg-primary/20 opacity-0 group-hover:opacity-100"
+            }`} />
             <div
-              className={`p-2.5 rounded-lg transition-colors shrink-0 ${
+              className={`relative p-2.5 rounded-xl transition-all duration-300 ${
                 purchased
-                  ? "bg-green-100 dark:bg-green-900/30"
-                  : "bg-primary/10"
+                  ? "bg-gradient-to-br from-green-500/20 to-green-400/10 dark:from-green-500/30 dark:to-green-600/20 shadow-lg shadow-green-500/20"
+                  : "bg-gradient-to-br from-primary/15 to-primary/5 group-hover:from-primary/20 group-hover:to-primary/10 shadow-md shadow-primary/10"
               }`}
             >
               <ItemIcon
-                className={`h-5 w-5 ${
+                className={`h-5 w-5 transition-all duration-300 ${
                   purchased
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-primary"
+                    ? "text-green-700 dark:text-green-300 scale-110"
+                    : "text-primary group-hover:scale-110"
                 }`}
               />
             </div>
           </div>
 
-          {/* Contenido del Item */}
-          <div className="flex-1 min-w-0 pr-2">
-            <div className="flex items-start justify-between gap-2 mb-1">
-              <h3
-                className={`font-semibold text-sm sm:text-base ${
-                  purchased ? "line-through text-muted-foreground" : ""
-                }`}
-              >
-                {item.name}
-              </h3>
+          {/* Contenido principal */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-3 mb-2">
+              <div className="flex-1 min-w-0">
+                <h3
+                  className={`font-semibold text-base leading-tight mb-1 transition-all duration-300 ${
+                    purchased 
+                      ? "line-through text-muted-foreground/60" 
+                      : "text-foreground group-hover:text-primary"
+                  }`}
+                >
+                  <span className="line-clamp-2 break-words">{item.name}</span>
+                </h3>
+                {item.description && (
+                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-1">
+                    {item.description}
+                  </p>
+                )}
+              </div>
               {purchased && (
-                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
               )}
             </div>
 
-            {item.description && (
-              <p className="text-xs sm:text-sm text-muted-foreground mb-2.5">
-                {item.description}
-              </p>
-            )}
+            {/* Metadata inferior */}
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap">
+                {item.quantity && item.quantity > 1 && (
+                  <Badge variant="outline" className="gap-1 px-2 py-0.5 text-xs border-muted-foreground/20">
+                    <Package className="h-3 w-3" />
+                    <span className="font-medium">{item.quantity}</span>
+                  </Badge>
+                )}
+                {item.price && (
+                  <Badge 
+                    variant={purchased ? "outline" : "default"} 
+                    className="gap-1.5 px-2.5 py-1 text-xs font-semibold"
+                  >
+                    <DollarSign className="h-3.5 w-3.5" />
+                    <span>
+                      {formatCurrency(totalPrice)}
+                      {item.quantity && item.quantity > 1 && item.price && (
+                        <span className="ml-1.5 text-[10px] opacity-70 font-normal">
+                          · {formatCurrency(item.price)} c/u
+                        </span>
+                      )}
+                    </span>
+                  </Badge>
+                )}
+              </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              {item.quantity && item.quantity > 1 && (
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted text-muted-foreground">
-                  <Package className="h-3 w-3 shrink-0" />
-                  <span className="font-medium">{item.quantity}</span>
-                </div>
-              )}
-              {item.price && (
-                <>
-                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted text-muted-foreground">
-                    <DollarSign className="h-3 w-3 shrink-0" />
-                    <span>{formatCurrency(item.price)}</span>
-                    {item.quantity && item.quantity > 1 && (
-                      <span className="text-muted-foreground/70">
-                        × {item.quantity}
-                      </span>
+              {/* Información del comprador */}
+              {purchased && item.purchasedByName && (
+                <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-green-100/80 dark:bg-green-900/30 border border-green-200/60 dark:border-green-800/40">
+                  <Avatar className="h-5 w-5 border border-green-300/50 dark:border-green-700/50">
+                    {item.purchasedByImage && (
+                      <AvatarImage src={item.purchasedByImage} alt={item.purchasedByName} />
                     )}
-                  </div>
-                  {item.quantity && item.quantity > 1 && (
-                    <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 text-primary font-semibold">
-                      <DollarSign className="h-3 w-3 shrink-0" />
-                      <span>
-                        {formatCurrency(item.price * item.quantity)}
-                      </span>
-                    </div>
-                  )}
-                </>
+                    <AvatarFallback className="text-[10px] font-bold bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200">
+                      {getInitials(item.purchasedByName)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs font-medium text-foreground truncate max-w-[120px]">
+                    {item.purchasedByName}
+                  </span>
+                </div>
               )}
             </div>
           </div>

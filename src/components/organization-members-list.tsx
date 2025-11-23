@@ -13,8 +13,35 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Users, Trash2, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { removeMemberAction } from "@/actions/organizations";
 import type { ActionResult } from "@/types/actions";
+
+function getRoleLabel(role: string): string {
+  switch (role) {
+    case "owner":
+      return "Propietario";
+    case "admin":
+      return "Administrador";
+    case "member":
+      return "Miembro";
+    default:
+      return role;
+  }
+}
+
+function getRoleVariant(role: string): "default" | "secondary" | "outline" {
+  switch (role) {
+    case "owner":
+      return "default";
+    case "admin":
+      return "secondary";
+    case "member":
+      return "outline";
+    default:
+      return "outline";
+  }
+}
 
 interface OrganizationMember {
   id: string;
@@ -89,17 +116,22 @@ export function OrganizationMembersList({
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium truncate">
-                    {member.userName || member.userEmail || "Usuario"}
-                    {isCurrentUser && (
-                      <span className="text-muted-foreground ml-1">(Tú)</span>
-                    )}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium truncate">
+                      {member.userName || member.userEmail || "Usuario"}
+                      {isCurrentUser && (
+                        <span className="text-muted-foreground ml-1">(Tú)</span>
+                      )}
+                    </p>
+                    <Badge 
+                      variant={getRoleVariant(member.role)} 
+                      className="text-xs shrink-0"
+                    >
+                      {getRoleLabel(member.role)}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {member.userEmail}
-                    {isOwner && (
-                      <span className="ml-1">• {member.role === "owner" ? "Propietario" : member.role === "admin" ? "Administrador" : "Miembro"}</span>
-                    )}
                   </p>
                 </div>
               </div>

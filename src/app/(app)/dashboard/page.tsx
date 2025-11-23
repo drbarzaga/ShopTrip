@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-server";
 import { getDashboardStats } from "@/lib/dashboard-stats";
 import { getRecentTrips } from "@/lib/trips";
+import { formatCurrency } from "@/lib/format-currency";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardProgress } from "@/components/dashboard-progress";
@@ -20,13 +21,6 @@ import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-}
-
 export default async function DashboardPage() {
   const session = await getSession();
 
@@ -36,6 +30,7 @@ export default async function DashboardPage() {
 
   const stats = await getDashboardStats(session.user.id);
   const recentTrips = await getRecentTrips(session.user.id, 5);
+  const formattedTotalSpent = await formatCurrency(stats.totalSpent);
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -49,7 +44,7 @@ export default async function DashboardPage() {
                 Total Gastado
               </CardTitle>
               <p className="text-xl sm:text-2xl font-bold text-green-600">
-                {formatCurrency(stats.totalSpent)}
+                {formattedTotalSpent}
               </p>
             </CardHeader>
           </Card>

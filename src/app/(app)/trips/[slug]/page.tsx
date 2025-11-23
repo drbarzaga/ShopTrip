@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 import { getTripBySlug } from "@/actions/trips";
 import { getTripItems } from "@/lib/trip-items";
 import { getUserRoleInTripOrganization } from "@/actions/trip-items";
+import { formatCurrency } from "@/lib/format-currency";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,14 +28,6 @@ function formatDate(date: Date | null): string {
     day: "numeric",
     year: "numeric",
   }).format(new Date(date));
-}
-
-function formatCurrency(amount: number | null): string {
-  if (!amount) return "$0.00";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
 }
 
 export default async function TripDetailPage({
@@ -65,6 +58,8 @@ export default async function TripDetailPage({
   const totalSpent = items
     .filter((item) => item.purchased)
     .reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
+  
+  const formattedTotalSpent = await formatCurrency(totalSpent);
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -132,7 +127,7 @@ export default async function TripDetailPage({
                 Total Gastado
               </CardTitle>
               <p className="text-xl sm:text-2xl font-bold text-green-600">
-                {formatCurrency(totalSpent)}
+                {formattedTotalSpent}
               </p>
             </CardHeader>
           </Card>

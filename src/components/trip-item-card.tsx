@@ -10,14 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { CheckCircle2, DollarSign, Package } from "lucide-react";
 import { getItemIcon } from "@/lib/item-icons";
 import { toggleItemPurchasedAction } from "@/actions/trip-items";
-
-function formatCurrency(amount: number | null): string {
-  if (!amount) return "$0.00";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-}
+import { CurrencyFormatter } from "@/components/currency-formatter";
 
 interface TripItemCardProps {
   item: {
@@ -157,10 +150,10 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                   >
                     <DollarSign className="h-3.5 w-3.5" />
                     <span>
-                      {formatCurrency(totalPrice)}
+                      <CurrencyFormatter amount={totalPrice} />
                       {item.quantity && item.quantity > 1 && item.price && (
                         <span className="ml-1.5 text-[10px] opacity-70 font-normal">
-                          · {formatCurrency(item.price)} c/u
+                          · <CurrencyFormatter amount={item.price} /> c/u
                         </span>
                       )}
                     </span>

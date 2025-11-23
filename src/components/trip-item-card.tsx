@@ -101,7 +101,7 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
   const totalPrice =
     item.price !== null && item.quantity
       ? item.price * item.quantity
-      : item.price ?? 0;
+      : (item.price ?? 0);
 
   return (
     <Card
@@ -235,26 +235,24 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                     <span>{item.quantity}</span>
                   </Badge>
                 )}
-                {item.price !== null && (
-                  <Badge
-                    variant={purchased ? "outline" : "default"}
-                    className={`h-6 gap-1 px-2.5 text-xs font-semibold transition-all ${
-                      purchased
-                        ? "border-green-300/50 bg-green-50/50 dark:bg-green-950/30 text-green-700 dark:text-green-300"
-                        : "bg-primary text-primary-foreground"
-                    }`}
-                  >
-                    <DollarSign className="h-3 w-3" />
-                    <span>
-                      <CurrencyFormatter amount={totalPrice ?? 0} />
-                      {item.quantity && item.quantity > 1 && item.price !== null && (
-                        <span className="ml-1.5 text-[10px] opacity-75 font-normal">
-                          · <CurrencyFormatter amount={item.price} /> c/u
-                        </span>
-                      )}
-                    </span>
-                  </Badge>
-                )}
+                <Badge
+                  variant={purchased ? "outline" : "default"}
+                  className={`h-6 gap-1 px-2.5 text-xs font-semibold transition-all ${
+                    purchased
+                      ? "border-green-300/50 bg-green-50/50 dark:bg-green-950/30 text-green-700 dark:text-green-300"
+                      : "bg-primary text-primary-foreground"
+                  }`}
+                >
+                  <DollarSign className="h-3 w-3" />
+                  <span>
+                    <CurrencyFormatter amount={totalPrice ?? 0} />
+                    {item.quantity && item.quantity > 1 && item.price !== null && (
+                      <span className="ml-1.5 text-[10px] opacity-75 font-normal">
+                        · <CurrencyFormatter amount={item.price} /> c/u
+                      </span>
+                    )}
+                  </span>
+                </Badge>
               </div>
 
               {/* Información del comprador */}

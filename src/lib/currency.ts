@@ -90,7 +90,7 @@ export async function convertCurrency(
 export function getCurrencySymbol(currency: Currency): string {
   switch (currency) {
     case "UYU":
-      return "$";
+      return "$ UYU";
     case "USD":
       return "US$";
     default:
@@ -123,8 +123,6 @@ export function formatCurrency(
     return `${getCurrencySymbol(currency)}0.00`;
   }
 
-  const code = getCurrencyCode(currency);
-
   // Para UYU, usar formato personalizado sin decimales si es entero
   if (currency === "UYU") {
     if (Number.isInteger(amount)) {
@@ -136,9 +134,12 @@ export function formatCurrency(
     })}`;
   }
 
-  // Para USD, usar formato estándar
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: code,
-  }).format(amount);
+  // Para USD, usar formato personalizado con US$
+  if (Number.isInteger(amount)) {
+    return `${getCurrencySymbol(currency)}${amount.toLocaleString("en-US")}`;
+  }
+  return `${getCurrencySymbol(currency)}${amount.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }

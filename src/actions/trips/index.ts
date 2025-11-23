@@ -7,7 +7,7 @@ import { withValidation, success, failure } from "@/lib/actions/helpers";
 import type { ActionResult } from "@/types/actions";
 import { getSession, getActiveOrganizationId } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
-import { eq, desc, or, inArray, and } from "drizzle-orm";
+import { eq, desc, or, inArray, and, isNull } from "drizzle-orm";
 import { generateSlug, generateUniqueSlug } from "@/lib/utils";
 import { getUserOrganizations } from "@/actions/organizations";
 
@@ -54,7 +54,10 @@ export const createTripAction = async (
         endDate: endDate,
       });
 
-      return await success({ id: tripId, slug: uniqueSlug }, "¡Viaje creado exitosamente!");
+      return await success(
+        { id: tripId, slug: uniqueSlug },
+        "¡Viaje creado exitosamente!"
+      );
     } catch (error) {
       const message =
         (error as Error).message || "Ocurrió un error al crear el viaje";
@@ -67,15 +70,12 @@ export async function getTrips(userId: string) {
   try {
     // Obtener todas las organizaciones de las que el usuario es miembro
     const userOrganizations = await getUserOrganizations(userId);
-    const organizationIds = userOrganizations.map(org => org.id);
+    const organizationIds = userOrganizations.map((org) => org.id);
 
     // Construir condiciones: viajes de las organizaciones del usuario O viajes personales (sin organización) creados por el usuario
     const conditions = [
       // Viajes personales del usuario (sin organización)
-      and(
-        eq(trip.userId, userId),
-        eq(trip.organizationId, null)
-      )
+      and(eq(trip.userId, userId), isNull(trip.organizationId)),
     ];
 
     // Si el usuario es miembro de organizaciones, agregar condición para viajes de esas organizaciones
@@ -84,9 +84,8 @@ export async function getTrips(userId: string) {
     }
 
     // Si solo hay una condición, usar esa condición directamente; si hay múltiples, usar or()
-    const whereCondition = conditions.length === 1 
-      ? conditions[0] 
-      : or(...conditions);
+    const whereCondition =
+      conditions.length === 1 ? conditions[0] : or(...conditions);
 
     const trips = await db
       .select({

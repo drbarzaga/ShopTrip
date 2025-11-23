@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { trip, tripItem } from "@/db/schema";
-import { eq, and, sql, inArray, or } from "drizzle-orm";
+import { eq, and, sql, inArray, or, isNull } from "drizzle-orm";
 import { getUserOrganizations } from "@/actions/organizations";
 
 export async function getDashboardStats(userId: string) {
@@ -16,7 +16,7 @@ export async function getDashboardStats(userId: string) {
       // Viajes personales del usuario (sin organización)
       and(
         eq(trip.userId, userId),
-        eq(trip.organizationId, null)
+        isNull(trip.organizationId)
       )
     ];
 

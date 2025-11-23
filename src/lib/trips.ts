@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { trip } from "@/db/schema";
-import { eq, desc, or, inArray, and } from "drizzle-orm";
+import { eq, desc, or, inArray, and, isNull } from "drizzle-orm";
 import { getUserOrganizations } from "@/actions/organizations";
 
 export async function getRecentTrips(userId: string, limit: number = 5) {
@@ -16,7 +16,7 @@ export async function getRecentTrips(userId: string, limit: number = 5) {
       // Viajes personales del usuario (sin organización)
       and(
         eq(trip.userId, userId),
-        eq(trip.organizationId, null)
+        isNull(trip.organizationId)
       )
     ];
 

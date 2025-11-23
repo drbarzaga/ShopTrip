@@ -2,13 +2,14 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-server";
 
 export const dynamic = 'force-dynamic';
-import { getUserOrganizations, getOrganizationInvitations } from "@/actions/organizations";
+import { getUserOrganizations, getOrganizationInvitations, getOrganizationMembers } from "@/actions/organizations";
 import { CreateOrganizationDialog } from "@/components/create-organization-dialog";
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Building2, Users, UserPlus, Mail, Trash2 } from "lucide-react";
 import { DeleteOrganizationDialog } from "@/components/delete-organization-dialog";
+import { OrganizationMembersList } from "@/components/organization-members-list";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
 export default async function OrganizationsPage() {
@@ -20,11 +21,15 @@ export default async function OrganizationsPage() {
 
   const organizations = await getUserOrganizations(session.user.id);
   
-  // Obtener invitaciones pendientes para cada organización
-  const organizationsWithInvitations = await Promise.all(
+  // Obtener invitaciones pendientes y miembros para cada organización
+  const organizationsWithData = await Promise.all(
     organizations.map(async (org) => {
       const invitations = await getOrganizationInvitations(org.id);
-      return { ...org, invitations };
+      // Solo obtener miembros si el usuario es owner
+      const members = org.role === "owner" 
+        ? await getOrganizationMembers(org.id)
+        : [];
+      return { ...org, invitations, members };
     })
   );
 
@@ -58,7 +63,7 @@ export default async function OrganizationsPage() {
           </Card>
         ) : (
           <div className="space-y-2 sm:space-y-3">
-            {organizationsWithInvitations.map((org) => (
+            {organizationsWithData.map((org) => (
               <Card key={org.id} className="border">
                 <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
                   <div className="flex items-center justify-between gap-2">
@@ -101,6 +106,13 @@ export default async function OrganizationsPage() {
                         />
                       )}
                     </div>
+                    {org.role === "owner" && org.members && org.members.length > 0 && (
+                      <OrganizationMembersList
+                        members={org.members}
+                        organizationId={org.id}
+                        currentUserId={session.user.id}
+                      />
+                    )}
                     {org.invitations && org.invitations.length > 0 && (
                       <div className="pt-2 sm:pt-3 border-t">
                         <p className="text-xs sm:text-sm font-medium mb-2 flex items-center gap-2">

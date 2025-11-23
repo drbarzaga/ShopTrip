@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { organization, member, invitation } from "@/db/schema";
+import { organization, member, invitation, user } from "@/db/schema";
 import {
   createOrganizationSchema,
   inviteMemberSchema,
@@ -294,6 +294,93 @@ export async function getOrganizationInvitations(organizationId: string) {
   } catch (error) {
     console.error("Error getting organization invitations:", error);
     return [];
+  }
+}
+
+export async function getOrganizationMembers(organizationId: string) {
+  try {
+    const members = await db
+      .select({
+        id: member.id,
+        userId: member.userId,
+        role: member.role,
+        createdAt: member.createdAt,
+        userName: user.name,
+        userEmail: user.email,
+        userImage: user.image,
+      })
+      .from(member)
+      .innerJoin(user, eq(user.id, member.userId))
+      .where(eq(member.organizationId, organizationId))
+      .orderBy(member.createdAt);
+
+    return members;
+  } catch (error) {
+    console.error("Error getting organization members:", error);
+    return [];
+  }
+}
+
+export async function removeMemberAction(memberId: string, organizationId: string) {
+  "use server";
+  try {
+    const session = await getSession();
+    if (!session) {
+      redirect("/login");
+    }
+
+    // Verificar que el usuario es owner de la organización
+    const membership = await db
+      .select()
+      .from(member)
+      .where(
+        and(
+          eq(member.organizationId, organizationId),
+          eq(member.userId, session.user.id)
+        )
+      )
+      .limit(1);
+
+    if (membership.length === 0) {
+      return await failure("No eres miembro de esta organización");
+    }
+
+    if (membership[0].role !== "owner") {
+      return await failure("Solo el propietario puede eliminar miembros");
+    }
+
+    // Obtener el miembro a eliminar
+    const memberToRemove = await db
+      .select()
+      .from(member)
+      .where(
+        and(
+          eq(member.id, memberId),
+          eq(member.organizationId, organizationId)
+        )
+      )
+      .limit(1);
+
+    if (memberToRemove.length === 0) {
+      return await failure("Miembro no encontrado");
+    }
+
+    // No permitir que el owner se elimine a sí mismo
+    if (memberToRemove[0].userId === session.user.id) {
+      return await failure("No puedes eliminarte a ti mismo como propietario");
+    }
+
+    // Eliminar el miembro
+    await db
+      .delete(member)
+      .where(eq(member.id, memberId));
+
+    return await success(undefined, "Miembro eliminado exitosamente");
+  } catch (error) {
+    console.error("Error removing member:", error);
+    const message =
+      (error as Error).message || "Ocurrió un error al eliminar el miembro";
+    return await failure(message);
   }
 }
 

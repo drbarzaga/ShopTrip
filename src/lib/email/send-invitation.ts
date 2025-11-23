@@ -1,7 +1,7 @@
 "use server";
 
 import { getAppName } from "../utils";
-import { resend, FROM_EMAIL, APP_URL } from "./resend";
+import { resend, FROM_EMAIL } from "./resend";
 import { InvitationEmail } from "./templates/invitation";
 import { render } from "@react-email/render";
 
@@ -32,7 +32,7 @@ export async function sendInvitationEmail({
     }
 
     // El link lleva a la página de invitaciones donde el usuario puede aceptar
-    const invitationLink = `${APP_URL}/invitations/${invitationId}`;
+    const invitationLink = `${process.env.NEXT_PUBLIC_APP_URL as string}/invitations/${invitationId}`;
 
     const emailHtml = await render(
       InvitationEmail({

@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-server";
+
+export const dynamic = 'force-dynamic';
 import { getUserOrganizations, getOrganizationInvitations } from "@/actions/organizations";
 import { CreateOrganizationDialog } from "@/components/create-organization-dialog";
 import { InviteMemberDialog } from "@/components/invite-member-dialog";

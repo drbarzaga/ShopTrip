@@ -10,10 +10,10 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFormState } from "react-dom";
 import { signUpAction } from "@/actions/auth";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import type { ActionResult } from "@/types/actions";
 
-export default function RegisterPage() {
+function RegisterForm() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect");
   const router = useRouter();
@@ -123,6 +123,20 @@ export default function RegisterPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen w-full items-center justify-center p-4 sm:p-6">
+        <div className="w-full max-w-sm text-center">
+          <p className="text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <RegisterForm />
+    </Suspense>
   );
 }
 

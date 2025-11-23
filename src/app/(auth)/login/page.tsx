@@ -10,10 +10,10 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useFormState } from "react-dom";
 import { signInAction } from "@/actions/auth";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import type { ActionResult } from "@/types/actions";
 
-export default function LoginPage() {
+function LoginForm() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect");
   const router = useRouter();
@@ -134,5 +134,19 @@ export default function LoginPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen w-full items-center justify-center p-4 sm:p-6">
+        <div className="w-full max-w-sm text-center">
+          <p className="text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

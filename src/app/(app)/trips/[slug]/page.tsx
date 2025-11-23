@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-server";
+
+export const dynamic = 'force-dynamic';
 import { getTripBySlug } from "@/actions/trips";
 import { getTripItems } from "@/lib/trip-items";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

@@ -18,6 +18,8 @@ import {
 import { DashboardTripDialog } from "@/components/dashboard-trip-dialog";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",

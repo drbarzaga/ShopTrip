@@ -1,26 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useCallback } from "react";
 import { useNotificationsContext } from "@/components/notifications-provider";
 
 export function PushRegistration() {
   const { requestPermission } = useNotificationsContext();
-  const [isSupported, setIsSupported] = useState(false);
-  const [isRegistered, setIsRegistered] = useState(false);
 
-  useEffect(() => {
-    // Verificar soporte de Service Worker y Push API
-    if (
-      typeof window !== "undefined" &&
-      "serviceWorker" in navigator &&
-      "PushManager" in window
-    ) {
-      setIsSupported(true);
-      initializePush();
-    }
-  }, []);
+  // Convertir VAPID key de base64 a Uint8Array
+  const urlBase64ToUint8Array = useCallback(
+    (base64String: string): Uint8Array => {
+      const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding)
+        .replaceAll("-", "+")
+        .replaceAll("_", "/");
 
-  const initializePush = async () => {
+      const rawData = globalThis.window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.codePointAt(i) || 0;
+      }
+      return outputArray;
+    },
+    []
+  );
+
+  const initializePush = useCallback(async () => {
     try {
       // Solicitar permiso de notificaciones
       const permission = await requestPermission();
@@ -43,9 +48,10 @@ export function PushRegistration() {
           return;
         }
 
+        const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+          applicationServerKey: applicationServerKey.buffer as ArrayBuffer,
         });
       }
 
@@ -61,31 +67,26 @@ export function PushRegistration() {
         }),
       });
 
-      if (response.ok) {
-        setIsRegistered(true);
+      if (!response.ok) {
+        console.error("Failed to register push subscription");
       }
     } catch (error) {
       console.error("Error initializing push notifications:", error);
     }
-  };
+  }, [requestPermission, urlBase64ToUint8Array]);
 
-  // Convertir VAPID key de base64 a Uint8Array
-  const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
-    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-    const base64 = (base64String + padding)
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
-
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
+  useEffect(() => {
+    // Verificar soporte de Service Worker y Push API
+    if (
+      globalThis.window !== undefined &&
+      "serviceWorker" in navigator &&
+      "PushManager" in globalThis.window
+    ) {
+      // Llamar async para evitar setState síncrono en effect
+      void initializePush();
     }
-    return outputArray;
-  };
+  }, [initializePush]);
 
   // Este componente no renderiza nada, solo maneja el registro
   return null;
 }
-

@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Package, Pencil, Trash2, Calendar } from "lucide-react";
+import { Package, Pencil, Trash2, Calendar } from "lucide-react";
 import { getItemIcon } from "@/lib/item-icons";
 import { toggleItemPurchasedAction, deleteTripItemAction } from "@/actions/trip-items";
 import { CurrencyFormatter } from "@/components/currency-formatter";
@@ -243,7 +243,6 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                       : "bg-primary text-primary-foreground"
                   }`}
                 >
-                  <DollarSign className="h-3 w-3" />
                   <span>
                     <CurrencyFormatter amount={totalPrice ?? 0} />
                     {item.quantity && item.quantity > 1 && item.price !== null && (

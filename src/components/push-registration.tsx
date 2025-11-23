@@ -1,0 +1,91 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useNotificationsContext } from "@/components/notifications-provider";
+
+export function PushRegistration() {
+  const { requestPermission } = useNotificationsContext();
+  const [isSupported, setIsSupported] = useState(false);
+  const [isRegistered, setIsRegistered] = useState(false);
+
+  useEffect(() => {
+    // Verificar soporte de Service Worker y Push API
+    if (
+      typeof window !== "undefined" &&
+      "serviceWorker" in navigator &&
+      "PushManager" in window
+    ) {
+      setIsSupported(true);
+      initializePush();
+    }
+  }, []);
+
+  const initializePush = async () => {
+    try {
+      // Solicitar permiso de notificaciones
+      const permission = await requestPermission();
+      if (!permission) {
+        return;
+      }
+
+      // Registrar Service Worker
+      const registration = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
+
+      // Verificar si ya hay una suscripción
+      let subscription = await registration.pushManager.getSubscription();
+
+      // Si no hay suscripción, crear una nueva
+      if (!subscription) {
+        const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!vapidPublicKey) {
+          console.warn("VAPID public key not configured");
+          return;
+        }
+
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+        });
+      }
+
+      // Enviar suscripción al servidor
+      const response = await fetch("/api/push/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subscription: JSON.stringify(subscription),
+          deviceInfo: navigator.userAgent,
+        }),
+      });
+
+      if (response.ok) {
+        setIsRegistered(true);
+      }
+    } catch (error) {
+      console.error("Error initializing push notifications:", error);
+    }
+  };
+
+  // Convertir VAPID key de base64 a Uint8Array
+  const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  };
+
+  // Este componente no renderiza nada, solo maneja el registro
+  return null;
+}
+

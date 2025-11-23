@@ -203,6 +203,31 @@ export const tripItem = pgTable(
 
 // -------------------------------- End of Trips Tables --------------------------------
 
+// -------------------------------- FCM Tokens Table --------------------------------
+
+export const fcmToken = pgTable(
+  "fcm_tokens",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    token: text("token").notNull().unique(),
+    deviceInfo: text("device_info"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("fcm_tokens_user_id_idx").on(table.userId),
+    index("fcm_tokens_token_idx").on(table.token),
+  ]
+);
+
+// -------------------------------- End of FCM Tokens Table --------------------------------
+
 // -------------------------------- Relations ---------------------------------------------------
 
 export const userRelations = relations(user, ({ many }) => ({
@@ -298,4 +323,5 @@ export const schema = {
   invitation,
   trip,
   tripItem,
+  fcmToken,
 };

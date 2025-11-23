@@ -92,6 +92,15 @@ export const createTripAction = async (
         endDate: endDate,
       });
 
+      // Enviar notificación en tiempo real
+      try {
+        const { notifyTripCreated } = await import("@/lib/notifications");
+        await notifyTripCreated(tripId, data.name, session.user.name || "Usuario");
+      } catch (error) {
+        console.error("Error sending trip creation notification:", error);
+        // No fallar la creación del viaje si falla la notificación
+      }
+
       return await success(
         { id: tripId, slug: uniqueSlug },
         "¡Viaje creado exitosamente!"
@@ -276,6 +285,19 @@ export const updateTripAction = async (
         .from(trip)
         .where(eq(trip.id, tripId))
         .limit(1);
+
+      // Enviar notificación en tiempo real
+      try {
+        const { notifyTripUpdated } = await import("@/lib/notifications");
+        await notifyTripUpdated(
+          tripId,
+          data.name,
+          session.user.name || "Usuario"
+        );
+      } catch (error) {
+        console.error("Error sending trip update notification:", error);
+        // No fallar la acción si falla la notificación
+      }
 
       return await success(
         { slug: updatedTrip[0]?.slug || "" },

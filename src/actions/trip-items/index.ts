@@ -81,6 +81,7 @@ export async function toggleItemPurchasedAction(
         itemId: tripItem.id,
         tripId: tripItem.tripId,
         price: tripItem.price,
+        name: tripItem.name,
       })
       .from(tripItem)
       .innerJoin(trip, eq(tripItem.tripId, trip.id))
@@ -107,6 +108,10 @@ export async function toggleItemPurchasedAction(
       return await failure("Solo los propietarios y administradores pueden marcar artículos como comprados");
     }
 
+    // Obtener el nombre del item antes de actualizar
+    const itemName = itemData[0]?.name || "Artículo";
+    const tripId = itemData[0]?.tripId;
+
     // Actualizar el estado de comprado
     await db
       .update(tripItem)
@@ -116,6 +121,21 @@ export async function toggleItemPurchasedAction(
         purchasedBy: purchased ? session.user.id : null,
       })
       .where(eq(tripItem.id, itemId));
+
+    // Enviar notificación en tiempo real solo si se marca como comprado
+    if (purchased && tripId) {
+      try {
+        const { notifyItemPurchased } = await import("@/lib/notifications");
+        await notifyItemPurchased(
+          tripId,
+          itemName,
+          session.user.name || "Usuario"
+        );
+      } catch (error) {
+        console.error("Error sending item purchase notification:", error);
+        // No fallar la acción si falla la notificación
+      }
+    }
 
     return await success(undefined, purchased ? "Artículo marcado como comprado" : "Artículo marcado como no comprado");
   } catch (error) {
@@ -181,6 +201,15 @@ export const createTripItemAction = async (
         addedBy: session.user.id,
       });
 
+      // Enviar notificación en tiempo real
+      try {
+        const { notifyItemCreated } = await import("@/lib/notifications");
+        await notifyItemCreated(tripId, data.name, session.user.name || "Usuario");
+      } catch (error) {
+        console.error("Error sending item creation notification:", error);
+        // No fallar la creación del item si falla la notificación
+      }
+
       return await success({ id: itemId }, "¡Artículo agregado exitosamente!");
     } catch (error) {
       console.error("Error creating trip item:", error);
@@ -233,6 +262,15 @@ export const updateTripItemAction = async (
         return await failure("Solo los propietarios y administradores pueden editar artículos");
       }
 
+      // Obtener el nombre anterior del item
+      const oldItemData = await db
+        .select({ name: tripItem.name })
+        .from(tripItem)
+        .where(eq(tripItem.id, itemId))
+        .limit(1);
+
+      const itemName = oldItemData[0]?.name || data.name;
+
       // Actualizar el artículo
       await db
         .update(tripItem)
@@ -243,6 +281,19 @@ export const updateTripItemAction = async (
           quantity: data.quantity,
         })
         .where(eq(tripItem.id, itemId));
+
+      // Enviar notificación en tiempo real
+      try {
+        const { notifyItemUpdated } = await import("@/lib/notifications");
+        await notifyItemUpdated(
+          itemData[0].tripId,
+          data.name,
+          session.user.name || "Usuario"
+        );
+      } catch (error) {
+        console.error("Error sending item update notification:", error);
+        // No fallar la acción si falla la notificación
+      }
 
       return await success({ id: itemId }, "¡Artículo actualizado exitosamente!");
     } catch (error) {

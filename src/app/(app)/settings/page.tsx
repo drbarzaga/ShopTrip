@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-server";
 import { getUserPreferredCurrency } from "@/actions/settings";
 import { CurrencySelector } from "@/components/currency-selector";
+import { ProfileSection } from "@/components/profile-section";
+import { DeleteAccountSection } from "@/components/delete-account-section";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Settings } from "lucide-react";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -33,6 +35,14 @@ export default async function SettingsPage() {
 
         {/* Settings Cards */}
         <div className="space-y-4">
+          {/* Profile Section */}
+          <ProfileSection
+            userName={session.user.name}
+            userEmail={session.user.email}
+            userImage={session.user.image}
+          />
+
+          {/* Currency Preferences */}
           <Card className="border">
             <CardHeader>
               <CardTitle>Preferencias de Moneda</CardTitle>
@@ -44,6 +54,9 @@ export default async function SettingsPage() {
               <CurrencySelector initialCurrency={preferredCurrency} />
             </CardContent>
           </Card>
+
+          {/* Delete Account */}
+          <DeleteAccountSection userEmail={session.user.email || ""} />
         </div>
       </div>
     </div>

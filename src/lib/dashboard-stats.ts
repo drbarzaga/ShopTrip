@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { trip, tripItem } from "@/db/schema";
-import { eq, and, sql, isNull } from "drizzle-orm";
+import { eq, and, sql, isNull, inArray } from "drizzle-orm";
 import { getUserOrganizations } from "@/actions/organizations";
 import { getActiveOrganizationId } from "@/lib/auth-server";
 
@@ -16,7 +16,9 @@ export async function getDashboardStats(userId: string) {
     if (activeOrganizationId) {
       // Verificar que el usuario sea miembro de la organización activa
       const userOrganizations = await getUserOrganizations(userId);
-      const isMember = userOrganizations.some(org => org.id === activeOrganizationId);
+      const isMember = userOrganizations.some(
+        (org) => org.id === activeOrganizationId
+      );
 
       if (isMember) {
         whereCondition = eq(trip.organizationId, activeOrganizationId);
@@ -26,7 +28,10 @@ export async function getDashboardStats(userId: string) {
       }
     } else {
       // Si no hay organización activa, mostrar solo viajes personales (sin organización)
-      whereCondition = and(eq(trip.userId, userId), isNull(trip.organizationId));
+      whereCondition = and(
+        eq(trip.userId, userId),
+        isNull(trip.organizationId)
+      );
     }
 
     // Get all trips accessible to the user
@@ -108,4 +113,3 @@ export async function getDashboardStats(userId: string) {
     };
   }
 }
-

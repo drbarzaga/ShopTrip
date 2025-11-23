@@ -23,14 +23,16 @@ interface CreateTripDialogProps {
   className?: string;
 }
 
-export function CreateTripDialog({
-  trigger,
-  className,
-}: CreateTripDialogProps = {} as CreateTripDialogProps) {
+export function CreateTripDialog(
+  { trigger, className }: CreateTripDialogProps = {} as CreateTripDialogProps
+) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const [state, setState] = useState<ActionResult<{ id: string; slug: string }> | null>(null);
+  const [state, setState] = useState<ActionResult<{
+    id: string;
+    slug: string;
+  }> | null>(null);
 
   const handleSubmit = async (formData: FormData) => {
     startTransition(async () => {
@@ -50,7 +52,10 @@ export function CreateTripDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button size="sm" className={`h-10 text-sm ${className || "w-full sm:w-auto"}`}>
+          <Button
+            size="sm"
+            className={`h-10 text-sm ${className || "w-full sm:w-auto"}`}
+          >
             <Plus className="mr-2 h-4 w-4" />
             New Trip
           </Button>
@@ -75,9 +80,13 @@ export function CreateTripDialog({
                 placeholder="e.g., Summer Vacation"
                 required
                 disabled={isPending}
-                defaultValue={state?.formData?.name as string}
+                defaultValue={
+                  state && !state.success
+                    ? (state.formData?.name as string)
+                    : ""
+                }
               />
-              {state?.fieldErrors?.name && (
+              {state && !state.success && state.fieldErrors?.name && (
                 <p className="text-sm text-destructive">
                   {state.fieldErrors.name[0]}
                 </p>
@@ -90,9 +99,13 @@ export function CreateTripDialog({
                 name="destination"
                 placeholder="e.g., Paris, France"
                 disabled={isPending}
-                defaultValue={state?.formData?.destination as string}
+                defaultValue={
+                  state && !state.success
+                    ? (state.formData?.destination as string)
+                    : ""
+                }
               />
-              {state?.fieldErrors?.destination && (
+              {state && !state.success && state.fieldErrors?.destination && (
                 <p className="text-sm text-destructive">
                   {state.fieldErrors.destination[0]}
                 </p>
@@ -106,7 +119,11 @@ export function CreateTripDialog({
                   name="startDate"
                   type="date"
                   disabled={isPending}
-                  defaultValue={state?.formData?.startDate as string}
+                  defaultValue={
+                    state && !state.success
+                      ? (state.formData?.startDate as string)
+                      : ""
+                  }
                 />
               </div>
               <div className="grid gap-2">
@@ -116,7 +133,11 @@ export function CreateTripDialog({
                   name="endDate"
                   type="date"
                   disabled={isPending}
-                  defaultValue={state?.formData?.endDate as string}
+                  defaultValue={
+                    state && !state.success
+                      ? (state.formData?.endDate as string)
+                      : ""
+                  }
                 />
               </div>
             </div>
@@ -137,7 +158,11 @@ export function CreateTripDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto h-10">
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full sm:w-auto h-10"
+            >
               {isPending ? "Creating..." : "Create Trip"}
             </Button>
           </DialogFooter>
@@ -146,4 +171,3 @@ export function CreateTripDialog({
     </Dialog>
   );
 }
-

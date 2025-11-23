@@ -88,9 +88,9 @@ export function CreateOrganizationDialog({
                 placeholder="e.g., Family Trips"
                 required
                 disabled={isPending}
-                defaultValue={state?.formData?.name as string}
+                defaultValue={state && !state.success ? (state.formData?.name as string) : ""}
               />
-              {state?.fieldErrors?.name && (
+              {state && !state.success && state.fieldErrors?.name && (
                 <p className="text-sm text-destructive">
                   {state.fieldErrors.name[0]}
                 </p>

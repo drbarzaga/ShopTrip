@@ -13,3 +13,4 @@ export const inviteMemberSchema = z.object({
 export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;
 export type InviteMemberInput = z.infer<typeof inviteMemberSchema>;
 
+

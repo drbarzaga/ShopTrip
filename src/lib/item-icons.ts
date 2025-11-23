@@ -69,3 +69,4 @@ export function getItemIcon(itemName: string): LucideIcon {
   return ShoppingBag;
 }
 
+

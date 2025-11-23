@@ -2,7 +2,10 @@
 
 import { db } from "@/db";
 import { organization, member, invitation } from "@/db/schema";
-import { createOrganizationSchema, inviteMemberSchema } from "@/schemas/organization";
+import {
+  createOrganizationSchema,
+  inviteMemberSchema,
+} from "@/schemas/organization";
 import { withValidation, success, failure } from "@/lib/actions/helpers";
 import type { ActionResult } from "@/types/actions";
 import { getSession } from "@/lib/auth-server";
@@ -26,7 +29,7 @@ export const createOrganizationAction = async (
   return withValidation(formData, createOrganizationSchema, async (data) => {
     try {
       const baseSlug = generateSlug(data.name);
-      
+
       // Generar slug único
       const uniqueSlug = await generateUniqueSlug(baseSlug, async (slug) => {
         const existing = await db
@@ -36,7 +39,7 @@ export const createOrganizationAction = async (
           .limit(1);
         return existing.length > 0;
       });
-      
+
       // Crear organización directamente en la base de datos
       // Usamos el método directo ya que Better Auth puede tener problemas con la API
       const orgId = crypto.randomUUID();
@@ -71,7 +74,9 @@ export const createOrganizationAction = async (
         });
       } catch (syncError) {
         // Ignorar errores de sincronización, la organización ya está creada
-        console.log("Could not sync organization with Better Auth session, but organization was created successfully");
+        console.log(
+          "Could not sync organization with Better Auth session, but organization was created successfully"
+        );
       }
 
       return await success(
@@ -80,7 +85,10 @@ export const createOrganizationAction = async (
       );
     } catch (error) {
       console.error("Error creating organization:", error);
-      const errorMessage = error instanceof Error ? error.message : "An error occurred while creating the organization";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An error occurred while creating the organization";
       return await failure(errorMessage, undefined, data);
     }
   });
@@ -117,7 +125,7 @@ export async function setActiveOrganization(organizationId: string) {
     }
 
     const headersList = await headers();
-    
+
     // Verificar que el usuario es miembro de la organización
     const membership = await db
       .select()
@@ -145,7 +153,8 @@ export async function setActiveOrganization(organizationId: string) {
     return await success(undefined, "Active organization changed successfully");
   } catch (error) {
     const message =
-      (error as Error).message || "An error occurred while changing active organization";
+      (error as Error).message ||
+      "An error occurred while changing active organization";
     return await failure(message);
   }
 }
@@ -182,24 +191,8 @@ export const inviteMemberAction = async (
         return await failure("Only owners and admins can invite members");
       }
 
-      // Intentar usar Better Auth API primero
-      try {
-        const headersList = await headers();
-        await auth.api.inviteMember({
-          headers: headersList,
-          body: {
-            organizationId: data.organizationId,
-            email: data.email,
-            role: data.role,
-          },
-        });
-        return await success(undefined, "Invitation sent successfully!");
-      } catch (apiError) {
-        // Si Better Auth falla, crear la invitación directamente en la BD
-        console.log("Better Auth API not available, using database fallback");
-      }
-
-      // Fallback: Crear invitación directamente en la base de datos
+      // Crear invitación directamente en la base de datos
+      // Better Auth no expone inviteMember en su API, así que usamos el método directo
       const invitationId = crypto.randomUUID();
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7); // Invitación expira en 7 días
@@ -218,7 +211,8 @@ export const inviteMemberAction = async (
     } catch (error) {
       console.error("Error sending invitation:", error);
       const message =
-        (error as Error).message || "An error occurred while sending the invitation";
+        (error as Error).message ||
+        "An error occurred while sending the invitation";
       return await failure(message, undefined, data);
     }
   });
@@ -381,7 +375,8 @@ export async function acceptInvitationAction(invitationId: string) {
   } catch (error) {
     console.error("Error accepting invitation:", error);
     const message =
-      (error as Error).message || "An error occurred while accepting the invitation";
+      (error as Error).message ||
+      "An error occurred while accepting the invitation";
     return await failure(message);
   }
 }
@@ -409,7 +404,8 @@ export async function rejectInvitationAction(invitationId: string) {
   } catch (error) {
     console.error("Error rejecting invitation:", error);
     const message =
-      (error as Error).message || "An error occurred while rejecting the invitation";
+      (error as Error).message ||
+      "An error occurred while rejecting the invitation";
     return await failure(message);
   }
 }
@@ -449,8 +445,8 @@ export async function deleteOrganizationAction(organizationId: string) {
   } catch (error) {
     console.error("Error deleting organization:", error);
     const message =
-      (error as Error).message || "An error occurred while deleting the organization";
+      (error as Error).message ||
+      "An error occurred while deleting the organization";
     return await failure(message);
   }
 }
-

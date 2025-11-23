@@ -47,7 +47,7 @@ export function InviteMemberDialog({
   const handleSubmit = async (formData: FormData) => {
     formData.append("organizationId", organizationId);
     formData.append("role", role);
-    
+
     startTransition(async () => {
       const result = await inviteMemberAction(state, formData);
       setState(result);
@@ -91,9 +91,13 @@ export function InviteMemberDialog({
                 placeholder="user@example.com"
                 required
                 disabled={isPending}
-                defaultValue={state?.formData?.email as string}
+                defaultValue={
+                  state && !state.success
+                    ? (state.formData?.email as string)
+                    : ""
+                }
               />
-              {state?.fieldErrors?.email && (
+              {state && !state.success && state.fieldErrors?.email && (
                 <p className="text-sm text-destructive">
                   {state.fieldErrors.email[0]}
                 </p>
@@ -122,27 +126,30 @@ export function InviteMemberDialog({
               <p className="text-sm text-destructive">{state.message}</p>
             )}
           </div>
-                 <DialogFooter className="flex-col sm:flex-row gap-2">
-                   <Button
-                     type="button"
-                     variant="outline"
-                     onClick={() => {
-                       setOpen(false);
-                       setState(null);
-                       setRole("member");
-                     }}
-                     disabled={isPending}
-                     className="w-full sm:w-auto h-10"
-                   >
-                     Cancel
-                   </Button>
-                   <Button type="submit" disabled={isPending} className="w-full sm:w-auto h-10">
-                     {isPending ? "Sending..." : "Send Invitation"}
-                   </Button>
-                 </DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+                setState(null);
+                setRole("member");
+              }}
+              disabled={isPending}
+              className="w-full sm:w-auto h-10"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full sm:w-auto h-10"
+            >
+              {isPending ? "Sending..." : "Send Invitation"}
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   );
 }
-

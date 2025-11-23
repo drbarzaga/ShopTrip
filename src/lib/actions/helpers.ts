@@ -61,6 +61,26 @@ export async function validate<T extends z.ZodTypeAny>(
 }
 
 /**
+ * Valida FormData y retorna un objeto con success, data y error
+ * Útil para validaciones que necesitan manejar el resultado de forma explícita
+ */
+export async function validateActionInput<T extends z.ZodTypeAny>(
+  formData: FormData,
+  schema: T
+): Promise<
+  | { success: true; data: z.infer<T> }
+  | { success: false; error: ActionResult<never> }
+> {
+  const result = await validate(formData, schema);
+
+  if (isActionResult(result) && !result.success) {
+    return { success: false, error: result };
+  }
+
+  return { success: true, data: result as z.infer<T> };
+}
+
+/**
  * Helper para manejar la validación en actions de forma más legible
  * Si la validación falla, retorna el error directamente
  * Si tiene éxito, ejecuta la función callback con los datos validados

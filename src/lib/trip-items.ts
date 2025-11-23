@@ -19,3 +19,4 @@ export async function getTripItems(tripId: string) {
   }
 }
 
+

@@ -9,3 +9,4 @@ export const createTripSchema = z.object({
 
 export type CreateTripInput = z.infer<typeof createTripSchema>;
 
+

@@ -21,11 +21,16 @@ import type { ActionResult } from "@/types/actions";
 interface CreateTripDialogProps {
   trigger?: React.ReactNode;
   className?: string;
+  onSuccess?: () => void;
+  redirectOnSuccess?: boolean;
 }
 
-export function CreateTripDialog(
-  { trigger, className }: CreateTripDialogProps = {} as CreateTripDialogProps
-) {
+export function CreateTripDialog({
+  trigger,
+  className,
+  onSuccess,
+  redirectOnSuccess = true,
+}: CreateTripDialogProps = {} as CreateTripDialogProps) {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -41,9 +46,15 @@ export function CreateTripDialog(
 
       if (result.success && result.data) {
         setOpen(false);
-        router.push(`/trips/${result.data.slug}`);
-        router.refresh();
         setState(null);
+        
+        if (onSuccess) {
+          onSuccess();
+        } else if (redirectOnSuccess) {
+          router.push(`/trips/${result.data.slug}`);
+        } else {
+          router.refresh();
+        }
       }
     });
   };

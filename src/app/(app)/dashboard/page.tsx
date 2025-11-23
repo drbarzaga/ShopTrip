@@ -15,7 +15,7 @@ import {
   Plane,
   Sparkles,
 } from "lucide-react";
-import { CreateTripDialog } from "@/components/create-trip-dialog";
+import { DashboardTripDialog } from "@/components/dashboard-trip-dialog";
 import Link from "next/link";
 
 function formatCurrency(amount: number): string {
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
                   Start organizing your shopping lists by creating your first
                   trip. Add items, track purchases, and stay organized!
                 </p>
-                <CreateTripDialog />
+                <DashboardTripDialog />
               </CardContent>
             </Card>
           ) : (

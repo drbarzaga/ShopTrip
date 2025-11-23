@@ -7,17 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getAppName } from "@/lib/utils";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useActionState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useFormState } from "react-dom";
 import { signUpAction } from "@/actions/auth";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import type { ActionResult } from "@/types/actions";
 
 export default function RegisterPage() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect");
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(signUpAction, null);
+  const [state, formAction] = useFormState<ActionResult<{ redirectTo?: string }> | null, FormData>(signUpAction, null);
+  const isPending = false;
 
   useEffect(() => {
     if (state?.success) {
@@ -54,7 +55,7 @@ export default function RegisterPage() {
                 required
                 name="name"
                 id="name"
-                defaultValue={state?.formData?.name}
+                defaultValue={state && !state.success ? state.formData?.name as string : undefined}
               />
             </div>
 
@@ -67,7 +68,7 @@ export default function RegisterPage() {
                 required
                 name="email"
                 id="email"
-                defaultValue={state?.formData?.email}
+                defaultValue={state && !state.success ? state.formData?.email as string : undefined}
               />
             </div>
 

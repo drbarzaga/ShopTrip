@@ -7,21 +7,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getAppName } from "@/lib/utils";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useActionState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useFormState } from "react-dom";
 import { signInAction } from "@/actions/auth";
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import type { ActionResult } from "@/types/actions";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect");
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(signInAction, null);
+  const [state, formAction] = useFormState<
+    ActionResult<{ redirectTo?: string }> | null,
+    FormData
+  >(signInAction, null);
+  const isPending = false;
 
   useEffect(() => {
     if (state?.success) {
-      const finalRedirect = state.data?.redirectTo || redirectTo || "/dashboard";
+      const finalRedirect =
+        state.data?.redirectTo || redirectTo || "/dashboard";
       router.push(finalRedirect);
     }
   }, [state, redirectTo, router]);
@@ -32,7 +37,9 @@ export default function LoginPage() {
         action={formAction}
         className="w-full max-w-sm bg-muted overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]"
       >
-        {redirectTo && <input type="hidden" name="redirect" value={redirectTo} />}
+        {redirectTo && (
+          <input type="hidden" name="redirect" value={redirectTo} />
+        )}
         <div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-6 sm:p-8 pb-6">
           <div className="text-center">
             <Link href="/" aria-label="go home" className="mx-auto block w-fit">
@@ -41,7 +48,9 @@ export default function LoginPage() {
             <h1 className="mb-1 mt-4 text-xl font-semibold">
               Iniciar Sesión en {getAppName()}
             </h1>
-            <p className="text-sm">¡Bienvenido de nuevo! Inicia sesión para continuar</p>
+            <p className="text-sm">
+              ¡Bienvenido de nuevo! Inicia sesión para continuar
+            </p>
           </div>
 
           <div className="mt-6 space-y-6">
@@ -54,7 +63,11 @@ export default function LoginPage() {
                 required
                 name="email"
                 id="email"
-                defaultValue={state?.formData?.email}
+                defaultValue={
+                  state && !state.success
+                    ? (state.formData?.email as string)
+                    : undefined
+                }
               />
             </div>
 
@@ -107,7 +120,13 @@ export default function LoginPage() {
           <p className="text-accent-foreground text-center text-sm">
             ¿No tienes una cuenta?
             <Button asChild variant="link" className="px-2">
-              <Link href={redirectTo ? `/register?redirect=${encodeURIComponent(redirectTo)}` : "/register"}>
+              <Link
+                href={
+                  redirectTo
+                    ? `/register?redirect=${encodeURIComponent(redirectTo)}`
+                    : "/register"
+                }
+              >
                 Crear cuenta
               </Link>
             </Button>

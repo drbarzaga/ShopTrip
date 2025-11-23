@@ -8,7 +8,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export const signInAction = async (
-  prevState: ActionState<SignInInput>,
+  prevState: ActionResult<{ redirectTo?: string }> | null,
   formData: FormData
 ): Promise<ActionResult<{ redirectTo?: string }>> => {
   const redirectTo = formData.get("redirect") as string | null;
@@ -32,7 +32,7 @@ export const signInAction = async (
 };
 
 export const signUpAction = async (
-  prevState: ActionState<SignUpInput>,
+  prevState: ActionResult<{ redirectTo?: string }> | null,
   formData: FormData
 ): Promise<ActionResult<{ redirectTo?: string }>> => {
   const redirectTo = formData.get("redirect") as string | null;

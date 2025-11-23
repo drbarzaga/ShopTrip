@@ -114,17 +114,6 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
     >
       <CardContent className="p-5">
         <div className="flex items-start gap-4">
-          {/* Checkbox */}
-          <div className="pt-0.5 shrink-0">
-            <Checkbox
-              checked={purchased}
-              onCheckedChange={handleToggle}
-              disabled={isPending || !canEdit || !hasPrice}
-              className="h-5 w-5 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
-              title={!hasPrice ? "Agrega un precio para marcar como comprado" : ""}
-            />
-          </div>
-
           {/* Icono */}
           <div className="shrink-0">
             <div
@@ -221,6 +210,16 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                     </Dialog>
                   </>
                 )}
+                {/* Checkbox movido a la derecha */}
+                <div className="pt-0.5 shrink-0">
+                  <Checkbox
+                    checked={purchased}
+                    onCheckedChange={handleToggle}
+                    disabled={isPending || !canEdit || !hasPrice}
+                    className="h-5 w-5 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                    title={!hasPrice ? "Agrega un precio para marcar como comprado" : ""}
+                  />
+                </div>
               </div>
             </div>
 

@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth-server";
 export const dynamic = 'force-dynamic';
 import { getTripBySlug } from "@/actions/trips";
 import { getTripItems } from "@/lib/trip-items";
+import { getUserRoleInTripOrganization } from "@/actions/trip-items";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,6 +56,10 @@ export default async function TripDetailPage({
   }
 
   const items = await getTripItems(tripData.id);
+  
+  // Obtener el rol del usuario en la organización del viaje
+  const userRole = await getUserRoleInTripOrganization(session.user.id, tripData.id);
+  const canEdit = userRole === "owner" || userRole === "admin";
 
   const purchasedItems = items.filter((item) => item.purchased).length;
   const totalSpent = items
@@ -137,7 +142,7 @@ export default async function TripDetailPage({
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h2 className="text-lg sm:text-xl font-bold">Artículos</h2>
-            <CreateTripItemDialog tripId={tripData.id} />
+            {canEdit && <CreateTripItemDialog tripId={tripData.id} />}
           </div>
 
           {items.length === 0 ? (
@@ -147,21 +152,23 @@ export default async function TripDetailPage({
                 <p className="text-muted-foreground text-sm mb-4">
                   Aún no hay artículos
                 </p>
-                <CreateTripItemDialog 
-                  tripId={tripData.id}
-                  trigger={
-                    <Button size="sm">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Agregar Primer Artículo
-                    </Button>
-                  }
-                />
+                {canEdit && (
+                  <CreateTripItemDialog 
+                    tripId={tripData.id}
+                    trigger={
+                      <Button size="sm">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Agregar Primer Artículo
+                      </Button>
+                    }
+                  />
+                )}
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-2">
               {items.map((item) => (
-                <TripItemCard key={item.id} item={item} />
+                <TripItemCard key={item.id} item={item} canEdit={canEdit} />
               ))}
             </div>
           )}

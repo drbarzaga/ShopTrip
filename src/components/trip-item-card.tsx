@@ -31,6 +31,7 @@ interface TripItemCardProps {
     purchasedByName: string | null;
     purchasedByImage: string | null;
   };
+  canEdit?: boolean;
 }
 
 function getInitials(name: string | null | undefined): string {
@@ -43,13 +44,14 @@ function getInitials(name: string | null | undefined): string {
     .slice(0, 2);
 }
 
-export function TripItemCard({ item }: TripItemCardProps) {
+export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [purchased, setPurchased] = useState(item.purchased);
   const ItemIcon = getItemIcon(item.name);
 
   const handleToggle = (checked: boolean) => {
+    if (!canEdit) return;
     setPurchased(checked);
     startTransition(async () => {
       const result = await toggleItemPurchasedAction(item.id, checked);
@@ -86,7 +88,7 @@ export function TripItemCard({ item }: TripItemCardProps) {
             <Checkbox
               checked={purchased}
               onCheckedChange={handleToggle}
-              disabled={isPending}
+              disabled={isPending || !canEdit}
               className="h-5 w-5 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600 relative z-20"
             />
           </div>

@@ -24,6 +24,8 @@ export async function getRecentTrips(userId: string, limit: number = 5) {
             name: trip.name,
             slug: trip.slug,
             destination: trip.destination,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
             createdAt: trip.createdAt,
             updatedAt: trip.updatedAt,
           })
@@ -43,6 +45,8 @@ export async function getRecentTrips(userId: string, limit: number = 5) {
         name: trip.name,
         slug: trip.slug,
         destination: trip.destination,
+        startDate: trip.startDate,
+        endDate: trip.endDate,
         createdAt: trip.createdAt,
         updatedAt: trip.updatedAt,
       })

@@ -88,7 +88,7 @@ export function CreateTripDialog({
         {trigger ?? (
           <Button
             size="sm"
-            className={`h-10 text-sm ${className || "w-full sm:w-auto"}`}
+            className={`h-8 text-sm ${className || "w-full sm:w-auto"}`}
           >
             <Plus className="mr-2 h-4 w-4" />
             Nuevo Viaje

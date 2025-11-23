@@ -68,27 +68,27 @@ export function CreateTripDialog({
             className={`h-10 text-sm ${className || "w-full sm:w-auto"}`}
           >
             <Plus className="mr-2 h-4 w-4" />
-            New Trip
+            Nuevo Viaje
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <form action={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create New Trip</DialogTitle>
+            <DialogTitle>Crear Nuevo Viaje</DialogTitle>
             <DialogDescription>
-              Add a new trip to organize your shopping list.
+              Agrega un nuevo viaje para organizar tu lista de compras.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">
-                Trip Name <span className="text-destructive">*</span>
+                Nombre del Viaje <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="name"
                 name="name"
-                placeholder="e.g., Summer Vacation"
+                placeholder="ej: Vacaciones de Verano"
                 required
                 disabled={isPending}
                 defaultValue={
@@ -104,11 +104,11 @@ export function CreateTripDialog({
               )}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="destination">Destination</Label>
+              <Label htmlFor="destination">Destino</Label>
               <Input
                 id="destination"
                 name="destination"
-                placeholder="e.g., Paris, France"
+                placeholder="ej: París, Francia"
                 disabled={isPending}
                 defaultValue={
                   state && !state.success
@@ -124,7 +124,7 @@ export function CreateTripDialog({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="startDate">Start Date</Label>
+                <Label htmlFor="startDate">Fecha de Inicio</Label>
                 <Input
                   id="startDate"
                   name="startDate"
@@ -138,7 +138,7 @@ export function CreateTripDialog({
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="endDate">End Date</Label>
+                <Label htmlFor="endDate">Fecha de Fin</Label>
                 <Input
                   id="endDate"
                   name="endDate"
@@ -167,14 +167,14 @@ export function CreateTripDialog({
               disabled={isPending}
               className="w-full sm:w-auto h-10"
             >
-              Cancel
+              Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isPending}
               className="w-full sm:w-auto h-10"
             >
-              {isPending ? "Creating..." : "Create Trip"}
+              {isPending ? "Creando..." : "Crear Viaje"}
             </Button>
           </DialogFooter>
         </form>

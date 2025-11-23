@@ -7,7 +7,7 @@ import { ArrowRight, MapPin, Calendar, Plane } from "lucide-react";
 import Link from "next/link";
 
 function formatDate(date: Date | null): string {
-  if (!date) return "Not set";
+  if (!date) return "No establecida";
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
@@ -30,7 +30,7 @@ export default async function TripsPage() {
         {/* Header */}
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <h1 className="text-2xl sm:text-3xl font-bold">My Trips</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">Mis Viajes</h1>
             <div className="w-full sm:w-auto">
               <CreateTripDialog />
             </div>
@@ -44,9 +44,9 @@ export default async function TripsPage() {
               <div className="bg-primary/10 text-primary p-3 rounded-full w-fit mx-auto mb-4">
                 <MapPin className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">No trips yet</h3>
+              <h3 className="text-lg font-semibold mb-2">Aún no hay viajes</h3>
               <p className="text-muted-foreground text-sm mb-4">
-                Create your first trip to start planning your adventure
+                Crea tu primer viaje para comenzar a planificar tu aventura
               </p>
               <CreateTripDialog />
             </CardContent>

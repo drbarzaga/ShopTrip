@@ -65,27 +65,27 @@ export function CreateOrganizationDialog({
         <DialogTrigger asChild>
           <Button size="sm" className={`h-10 text-sm w-full sm:w-auto ${className || ""}`}>
             <Plus className="mr-2 h-4 w-4" />
-            New Organization
+            Nueva Organización
           </Button>
         </DialogTrigger>
       )}
       <DialogContent className="sm:max-w-[425px]">
         <form action={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create New Organization</DialogTitle>
+            <DialogTitle>Crear Nueva Organización</DialogTitle>
             <DialogDescription>
-              Create a new organization to collaborate on trips with others.
+              Crea una nueva organización para colaborar en viajes con otros.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">
-                Organization Name <span className="text-destructive">*</span>
+                Nombre de la Organización <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="name"
                 name="name"
-                placeholder="e.g., Family Trips"
+                placeholder="ej: Viajes Familiares"
                 required
                 disabled={isPending}
                 defaultValue={state && !state.success ? (state.formData?.name as string) : ""}
@@ -111,10 +111,10 @@ export function CreateOrganizationDialog({
               disabled={isPending}
               className="w-full sm:w-auto h-10"
             >
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={isPending} className="w-full sm:w-auto h-10">
-              {isPending ? "Creating..." : "Create Organization"}
+              {isPending ? "Creando..." : "Crear Organización"}
             </Button>
           </DialogFooter>
         </form>

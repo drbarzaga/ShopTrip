@@ -17,10 +17,10 @@ export default function MobileNav() {
             <Button
               variant="ghost"
               className="h-full rounded-none flex-col gap-1 hover:bg-primary/10 active:bg-primary/20 touch-manipulation"
-              aria-label="Create new trip"
+              aria-label="Crear nuevo viaje"
             >
               <Plus className="h-5 w-5" />
-              <span className="text-xs font-medium">New Trip</span>
+              <span className="text-xs font-medium">Nuevo Viaje</span>
             </Button>
           }
         />
@@ -30,10 +30,10 @@ export default function MobileNav() {
             className={`h-full rounded-none flex-col gap-1 hover:bg-primary/10 active:bg-primary/20 touch-manipulation ${
               pathname?.startsWith("/trips") ? "bg-primary/10" : ""
             }`}
-            aria-label="View trips"
+            aria-label="Ver viajes"
           >
             <List className="h-5 w-5" />
-            <span className="text-xs font-medium">Trips</span>
+            <span className="text-xs font-medium">Viajes</span>
           </Button>
         </Link>
       </div>

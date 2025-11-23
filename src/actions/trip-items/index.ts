@@ -51,11 +51,11 @@ export async function toggleItemPurchasedAction(
       })
       .where(eq(tripItem.id, itemId));
 
-    return await success(undefined, purchased ? "Item marked as purchased" : "Item marked as not purchased");
+    return await success(undefined, purchased ? "Artículo marcado como comprado" : "Artículo marcado como no comprado");
   } catch (error) {
     console.error("Error toggling item purchased:", error);
     const message =
-      (error as Error).message || "An error occurred while updating the item";
+      (error as Error).message || "Ocurrió un error al actualizar el artículo";
     return await failure(message);
   }
 }

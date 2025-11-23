@@ -67,22 +67,22 @@ export function InviteMemberDialog({
         {trigger || (
           <Button size="sm" className={`w-full sm:w-auto ${className || ""}`}>
             <UserPlus className="mr-2 h-4 w-4" />
-            Invite Member
+            Invitar Miembro
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <form action={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Invite Member</DialogTitle>
+            <DialogTitle>Invitar Miembro</DialogTitle>
             <DialogDescription>
-              Invite someone to join {organizationName}.
+              Invita a alguien a unirse a {organizationName}.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="email">
-                Email Address <span className="text-destructive">*</span>
+                Dirección de Correo <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="email"
@@ -104,7 +104,7 @@ export function InviteMemberDialog({
               )}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="role">Role</Label>
+              <Label htmlFor="role">Rol</Label>
               <Select
                 value={role}
                 onValueChange={(value: "owner" | "admin" | "member") =>
@@ -113,12 +113,12 @@ export function InviteMemberDialog({
                 disabled={isPending}
               >
                 <SelectTrigger id="role">
-                  <SelectValue placeholder="Select a role" />
+                  <SelectValue placeholder="Selecciona un rol" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="member">Member</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="owner">Owner</SelectItem>
+                  <SelectItem value="member">Miembro</SelectItem>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                  <SelectItem value="owner">Propietario</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -138,14 +138,14 @@ export function InviteMemberDialog({
               disabled={isPending}
               className="w-full sm:w-auto h-10"
             >
-              Cancel
+              Cancelar
             </Button>
             <Button
               type="submit"
               disabled={isPending}
               className="w-full sm:w-auto h-10"
             >
-              {isPending ? "Sending..." : "Send Invitation"}
+              {isPending ? "Enviando..." : "Enviar Invitación"}
             </Button>
           </DialogFooter>
         </form>

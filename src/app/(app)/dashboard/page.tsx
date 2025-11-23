@@ -44,7 +44,7 @@ export default async function DashboardPage() {
             <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
               <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <DollarSign className="h-3 w-3" />
-                Total Spent
+                Total Gastado
               </CardTitle>
               <p className="text-xl sm:text-2xl font-bold text-green-600">
                 {formatCurrency(stats.totalSpent)}
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
             <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
               <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <CheckCircle2 className="h-3 w-3" />
-                Purchased
+                Comprados
               </CardTitle>
               <p className="text-xl sm:text-2xl font-bold text-primary">
                 {stats.purchasedItems}
@@ -68,7 +68,7 @@ export default async function DashboardPage() {
             <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
               <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <Calendar className="h-3 w-3" />
-                Total Trips
+                Total Viajes
               </CardTitle>
               <p className="text-xl sm:text-2xl font-bold">
                 {stats.totalTrips}
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
             <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
               <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <TrendingUp className="h-3 w-3" />
-                Active Trips
+                Viajes Activos
               </CardTitle>
               <p className="text-xl sm:text-2xl font-bold text-blue-600">
                 {stats.activeTrips}
@@ -98,14 +98,14 @@ export default async function DashboardPage() {
         {/* Recent Trips - Main Focus */}
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 className="text-lg sm:text-xl font-bold">Recent Trips</h2>
+            <h2 className="text-lg sm:text-xl font-bold">Viajes Recientes</h2>
             <Link href="/trips" className="w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="sm"
                 className="w-full sm:w-auto h-10 text-sm"
               >
-                {recentTrips.length > 0 ? "View All" : "My Trips"}
+                {recentTrips.length > 0 ? "Ver Todos" : "Mis Viajes"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
@@ -123,11 +123,11 @@ export default async function DashboardPage() {
                   </div>
                 </div>
                 <h3 className="text-lg sm:text-xl font-semibold mb-2">
-                  No trips yet
+                  Aún no hay viajes
                 </h3>
                 <p className="text-muted-foreground text-sm mb-4 sm:mb-6 max-w-sm mx-auto px-2">
-                  Start organizing your shopping lists by creating your first
-                  trip. Add items, track purchases, and stay organized!
+                  Comienza a organizar tus listas de compras creando tu primer
+                  viaje. Agrega artículos, rastrea compras y mantente organizado!
                 </p>
                 <DashboardTripDialog />
               </CardContent>

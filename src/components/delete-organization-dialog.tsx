@@ -51,7 +51,7 @@ export function DeleteOrganizationDialog({
         {trigger || (
           <Button variant="destructive" size="sm">
             <Trash2 className="mr-2 h-4 w-4" />
-            Delete Organization
+            Eliminar Organización
           </Button>
         )}
       </DialogTrigger>
@@ -59,12 +59,12 @@ export function DeleteOrganizationDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-destructive" />
-            Delete Organization
+            Eliminar Organización
           </DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete <strong>{organizationName}</strong>? This action
-            cannot be undone. All members, invitations, and trips associated with this
-            organization will be deleted.
+            ¿Estás seguro de que deseas eliminar <strong>{organizationName}</strong>? Esta acción
+            no se puede deshacer. Todos los miembros, invitaciones y viajes asociados con esta
+            organización serán eliminados.
           </DialogDescription>
         </DialogHeader>
         <div className="py-4">
@@ -82,7 +82,7 @@ export function DeleteOrganizationDialog({
             }}
             disabled={isPending}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button
             type="button"
@@ -90,7 +90,7 @@ export function DeleteOrganizationDialog({
             onClick={handleDelete}
             disabled={isPending}
           >
-            {isPending ? "Deleting..." : "Delete Organization"}
+            {isPending ? "Eliminando..." : "Eliminar Organización"}
           </Button>
         </DialogFooter>
       </DialogContent>

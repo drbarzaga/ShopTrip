@@ -26,7 +26,7 @@ export function validateOnClient<T extends z.ZodTypeAny>(
       return { success: false, errors };
     }
     // Si no es un ZodError, retornar un error genérico
-    return { success: false, errors: { _form: ["Validation failed"] } };
+    return { success: false, errors: { _form: ["Error de validación"] } };
   }
 }
 

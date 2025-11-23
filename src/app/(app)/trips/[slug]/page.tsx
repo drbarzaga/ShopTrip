@@ -16,7 +16,7 @@ import Link from "next/link";
 import { TripItemCard } from "@/components/trip-item-card";
 
 function formatDate(date: Date | null): string {
-  if (!date) return "Not set";
+  if (!date) return "No establecida";
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
@@ -65,7 +65,7 @@ export default async function TripDetailPage({
           <Link href="/trips">
             <Button variant="ghost" size="sm" className="mb-3 sm:mb-4">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Trips
+              Volver a Viajes
             </Button>
           </Link>
           <h1 className="text-xl sm:text-2xl font-bold mb-2">
@@ -102,7 +102,7 @@ export default async function TripDetailPage({
             <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
               <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <CheckCircle2 className="h-3 w-3" />
-                Purchased
+                Comprados
               </CardTitle>
               <p className="text-xl sm:text-2xl font-bold text-primary">
                 {purchasedItems} / {items.length}
@@ -112,7 +112,7 @@ export default async function TripDetailPage({
           <Card className="border">
             <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
               <CardTitle className="text-xs font-medium text-muted-foreground">
-                Total Spent
+                Total Gastado
               </CardTitle>
               <p className="text-xl sm:text-2xl font-bold text-green-600">
                 {formatCurrency(totalSpent)}
@@ -124,10 +124,10 @@ export default async function TripDetailPage({
         {/* Items List */}
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 className="text-lg sm:text-xl font-bold">Items</h2>
+            <h2 className="text-lg sm:text-xl font-bold">Artículos</h2>
             <Button size="sm" className="w-full sm:w-auto h-10 text-sm">
               <Plus className="mr-2 h-4 w-4" />
-              Add Item
+              Agregar Artículo
             </Button>
           </div>
 
@@ -136,11 +136,11 @@ export default async function TripDetailPage({
               <CardContent className="p-6 sm:p-8 text-center">
                 <ShoppingCart className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground text-sm mb-4">
-                  No items yet
+                  Aún no hay artículos
                 </p>
                 <Button size="sm">
                   <Plus className="mr-2 h-4 w-4" />
-                  Add First Item
+                  Agregar Primer Artículo
                 </Button>
               </CardContent>
             </Card>

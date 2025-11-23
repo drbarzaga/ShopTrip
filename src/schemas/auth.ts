@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const signInSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email format"),
+  email: z.string().min(1, "El correo electrónico es requerido").email("Formato de correo inválido"),
   password: z
     .string()
-    .min(1, "Password is required")
-    .min(6, "Password must be at least 6 characters"),
+    .min(1, "La contraseña es requerida")
+    .min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
 export type SignInInput = z.infer<typeof signInSchema>;

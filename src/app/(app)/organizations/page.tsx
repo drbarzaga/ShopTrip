@@ -31,7 +31,7 @@ export default async function OrganizationsPage() {
         {/* Header */}
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <h1 className="text-2xl sm:text-3xl font-bold">Organizations</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold">Organizaciones</h1>
             <div className="w-full sm:w-auto">
               <CreateOrganizationDialog />
             </div>
@@ -44,9 +44,9 @@ export default async function OrganizationsPage() {
             <div className="bg-primary/10 text-primary p-3 sm:p-4 rounded-full w-fit mx-auto mb-4 sm:mb-6 shadow-lg shadow-primary/20">
               <Building2 className="h-8 w-8 sm:h-10 sm:w-10" />
             </div>
-            <h3 className="text-lg sm:text-xl font-semibold mb-2">No organizations yet</h3>
+            <h3 className="text-lg sm:text-xl font-semibold mb-2">Aún no hay organizaciones</h3>
             <p className="text-muted-foreground text-sm mb-4 sm:mb-6 px-2">
-              Create an organization to start collaborating on trips with others.
+              Crea una organización para comenzar a colaborar en viajes con otros.
             </p>
             <CreateOrganizationDialog />
           </Card>
@@ -63,7 +63,7 @@ export default async function OrganizationsPage() {
                       <div className="min-w-0 flex-1">
                         <CardTitle className="text-base sm:text-lg truncate">{org.name}</CardTitle>
                         <p className="text-xs sm:text-sm text-muted-foreground">
-                          Role: {org.role || "member"}
+                          Rol: {org.role === "owner" ? "Propietario" : "Miembro"}
                         </p>
                       </div>
                     </div>
@@ -78,7 +78,7 @@ export default async function OrganizationsPage() {
                         trigger={
                           <Button variant="outline" size="sm" className="w-full h-10 text-sm">
                             <UserPlus className="mr-2 h-4 w-4" />
-                            Invite Member
+                            Invitar Miembro
                           </Button>
                         }
                       />
@@ -89,7 +89,7 @@ export default async function OrganizationsPage() {
                           trigger={
                             <Button variant="destructive" size="sm" className="w-full h-10 text-sm">
                               <Trash2 className="mr-2 h-4 w-4" />
-                              Delete Organization
+                              Eliminar Organización
                             </Button>
                           }
                         />
@@ -99,7 +99,7 @@ export default async function OrganizationsPage() {
                       <div className="pt-2 sm:pt-3 border-t">
                         <p className="text-xs sm:text-sm font-medium mb-2 flex items-center gap-2">
                           <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          Pending Invitations ({org.invitations.length})
+                          Invitaciones Pendientes ({org.invitations.length})
                         </p>
                         <div className="space-y-1.5 sm:space-y-2">
                           {org.invitations.map((inv) => (
@@ -110,7 +110,7 @@ export default async function OrganizationsPage() {
                               <div className="min-w-0 flex-1">
                                 <p className="font-medium truncate">{inv.email}</p>
                                 <p className="text-xs text-muted-foreground">
-                                  Role: {inv.role || "member"}
+                                  Rol: {inv.role === "owner" ? "Propietario" : "Miembro"}
                                 </p>
                               </div>
                             </div>

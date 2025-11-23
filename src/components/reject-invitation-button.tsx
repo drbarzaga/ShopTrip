@@ -37,7 +37,7 @@ export function RejectInvitationButton({ invitationId }: RejectInvitationButtonP
         className="w-full sm:w-auto text-xs sm:text-sm"
       >
         <X className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-        {isPending ? "Rejecting..." : "Reject"}
+        {isPending ? "Rechazando..." : "Rechazar"}
       </Button>
       {state && !state.success && (
         <p className="text-sm text-destructive mt-2">{state.message}</p>

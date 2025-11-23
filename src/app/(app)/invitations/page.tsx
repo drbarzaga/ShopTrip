@@ -21,7 +21,7 @@ export default async function InvitationsPage() {
       <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold">Invitations</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Invitaciones</h1>
         </div>
 
         {/* Invitations List */}
@@ -30,9 +30,9 @@ export default async function InvitationsPage() {
             <div className="bg-primary/10 text-primary p-3 sm:p-4 rounded-full w-fit mx-auto mb-4 sm:mb-6 shadow-lg shadow-primary/20">
               <Mail className="h-8 w-8 sm:h-10 sm:w-10" />
             </div>
-            <h3 className="text-lg sm:text-xl font-semibold mb-2">No pending invitations</h3>
+            <h3 className="text-lg sm:text-xl font-semibold mb-2">No hay invitaciones pendientes</h3>
             <p className="text-muted-foreground text-sm px-2">
-              You don&apos;t have any pending invitations at the moment.
+              No tienes invitaciones pendientes en este momento.
             </p>
           </Card>
         ) : (
@@ -47,7 +47,7 @@ export default async function InvitationsPage() {
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-base sm:text-lg truncate">{inv.organizationName}</CardTitle>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        Role: {inv.role || "member"}
+                        Rol: {inv.role === "owner" ? "Propietario" : "Miembro"}
                       </p>
                     </div>
                   </div>

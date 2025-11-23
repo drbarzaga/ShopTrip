@@ -48,7 +48,7 @@ export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{userName || "User"}</p>
+            <p className="text-sm font-medium leading-none">{userName || "Usuario"}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {userEmail}
             </p>
@@ -58,19 +58,19 @@ export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
         <DropdownMenuItem asChild>
           <Link href="/dashboard" className="flex items-center cursor-pointer">
             <LayoutDashboard className="mr-2 h-4 w-4" />
-            <span>Dashboard</span>
+            <span>Panel de Control</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/organizations" className="flex items-center cursor-pointer">
             <Building2 className="mr-2 h-4 w-4" />
-            <span>Organizations</span>
+            <span>Organizaciones</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/invitations" className="flex items-center cursor-pointer">
             <Mail className="mr-2 h-4 w-4" />
-            <span>Invitations</span>
+            <span>Invitaciones</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -81,7 +81,7 @@ export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
               className="flex w-full items-center cursor-pointer"
             >
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
+              <span>Cerrar Sesión</span>
             </button>
           </DropdownMenuItem>
         </form>

@@ -16,10 +16,10 @@ export const signInAction = async (
         body: { email, password },
       });
 
-      return await success(undefined, "Successfully signed in!");
+      return await success(undefined, "¡Inicio de sesión exitoso!");
     } catch (error) {
       const message =
-        (error as Error).message || "An error occurred during sign in";
+        (error as Error).message || "Ocurrió un error durante el inicio de sesión";
       return await failure(message, undefined, { email });
     }
   });

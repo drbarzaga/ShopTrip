@@ -81,14 +81,14 @@ export const createOrganizationAction = async (
 
       return await success(
         { id: orgId, slug: uniqueSlug },
-        "Organization created successfully!"
+        "¡Organización creada exitosamente!"
       );
     } catch (error) {
       console.error("Error creating organization:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "An error occurred while creating the organization";
+          : "Ocurrió un error al crear la organización";
       return await failure(errorMessage, undefined, data);
     }
   });
@@ -150,11 +150,11 @@ export async function setActiveOrganization(organizationId: string) {
       },
     });
 
-    return await success(undefined, "Active organization changed successfully");
+    return await success(undefined, "Organización activa cambiada exitosamente");
   } catch (error) {
     const message =
       (error as Error).message ||
-      "An error occurred while changing active organization";
+      "Ocurrió un error al cambiar la organización activa";
     return await failure(message);
   }
 }
@@ -207,12 +207,12 @@ export const inviteMemberAction = async (
         inviterId: session.user.id,
       });
 
-      return await success(undefined, "Invitation sent successfully!");
+      return await success(undefined, "¡Invitación enviada exitosamente!");
     } catch (error) {
       console.error("Error sending invitation:", error);
       const message =
         (error as Error).message ||
-        "An error occurred while sending the invitation";
+        "Ocurrió un error al enviar la invitación";
       return await failure(message, undefined, data);
     }
   });
@@ -371,12 +371,12 @@ export async function acceptInvitationAction(invitationId: string) {
       .set({ status: "accepted" })
       .where(eq(invitation.id, invitationId));
 
-    return await success(undefined, "Invitation accepted successfully!");
+    return await success(undefined, "¡Invitación aceptada exitosamente!");
   } catch (error) {
     console.error("Error accepting invitation:", error);
     const message =
       (error as Error).message ||
-      "An error occurred while accepting the invitation";
+      "Ocurrió un error al aceptar la invitación";
     return await failure(message);
   }
 }
@@ -400,12 +400,12 @@ export async function rejectInvitationAction(invitationId: string) {
         )
       );
 
-    return await success(undefined, "Invitation rejected");
+    return await success(undefined, "Invitación rechazada");
   } catch (error) {
     console.error("Error rejecting invitation:", error);
     const message =
       (error as Error).message ||
-      "An error occurred while rejecting the invitation";
+      "Ocurrió un error al rechazar la invitación";
     return await failure(message);
   }
 }
@@ -441,12 +441,12 @@ export async function deleteOrganizationAction(organizationId: string) {
     // Eliminar la organización (cascade eliminará miembros, invitaciones y viajes)
     await db.delete(organization).where(eq(organization.id, organizationId));
 
-    return await success(undefined, "Organization deleted successfully");
+    return await success(undefined, "Organización eliminada exitosamente");
   } catch (error) {
     console.error("Error deleting organization:", error);
     const message =
       (error as Error).message ||
-      "An error occurred while deleting the organization";
+      "Ocurrió un error al eliminar la organización";
     return await failure(message);
   }
 }

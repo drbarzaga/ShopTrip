@@ -71,7 +71,7 @@ export function OrganizationSelector({
           trigger={
             <Button variant="outline" size="sm" className="hidden md:flex">
               <Building2 className="mr-2 h-4 w-4" />
-              Create Organization
+              Crear Organización
             </Button>
           }
         />
@@ -79,7 +79,7 @@ export function OrganizationSelector({
           trigger={
             <Button variant="outline" size="sm" className="w-full md:hidden">
               <Building2 className="mr-2 h-4 w-4" />
-              Create Organization
+              Crear Organización
             </Button>
           }
         />
@@ -99,7 +99,7 @@ export function OrganizationSelector({
         >
           <SelectTrigger className="w-[180px]">
             <Building2 className="mr-2 h-4 w-4 shrink-0" />
-            <SelectValue placeholder="Select organization" />
+            <SelectValue placeholder="Selecciona organización" />
           </SelectTrigger>
           <SelectContent>
             {organizations.map((org) => (
@@ -109,7 +109,7 @@ export function OrganizationSelector({
             ))}
             <SelectItem value="create" className="text-primary font-medium">
               <Plus className="mr-2 h-4 w-4 inline" />
-              Create New Organization
+              Crear Nueva Organización
             </SelectItem>
           </SelectContent>
         </Select>
@@ -124,7 +124,7 @@ export function OrganizationSelector({
         >
           <SelectTrigger className="h-9 text-sm flex-1 min-w-0">
             <Building2 className="h-4 w-4 mr-1.5 shrink-0" />
-            <SelectValue placeholder="Select organization" />
+            <SelectValue placeholder="Selecciona organización" />
           </SelectTrigger>
           <SelectContent>
             {organizations.map((org) => (

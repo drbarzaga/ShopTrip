@@ -19,15 +19,15 @@ export default function LoginPage() {
               <LogoIcon />
             </Link>
             <h1 className="mb-1 mt-4 text-xl font-semibold">
-              Sign In to {getAppName()}
+              Iniciar Sesión en {getAppName()}
             </h1>
-            <p className="text-sm">Welcome back! Sign in to continue</p>
+            <p className="text-sm">¡Bienvenido de nuevo! Inicia sesión para continuar</p>
           </div>
 
           <div className="mt-6 space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="block text-sm">
-                Username
+                Correo Electrónico
               </Label>
               <Input type="email" required name="email" id="email" />
             </div>
@@ -35,14 +35,14 @@ export default function LoginPage() {
             <div className="space-y-0.5">
               <div className="flex items-center justify-between">
                 <Label htmlFor="pwd" className="text-sm">
-                  Password
+                  Contraseña
                 </Label>
                 <Button asChild variant="link" size="sm">
                   <Link
                     href="#"
                     className="link intent-info variant-ghost text-sm"
                   >
-                    Forgot your Password ?
+                    ¿Olvidaste tu Contraseña?
                   </Link>
                 </Button>
               </div>
@@ -55,13 +55,13 @@ export default function LoginPage() {
               />
             </div>
 
-            <Button className="w-full">Sign In</Button>
+            <Button className="w-full">Iniciar Sesión</Button>
           </div>
 
           <div className="my-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
             <hr className="border-dashed" />
             <span className="text-muted-foreground text-xs">
-              Or continue With
+              O continúa con
             </span>
             <hr className="border-dashed" />
           </div>
@@ -73,9 +73,9 @@ export default function LoginPage() {
 
         <div className="p-3">
           <p className="text-accent-foreground text-center text-sm">
-            Don&apos;t have an account ?
+            ¿No tienes una cuenta?
             <Button asChild variant="link" className="px-2">
-              <Link href="#">Create account</Link>
+              <Link href="#">Crear cuenta</Link>
             </Button>
           </p>
         </div>

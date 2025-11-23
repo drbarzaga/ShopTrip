@@ -49,10 +49,10 @@ export const createTripAction = async (
         endDate: endDate,
       });
 
-      return await success({ id: tripId, slug: uniqueSlug }, "Trip created successfully!");
+      return await success({ id: tripId, slug: uniqueSlug }, "¡Viaje creado exitosamente!");
     } catch (error) {
       const message =
-        (error as Error).message || "An error occurred while creating the trip";
+        (error as Error).message || "Ocurrió un error al crear el viaje";
       return await failure(message, undefined, data);
     }
   });

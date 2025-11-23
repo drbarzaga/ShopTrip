@@ -36,7 +36,7 @@ export function AcceptInvitationButton({ invitationId }: AcceptInvitationButtonP
         className="w-full sm:w-auto text-xs sm:text-sm"
       >
         <Check className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-        {isPending ? "Accepting..." : "Accept"}
+        {isPending ? "Aceptando..." : "Aceptar"}
       </Button>
       {state && !state.success && (
         <p className="text-sm text-destructive mt-2">{state.message}</p>

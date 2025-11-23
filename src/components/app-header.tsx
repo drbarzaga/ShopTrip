@@ -92,7 +92,7 @@ export async function AppHeader() {
               <Link href="/trips">
                 <Button variant="ghost" size="sm">
                   <Plane className="mr-2 h-4 w-4" />
-                  My Trips
+                  Mis Viajes
                 </Button>
               </Link>
               <ThemeToggle />

@@ -33,11 +33,11 @@ export const signInAction: FormAction<{ userId: string }> = async (
     });
 
     if (!session?.user?.id) {
-      return failure("Failed to get user session after sign in");
+      return failure("Error al obtener la sesión del usuario después del inicio de sesión");
     }
 
-    return success({ userId: session.user.id }, "Sign in successful");
+    return success({ userId: session.user.id }, "Inicio de sesión exitoso");
   } catch (error) {
-    return failure((error as Error).message || "An unexpected error occurred");
+    return failure((error as Error).message || "Ocurrió un error inesperado");
   }
 };

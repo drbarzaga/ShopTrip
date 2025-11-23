@@ -32,7 +32,7 @@ export async function sendInvitationEmail({
     }
 
     // El link lleva a la página de invitaciones donde el usuario puede aceptar
-    const invitationLink = `${APP_URL}/invitations`;
+    const invitationLink = `${APP_URL}/invitations/${invitationId}`;
 
     const emailHtml = await render(
       InvitationEmail({

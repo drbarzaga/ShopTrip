@@ -10,10 +10,10 @@ import {
 } from "@react-email/components";
 
 interface InvitationEmailProps {
-  organizationName: string;
-  inviterName: string;
-  invitationLink: string;
-  role?: string;
+  readonly organizationName: string;
+  readonly inviterName: string;
+  readonly invitationLink: string;
+  readonly role?: string;
 }
 
 export function InvitationEmail({
@@ -30,41 +30,41 @@ export function InvitationEmail({
           <Section style={header}>
             <Text style={logo}>ShopTrip</Text>
           </Section>
-          
+
           <Section style={content}>
-            <Text style={title}>¡Has sido invitado a unirte a una organización!</Text>
-            
-            <Text style={text}>
-              Hola,
+            <Text style={title}>
+              ¡Has sido invitado a unirte a una organización!
             </Text>
-            
+
+            <Text style={text}>Hola,</Text>
+
             <Text style={text}>
-              <strong>{inviterName}</strong> te ha invitado a unirte a la organización{" "}
-              <strong>{organizationName}</strong> como <strong>{role}</strong>.
+              <strong>{inviterName}</strong> te ha invitado a unirte a la
+              organización <strong>{organizationName}</strong> como{" "}
+              <strong>{role}</strong>.
             </Text>
-            
+
             <Text style={text}>
-              Acepta esta invitación para comenzar a colaborar en viajes y listas de compras compartidas.
+              Acepta esta invitación para comenzar a colaborar en viajes y
+              listas de compras compartidas.
             </Text>
-            
+
             <Section style={buttonContainer}>
               <Button style={button} href={invitationLink}>
                 Aceptar Invitación
               </Button>
             </Section>
-            
+
             <Text style={textSmall}>
               O copia y pega este enlace en tu navegador:
             </Text>
             <Text style={link}>{invitationLink}</Text>
-            
-            <Text style={textSmall}>
-              Esta invitación expirará en 7 días.
-            </Text>
+
+            <Text style={textSmall}>Esta invitación expirará en 7 días.</Text>
           </Section>
-          
+
           <Hr style={hr} />
-          
+
           <Section style={footer}>
             <Text style={footerText}>
               Si no esperabas esta invitación, puedes ignorar este correo.
@@ -79,7 +79,8 @@ export function InvitationEmail({
 // Estilos
 const main = {
   backgroundColor: "#f6f9fc",
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  fontFamily:
+    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
 };
 
 const container = {
@@ -166,4 +167,3 @@ const footerText = {
   color: "#666666",
   textAlign: "center" as const,
 };
-

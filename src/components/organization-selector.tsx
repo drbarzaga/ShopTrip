@@ -63,63 +63,95 @@ export function OrganizationSelector({
     router.refresh();
   };
 
-  if (organizations.length === 0) {
+  // Si no hay organizaciones, mostrar solo el botón para crear
+  if (!organizations || organizations.length === 0) {
     return (
-      <CreateOrganizationDialog
-        trigger={
-          <Button variant="outline" size="sm" className="hidden sm:flex">
-            <Building2 className="mr-2 h-4 w-4" />
-            Create Organization
-          </Button>
-        }
-      />
+      <>
+        <CreateOrganizationDialog
+          trigger={
+            <Button variant="outline" size="sm" className="hidden md:flex">
+              <Building2 className="mr-2 h-4 w-4" />
+              Create Organization
+            </Button>
+          }
+        />
+        <CreateOrganizationDialog
+          trigger={
+            <Button variant="outline" size="sm" className="w-full md:hidden">
+              <Building2 className="mr-2 h-4 w-4" />
+              Create Organization
+            </Button>
+          }
+        />
+      </>
     );
   }
 
+  // Si hay organizaciones, mostrar selector y botón de crear (en móvil separados)
   return (
     <>
-      <Select
-        value={selectedOrgId && selectedOrgId !== "create" ? selectedOrgId : undefined}
-        onValueChange={handleChange}
-        disabled={isPending}
-      >
-        <SelectTrigger className="w-[180px] hidden sm:flex">
-          <Building2 className="mr-2 h-4 w-4" />
-          <SelectValue placeholder="Select organization" />
-        </SelectTrigger>
-        <SelectContent>
-          {organizations.map((org) => (
-            <SelectItem key={org.id} value={org.id}>
-              {org.name}
+      {/* Versión desktop del selector */}
+      <div className="hidden md:flex items-center gap-2">
+        <Select
+          value={selectedOrgId && selectedOrgId !== "create" ? selectedOrgId : undefined}
+          onValueChange={handleChange}
+          disabled={isPending}
+        >
+          <SelectTrigger className="w-[180px]">
+            <Building2 className="mr-2 h-4 w-4 shrink-0" />
+            <SelectValue placeholder="Select organization" />
+          </SelectTrigger>
+          <SelectContent>
+            {organizations.map((org) => (
+              <SelectItem key={org.id} value={org.id}>
+                {org.name}
+              </SelectItem>
+            ))}
+            <SelectItem value="create" className="text-primary font-medium">
+              <Plus className="mr-2 h-4 w-4 inline" />
+              Create New Organization
             </SelectItem>
-          ))}
-          <SelectItem value="create" className="text-primary font-medium">
-            <Plus className="mr-2 h-4 w-4 inline" />
-            Create New Organization
-          </SelectItem>
-        </SelectContent>
-      </Select>
-      <CreateOrganizationDialog
-        trigger={
-          <Button variant="ghost" size="icon" className="h-9 w-9 sm:hidden">
-            <Building2 className="h-4 w-4" />
-          </Button>
-        }
-      />
-      <CreateOrganizationDialog
-        open={createDialogOpen}
-        onOpenChange={(open) => {
-          setCreateDialogOpen(open);
-          if (!open) {
-            // Resetear el select cuando se cierra el diálogo
-            setSelectedOrgId(activeOrganizationId || "");
+          </SelectContent>
+        </Select>
+      </div>
+      
+      {/* Versión mobile: selector y botón separados con gap */}
+      <div className="flex md:hidden items-center gap-2 w-full">
+        <Select
+          value={selectedOrgId && selectedOrgId !== "create" ? selectedOrgId : undefined}
+          onValueChange={handleChange}
+          disabled={isPending}
+        >
+          <SelectTrigger className="h-9 text-sm flex-1 min-w-0">
+            <Building2 className="h-4 w-4 mr-1.5 shrink-0" />
+            <SelectValue placeholder="Select organization" />
+          </SelectTrigger>
+          <SelectContent>
+            {organizations.map((org) => (
+              <SelectItem key={org.id} value={org.id}>
+                {org.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <CreateOrganizationDialog
+          trigger={
+            <Button variant="outline" size="sm" className="h-9 shrink-0 px-2.5">
+              <Plus className="h-4 w-4" />
+            </Button>
           }
-        }}
-        onSuccess={() => {
-          setCreateDialogOpen(false);
-          // La página se refrescará y mostrará la nueva organización
-        }}
-      />
+          open={createDialogOpen}
+          onOpenChange={(open) => {
+            setCreateDialogOpen(open);
+            if (!open) {
+              setSelectedOrgId(activeOrganizationId || "");
+            }
+          }}
+          onSuccess={() => {
+            setCreateDialogOpen(false);
+          }}
+        />
+      </div>
     </>
   );
 }

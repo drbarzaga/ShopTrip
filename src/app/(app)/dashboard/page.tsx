@@ -37,50 +37,52 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      <div className="container mx-auto py-6 px-4 max-w-2xl">
+      <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl">
         {/* Key Stats */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6">
           <Card className="border">
-            <CardHeader className="pb-3 p-4">
+            <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
               <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <DollarSign className="h-3 w-3" />
                 Total Spent
               </CardTitle>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-xl sm:text-2xl font-bold text-green-600">
                 {formatCurrency(stats.totalSpent)}
               </p>
             </CardHeader>
           </Card>
 
           <Card className="border">
-            <CardHeader className="pb-3 p-4">
+            <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
               <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <CheckCircle2 className="h-3 w-3" />
                 Purchased
               </CardTitle>
-              <p className="text-2xl font-bold text-primary">
+              <p className="text-xl sm:text-2xl font-bold text-primary">
                 {stats.purchasedItems}
               </p>
             </CardHeader>
           </Card>
 
           <Card className="border">
-            <CardHeader className="pb-3 p-4">
+            <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
               <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <Calendar className="h-3 w-3" />
                 Total Trips
               </CardTitle>
-              <p className="text-2xl font-bold">{stats.totalTrips}</p>
+              <p className="text-xl sm:text-2xl font-bold">
+                {stats.totalTrips}
+              </p>
             </CardHeader>
           </Card>
 
           <Card className="border">
-            <CardHeader className="pb-3 p-4">
+            <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
               <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <TrendingUp className="h-3 w-3" />
                 Active Trips
               </CardTitle>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-xl sm:text-2xl font-bold text-blue-600">
                 {stats.activeTrips}
               </p>
             </CardHeader>
@@ -95,29 +97,35 @@ export default async function DashboardPage() {
 
         {/* Recent Trips - Main Focus */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Recent Trips</h2>
-            <Link href="/trips">
-              <Button variant="ghost" size="sm" className="h-8 text-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h2 className="text-lg sm:text-xl font-bold">Recent Trips</h2>
+            <Link href="/trips" className="w-full sm:w-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full sm:w-auto h-10 text-sm"
+              >
                 {recentTrips.length > 0 ? "View All" : "My Trips"}
-                <ArrowRight className="ml-1 h-3 w-3" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </div>
 
           {recentTrips.length === 0 ? (
             <Card className="border-2 border-dashed">
-              <CardContent className="p-12 text-center">
+              <CardContent className="p-6 sm:p-12 text-center">
                 <div className="flex justify-center mb-4">
                   <div className="relative">
                     <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl"></div>
-                    <div className="relative bg-primary/5 rounded-full p-6">
-                      <Plane className="h-12 w-12 text-primary" />
+                    <div className="relative bg-primary/5 rounded-full p-4 sm:p-6">
+                      <Plane className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
                     </div>
                   </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-2">No trips yet</h3>
-                <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto">
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">
+                  No trips yet
+                </h3>
+                <p className="text-muted-foreground text-sm mb-4 sm:mb-6 max-w-sm mx-auto px-2">
                   Start organizing your shopping lists by creating your first
                   trip. Add items, track purchases, and stay organized!
                 </p>
@@ -125,7 +133,7 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {recentTrips.map(
                 (trip: {
                   id: string;
@@ -136,21 +144,39 @@ export default async function DashboardPage() {
                   <Link
                     key={trip.id}
                     href={`/trips/${trip.slug}`}
-                    className="block p-4 rounded-lg border bg-card hover:bg-accent transition-colors touch-manipulation"
+                    className="block group"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-base truncate">
-                          {trip.name}
-                        </p>
-                        {trip.destination && (
-                          <p className="text-sm text-muted-foreground truncate mt-0.5">
-                            {trip.destination}
-                          </p>
-                        )}
-                      </div>
-                      <ArrowRight className="h-5 w-5 text-muted-foreground shrink-0 ml-3" />
-                    </div>
+                    <Card className="border hover:border-primary/50 transition-all hover:shadow-md touch-manipulation active:scale-[0.98]">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          {/* Icono con fondo decorativo */}
+                          <div className="relative shrink-0">
+                            <div className="absolute inset-0 bg-primary/10 rounded-lg blur-sm group-hover:bg-primary/20 transition-colors"></div>
+                            <div className="relative bg-gradient-to-br from-primary/10 to-primary/5 p-3 rounded-lg">
+                              <Plane className="h-5 w-5 text-primary" />
+                            </div>
+                          </div>
+
+                          {/* Contenido */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <h3 className="font-semibold text-base sm:text-lg truncate group-hover:text-primary transition-colors">
+                                {trip.name}
+                              </h3>
+                              <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                            </div>
+                            {trip.destination && (
+                              <div className="flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground">
+                                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                                <span className="truncate">
+                                  {trip.destination}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </Link>
                 )
               )}

@@ -1,30 +1,16 @@
 import { redirect } from "next/navigation";
-import { getSession, signOut } from "@/lib/auth-server";
+import { getSession } from "@/lib/auth-server";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { LogOut, Plane, Building2 } from "lucide-react";
+import { Plane } from "lucide-react";
 import Link from "next/link";
 import { OrganizationSelector } from "@/components/organization-selector";
-import { getUserOrganizations, getActiveOrganization } from "@/actions/organizations";
+import { UserMenu } from "@/components/user-menu";
+import { getUserOrganizations } from "@/actions/organizations";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-
-function getInitials(name: string | null | undefined): string {
-  if (!name) return "U";
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-async function handleSignOut() {
-  "use server";
-  await signOut();
-  redirect("/login");
-}
+import { getAppName } from "@/lib/utils";
+import { LogoIcon } from "@/components/shared/logo";
 
 export async function AppHeader() {
   const session = await getSession();
@@ -49,53 +35,77 @@ export async function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 py-3 max-w-7xl">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9 border-2 border-background">
-              {session.user.image && (
-                <AvatarImage
-                  src={session.user.image}
-                  alt={session.user.name || ""}
-                />
-              )}
-              <AvatarFallback className="text-sm font-semibold">
-                {getInitials(session.user.name)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0">
-              <h1 className="text-lg font-semibold truncate">
-                {session.user.name || session.user.email}
+    <>
+      {/* Header móvil - diseño optimizado */}
+      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">
+        <div className="px-3 py-2.5">
+          {/* Primera fila: Logo y menú de usuario */}
+          <div className="flex items-center justify-between mb-2.5 gap-2">
+            <Link 
+              href="/dashboard" 
+              className="flex items-center gap-1.5 hover:opacity-80 transition-opacity min-w-0 flex-shrink"
+            >
+              <LogoIcon className="shrink-0 h-5 w-5" />
+              <h1 className="text-sm font-semibold truncate">
+                {getAppName()}
               </h1>
+            </Link>
+            <div className="flex items-center gap-1 shrink-0">
+              <ThemeToggle />
+              <UserMenu
+                userName={session.user.name}
+                userEmail={session.user.email}
+                userImage={session.user.image}
+              />
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          {/* Segunda fila: Selector de organizaciones */}
+          <div className="w-full">
             <OrganizationSelector
               organizations={organizations}
               activeOrganizationId={activeOrganizationId}
             />
-            <Link href="/trips">
-              <Button variant="ghost" size="sm" className="hidden sm:flex">
-                <Plane className="mr-2 h-4 w-4" />
-                My Trips
-              </Button>
-            </Link>
-            <ThemeToggle />
-            <form action={handleSignOut}>
-              <Button
-                type="submit"
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </form>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+      
+      {/* Header desktop */}
+      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 hidden md:block">
+        <div className="container mx-auto px-4 py-3 max-w-7xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link 
+                href="/dashboard" 
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              >
+                <LogoIcon />
+                <h1 className="text-lg font-semibold truncate">
+                  {getAppName()}
+                </h1>
+              </Link>
+            </div>
+            <div className="flex items-center gap-2">
+              <OrganizationSelector
+                organizations={organizations}
+                activeOrganizationId={activeOrganizationId}
+              />
+              <Link href="/trips">
+                <Button variant="ghost" size="sm">
+                  <Plane className="mr-2 h-4 w-4" />
+                  My Trips
+                </Button>
+              </Link>
+              <ThemeToggle />
+              <UserMenu
+                userName={session.user.name}
+                userEmail={session.user.email}
+                userImage={session.user.image}
+              />
+            </div>
+          </div>
+        </div>
+      </header>
+    </>
   );
 }
 

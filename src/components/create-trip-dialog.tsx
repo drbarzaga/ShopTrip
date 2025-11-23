@@ -50,7 +50,7 @@ export function CreateTripDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button size="sm" className={className || "w-full sm:w-auto"}>
+          <Button size="sm" className={`h-10 text-sm ${className || "w-full sm:w-auto"}`}>
             <Plus className="mr-2 h-4 w-4" />
             New Trip
           </Button>
@@ -124,7 +124,7 @@ export function CreateTripDialog({
               <p className="text-sm text-destructive">{state.message}</p>
             )}
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
               type="button"
               variant="outline"
@@ -133,10 +133,11 @@ export function CreateTripDialog({
                 setState(null);
               }}
               disabled={isPending}
+              className="w-full sm:w-auto h-10"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto h-10">
               {isPending ? "Creating..." : "Create Trip"}
             </Button>
           </DialogFooter>

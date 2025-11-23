@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,7 @@ export function InviteMemberDialog({
   trigger,
   className,
 }: InviteMemberDialogProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [state, setState] = useState<ActionResult<void> | null>(null);
@@ -54,6 +56,7 @@ export function InviteMemberDialog({
         setOpen(false);
         setState(null);
         setRole("member");
+        router.refresh();
       }
     });
   };
@@ -119,23 +122,24 @@ export function InviteMemberDialog({
               <p className="text-sm text-destructive">{state.message}</p>
             )}
           </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setOpen(false);
-                setState(null);
-                setRole("member");
-              }}
-              disabled={isPending}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Sending..." : "Send Invitation"}
-            </Button>
-          </DialogFooter>
+                 <DialogFooter className="flex-col sm:flex-row gap-2">
+                   <Button
+                     type="button"
+                     variant="outline"
+                     onClick={() => {
+                       setOpen(false);
+                       setState(null);
+                       setRole("member");
+                     }}
+                     disabled={isPending}
+                     className="w-full sm:w-auto h-10"
+                   >
+                     Cancel
+                   </Button>
+                   <Button type="submit" disabled={isPending} className="w-full sm:w-auto h-10">
+                     {isPending ? "Sending..." : "Send Invitation"}
+                   </Button>
+                 </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

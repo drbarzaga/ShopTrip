@@ -23,6 +23,7 @@ interface CreateOrganizationDialogProps {
   className?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  onValueChange?: (open: boolean) => void;
   onSuccess?: () => void;
 }
 
@@ -31,11 +32,12 @@ export function CreateOrganizationDialog({
   className,
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
+  onValueChange,
   onSuccess,
 }: CreateOrganizationDialogProps = {} as CreateOrganizationDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
-  const setOpen = controlledOnOpenChange || setInternalOpen;
+  const setOpen = controlledOnOpenChange || onValueChange || setInternalOpen;
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [state, setState] = useState<ActionResult<{ id: string; slug: string }> | null>(null);
@@ -61,7 +63,7 @@ export function CreateOrganizationDialog({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       {!trigger && (
         <DialogTrigger asChild>
-          <Button size="sm" className={`w-full sm:w-auto ${className || ""}`}>
+          <Button size="sm" className={`h-10 text-sm w-full sm:w-auto ${className || ""}`}>
             <Plus className="mr-2 h-4 w-4" />
             New Organization
           </Button>
@@ -98,7 +100,7 @@ export function CreateOrganizationDialog({
               <p className="text-sm text-destructive">{state.message}</p>
             )}
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
               type="button"
               variant="outline"
@@ -107,10 +109,11 @@ export function CreateOrganizationDialog({
                 setState(null);
               }}
               disabled={isPending}
+              className="w-full sm:w-auto h-10"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto h-10">
               {isPending ? "Creating..." : "Create Organization"}
             </Button>
           </DialogFooter>

@@ -22,14 +22,15 @@ export async function createItemFromAIPromptAction(
     if (itemData.description) {
       formData.append("description", itemData.description);
     }
-    if (itemData.price !== undefined) {
+    // Solo agregar precio si se especificó explícitamente y es mayor a 0
+    if (itemData.price !== undefined && itemData.price !== null && itemData.price > 0) {
       formData.append("price", itemData.price.toString());
     }
-    if (itemData.quantity !== undefined) {
-      formData.append("quantity", itemData.quantity.toString());
-    } else {
-      formData.append("quantity", "1");
-    }
+    // Cantidad: usar la especificada o 1 por defecto
+    const quantity = itemData.quantity !== undefined && itemData.quantity !== null && itemData.quantity > 0 
+      ? itemData.quantity 
+      : 1;
+    formData.append("quantity", quantity.toString());
 
     // Usar la acción existente para crear el item
     const result = await createTripItemAction(null, formData);

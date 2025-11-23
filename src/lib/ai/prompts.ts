@@ -90,12 +90,15 @@ Extrae la información del producto y responde SOLO con un JSON válido en este 
 {
   "name": "Nombre del producto",
   "description": "Descripción detallada (opcional)",
-  "price": número decimal (opcional, en dólares USD),
-  "quantity": número entero (opcional, por defecto 1)
+  "price": número decimal (SOLO si el usuario menciona explícitamente un precio),
+  "quantity": número entero (SOLO si el usuario menciona explícitamente una cantidad)
 }
 
-Si no hay información sobre precio o cantidad, omítelos del JSON.
-Si mencionas un precio pero no especificas la moneda, asume que es en dólares USD.
+IMPORTANTE:
+- Si el usuario NO menciona un precio, NO incluyas el campo "price" en el JSON.
+- Si el usuario NO menciona una cantidad, NO incluyas el campo "quantity" en el JSON.
+- NO inventes precios ni cantidades si no se mencionan explícitamente.
+- Si mencionas un precio pero no especificas la moneda, asume que es en dólares USD.
 Responde SOLO con el JSON, sin texto adicional.`,
         },
         {

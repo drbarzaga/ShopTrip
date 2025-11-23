@@ -78,14 +78,24 @@ export function AIPromptInput({
         recognition.lang = "es-ES";
 
         recognition.onresult = (event: SpeechRecognitionEvent) => {
-          const transcript = event.results[0][0].transcript;
-          setPrompt(transcript);
+          const transcript = event.results[0]?.[0]?.transcript;
+          if (transcript) {
+            setPrompt(transcript);
+          }
           setIsListening(false);
         };
 
-        recognition.onerror = () => {
+        recognition.onerror = (event: Event) => {
           setIsListening(false);
-          setError("Error al reconocer la voz. Intenta de nuevo.");
+          const errorEvent = event as any;
+          const errorMessage = errorEvent.error;
+          if (errorMessage === "not-allowed") {
+            setError("Permiso de micrófono denegado. Por favor, permite el acceso al micrófono.");
+          } else if (errorMessage === "no-speech") {
+            setError("No se detectó voz. Intenta de nuevo.");
+          } else {
+            setError("Error al reconocer la voz. Intenta de nuevo.");
+          }
         };
 
         recognition.onend = () => {
@@ -93,12 +103,18 @@ export function AIPromptInput({
         };
 
         recognitionRef.current = recognition;
+      } else {
+        setError("Tu navegador no soporta reconocimiento de voz");
       }
     }
 
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.stop();
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          // Ignorar errores al detener
+        }
       }
     };
   }, []);
@@ -121,19 +137,28 @@ export function AIPromptInput({
     }
   };
 
-  const handleVoiceInput = () => {
+  const handleVoiceInput = async () => {
     if (!recognitionRef.current) {
       setError("Tu navegador no soporta reconocimiento de voz");
       return;
     }
 
     if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
+      try {
+        recognitionRef.current.stop();
+        setIsListening(false);
+      } catch (e) {
+        setIsListening(false);
+      }
     } else {
-      setIsListening(true);
-      setError(null);
-      recognitionRef.current.start();
+      try {
+        setIsListening(true);
+        setError(null);
+        recognitionRef.current.start();
+      } catch (e) {
+        setIsListening(false);
+        setError("Error al iniciar el reconocimiento de voz. Asegúrate de permitir el acceso al micrófono.");
+      }
     }
   };
 

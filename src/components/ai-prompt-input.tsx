@@ -16,6 +16,7 @@ interface SpeechRecognition extends EventTarget {
   onresult: (event: SpeechRecognitionEvent) => void;
   onerror: (event: Event) => void;
   onend: () => void;
+  onstart: () => void;
 }
 
 interface SpeechRecognitionEvent {
@@ -64,50 +65,73 @@ export function AIPromptInput({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  useEffect(() => {
-    // Verificar si el navegador soporta reconocimiento de voz
-    if (typeof globalThis.window !== "undefined") {
-      const SpeechRecognition =
-        globalThis.window.SpeechRecognition ||
-        globalThis.window.webkitSpeechRecognition;
-
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = "es-ES";
-
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
-          const transcript = event.results[0]?.[0]?.transcript;
-          if (transcript) {
-            setPrompt(transcript);
-          }
-          setIsListening(false);
-        };
-
-        recognition.onerror = (event: Event) => {
-          setIsListening(false);
-          const errorEvent = event as any;
-          const errorMessage = errorEvent.error;
-          if (errorMessage === "not-allowed") {
-            setError("Permiso de micrófono denegado. Por favor, permite el acceso al micrófono.");
-          } else if (errorMessage === "no-speech") {
-            setError("No se detectó voz. Intenta de nuevo.");
-          } else {
-            setError("Error al reconocer la voz. Intenta de nuevo.");
-          }
-        };
-
-        recognition.onend = () => {
-          setIsListening(false);
-        };
-
-        recognitionRef.current = recognition;
-      } else {
-        setError("Tu navegador no soporta reconocimiento de voz");
-      }
+  const createRecognition = (): SpeechRecognition | null => {
+    if (typeof globalThis.window === "undefined") {
+      return null;
     }
 
+    const SpeechRecognition =
+      globalThis.window.SpeechRecognition ||
+      globalThis.window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      return null;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "es-ES";
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      try {
+        const transcript = event.results[0]?.[0]?.transcript;
+        if (transcript && transcript.trim()) {
+          setPrompt((prev) => prev + (prev ? " " : "") + transcript.trim());
+        }
+        setIsListening(false);
+        setError(null);
+      } catch (e) {
+        console.error("Error processing speech result:", e);
+        setIsListening(false);
+      }
+    };
+
+    recognition.onerror = (event: Event) => {
+      setIsListening(false);
+      const errorEvent = event as any;
+      const errorMessage = errorEvent.error;
+      
+      console.error("Speech recognition error:", errorMessage);
+      
+      if (errorMessage === "not-allowed") {
+        setError("Permiso de micrófono denegado. Permite el acceso al micrófono en la configuración del navegador.");
+      } else if (errorMessage === "no-speech") {
+        setError("No se detectó voz. Intenta hablar más cerca del micrófono.");
+      } else if (errorMessage === "audio-capture") {
+        setError("No se pudo acceder al micrófono. Verifica que esté conectado y funcionando.");
+      } else if (errorMessage === "network") {
+        setError("Error de conexión con el servicio de reconocimiento de voz. El reconocimiento de voz requiere conexión a internet y acceso a los servidores de Google. Verifica tu conexión, firewall o VPN.");
+      } else if (errorMessage === "aborted") {
+        // Ignorar errores de aborto (cuando se detiene manualmente)
+        setError(null);
+      } else {
+        setError(`Error: ${errorMessage}. Intenta de nuevo.`);
+      }
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onstart = () => {
+      setError(null);
+    };
+
+    return recognition;
+  };
+
+  useEffect(() => {
     return () => {
       if (recognitionRef.current) {
         try {
@@ -115,6 +139,7 @@ export function AIPromptInput({
         } catch (e) {
           // Ignorar errores al detener
         }
+        recognitionRef.current = null;
       }
     };
   }, []);
@@ -137,27 +162,112 @@ export function AIPromptInput({
     }
   };
 
+  const checkNetworkConnection = async (): Promise<boolean> => {
+    if (typeof globalThis.navigator === "undefined") {
+      return false;
+    }
+    
+    // Verificar si hay conexión usando la API de Network Information si está disponible
+    if ("connection" in globalThis.navigator) {
+      const connection = (globalThis.navigator as any).connection;
+      if (connection && connection.effectiveType) {
+        return connection.effectiveType !== "offline";
+      }
+    }
+    
+    // Fallback: intentar hacer una petición simple
+    try {
+      const response = await fetch("https://www.google.com/favicon.ico", {
+        method: "HEAD",
+        mode: "no-cors",
+        cache: "no-cache",
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const handleVoiceInput = async () => {
-    if (!recognitionRef.current) {
-      setError("Tu navegador no soporta reconocimiento de voz");
+    // Verificar soporte del navegador
+    if (typeof globalThis.window === "undefined") {
+      setError("El reconocimiento de voz no está disponible.");
+      return;
+    }
+
+    const SpeechRecognition =
+      globalThis.window.SpeechRecognition ||
+      globalThis.window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      setError("Tu navegador no soporta reconocimiento de voz. Usa Chrome, Edge o Safari.");
+      return;
+    }
+
+    // Verificar conexión a internet antes de iniciar
+    const hasConnection = await checkNetworkConnection();
+    if (!hasConnection) {
+      setError("No hay conexión a internet. El reconocimiento de voz requiere conexión a internet.");
       return;
     }
 
     if (isListening) {
-      try {
-        recognitionRef.current.stop();
-        setIsListening(false);
-      } catch (e) {
-        setIsListening(false);
+      // Detener el reconocimiento
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          // Ignorar errores
+        }
       }
-    } else {
-      try {
-        setIsListening(true);
-        setError(null);
-        recognitionRef.current.start();
-      } catch (e) {
-        setIsListening(false);
-        setError("Error al iniciar el reconocimiento de voz. Asegúrate de permitir el acceso al micrófono.");
+      setIsListening(false);
+      return;
+    }
+
+    // Crear o reutilizar la instancia de reconocimiento
+    if (!recognitionRef.current) {
+      const recognition = createRecognition();
+      if (!recognition) {
+        setError("No se pudo inicializar el reconocimiento de voz.");
+        return;
+      }
+      recognitionRef.current = recognition;
+    }
+
+    // Iniciar el reconocimiento
+    try {
+      setIsListening(true);
+      setError(null);
+      recognitionRef.current.start();
+    } catch (e: any) {
+      console.error("Error starting recognition:", e);
+      setIsListening(false);
+      
+      // Si el error es que ya está iniciado, crear una nueva instancia
+      if (e?.message?.includes("started") || e?.message?.includes("already") || e?.message?.includes("abort")) {
+        try {
+          // Detener y crear nueva instancia
+          if (recognitionRef.current) {
+            try {
+              recognitionRef.current.stop();
+            } catch (stopError) {
+              // Ignorar
+            }
+          }
+          recognitionRef.current = createRecognition();
+          if (recognitionRef.current) {
+            setIsListening(true);
+            setError(null);
+            recognitionRef.current.start();
+          } else {
+            setError("Error al reinicializar el reconocimiento de voz.");
+          }
+        } catch (retryError) {
+          console.error("Error retrying recognition:", retryError);
+          setError("Error al iniciar el reconocimiento. Intenta recargar la página.");
+        }
+      } else {
+        setError("Error al iniciar el reconocimiento. Asegúrate de permitir el acceso al micrófono.");
       }
     }
   };

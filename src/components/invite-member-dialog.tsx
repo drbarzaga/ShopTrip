@@ -1,0 +1,144 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { UserPlus } from "lucide-react";
+import { inviteMemberAction } from "@/actions/organizations";
+import type { ActionResult } from "@/types/actions";
+
+interface InviteMemberDialogProps {
+  organizationId: string;
+  organizationName: string;
+  trigger?: React.ReactNode;
+  className?: string;
+}
+
+export function InviteMemberDialog({
+  organizationId,
+  organizationName,
+  trigger,
+  className,
+}: InviteMemberDialogProps) {
+  const [open, setOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [state, setState] = useState<ActionResult<void> | null>(null);
+  const [role, setRole] = useState<"owner" | "admin" | "member">("member");
+
+  const handleSubmit = async (formData: FormData) => {
+    formData.append("organizationId", organizationId);
+    formData.append("role", role);
+    
+    startTransition(async () => {
+      const result = await inviteMemberAction(state, formData);
+      setState(result);
+
+      if (result.success) {
+        setOpen(false);
+        setState(null);
+        setRole("member");
+      }
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger || (
+          <Button size="sm" className={`w-full sm:w-auto ${className || ""}`}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Invite Member
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <form action={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle>Invite Member</DialogTitle>
+            <DialogDescription>
+              Invite someone to join {organizationName}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">
+                Email Address <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="user@example.com"
+                required
+                disabled={isPending}
+                defaultValue={state?.formData?.email as string}
+              />
+              {state?.fieldErrors?.email && (
+                <p className="text-sm text-destructive">
+                  {state.fieldErrors.email[0]}
+                </p>
+              )}
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="role">Role</Label>
+              <Select
+                value={role}
+                onValueChange={(value: "owner" | "admin" | "member") =>
+                  setRole(value)
+                }
+                disabled={isPending}
+              >
+                <SelectTrigger id="role">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="owner">Owner</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {state && !state.success && (
+              <p className="text-sm text-destructive">{state.message}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+                setState(null);
+                setRole("member");
+              }}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Sending..." : "Send Invitation"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+

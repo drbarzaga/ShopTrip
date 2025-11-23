@@ -4,16 +4,19 @@ import { z } from "zod";
 import type { ActionResult } from "@/types/actions";
 
 // Helper para crear un resultado exitoso
-export function success<T>(data: T, message?: string): ActionResult<T> {
+export async function success<T>(
+  data: T,
+  message?: string
+): Promise<ActionResult<T>> {
   return { success: true, data, message };
 }
 
 // Helper para crear un resultado con error
-export function failure(
+export async function failure(
   message: string,
   fieldErrors?: Record<string, string[]>,
   formData?: Record<string, unknown>
-): ActionResult<never> {
+): Promise<ActionResult<never>> {
   return { success: false, message, fieldErrors, formData };
 }
 
@@ -33,10 +36,10 @@ function formDataToObject(formData: FormData): Record<string, unknown> {
  * Retorna los datos validados si tiene éxito, o un ActionResult si falla
  * Incluye los datos originales en el error para mantener el estado del formulario
  */
-export function validate<T extends z.ZodTypeAny>(
+export async function validate<T extends z.ZodTypeAny>(
   formData: FormData,
   schema: T
-): z.infer<T> | ActionResult<never> {
+): Promise<z.infer<T> | ActionResult<never>> {
   const data = formDataToObject(formData);
 
   try {
@@ -51,9 +54,9 @@ export function validate<T extends z.ZodTypeAny>(
         }
         fieldErrors[path].push(err.message);
       });
-      return failure("Validation failed", fieldErrors, data);
+      return await failure("Validation failed", fieldErrors, data);
     }
-    return failure("An unexpected error occurred", undefined, data);
+    return await failure("An unexpected error occurred", undefined, data);
   }
 }
 
@@ -75,7 +78,7 @@ export async function withValidation<
   schema: T,
   callback: (data: z.infer<T>) => Promise<TReturn> | TReturn
 ): Promise<TReturn | ActionResult<never>> {
-  const result = validate(formData, schema);
+  const result = await validate(formData, schema);
 
   // Si es un error de validación, retornarlo directamente
   if (isActionResult(result) && !result.success) {

@@ -38,19 +38,19 @@ export async function AppHeader() {
     <>
       {/* Header móvil - diseño optimizado */}
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">
-        <div className="px-3 py-3.5">
+        <div className="px-3 py-4">
           {/* Primera fila: Logo y menú de usuario */}
-          <div className="flex items-center justify-between mb-2.5 gap-2">
+          <div className="flex items-center justify-between mb-3 gap-2">
             <Link 
               href="/dashboard" 
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-shrink"
+              className="flex items-center gap-2.5 hover:opacity-80 transition-opacity min-w-0 flex-shrink"
             >
               <LogoIcon className="shrink-0" />
-              <h1 className="text-sm font-semibold truncate">
+              <h1 className="text-base font-semibold truncate">
                 {getAppName()}
               </h1>
             </Link>
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               <ThemeToggle />
               <UserMenu
                 userName={session.user.name}

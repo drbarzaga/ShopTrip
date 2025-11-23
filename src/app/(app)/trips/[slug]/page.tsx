@@ -21,6 +21,7 @@ import { ItemsList } from "@/components/items-list";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CreateTripItemDialog } from "@/components/create-trip-item-dialog";
 import { EditTripDialog } from "@/components/edit-trip-dialog";
+import { RefreshButton } from "@/components/refresh-button";
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
@@ -85,8 +86,9 @@ export default async function TripDetailPage({
             <h1 className="text-xl sm:text-2xl font-bold flex-1 min-w-0 pr-2">
               {tripData.name}
             </h1>
-            {canEdit && (
-              <div className="shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
+              <RefreshButton />
+              {canEdit && (
                 <EditTripDialog
                   trip={{
                     id: tripData.id,
@@ -96,8 +98,8 @@ export default async function TripDetailPage({
                     endDate: tripData.endDate,
                   }}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
           {tripData.destination && (
             <div className="flex items-center gap-1.5 text-sm sm:text-base text-muted-foreground mb-2">

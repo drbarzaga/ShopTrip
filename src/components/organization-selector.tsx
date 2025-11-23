@@ -116,14 +116,14 @@ export function OrganizationSelector({
       </div>
       
       {/* Versión mobile: selector y botón separados con gap */}
-      <div className="flex md:hidden items-center gap-2 w-full">
+      <div className="flex md:hidden items-center gap-2.5 w-full">
         <Select
           value={selectedOrgId && selectedOrgId !== "create" ? selectedOrgId : undefined}
           onValueChange={handleChange}
           disabled={isPending}
         >
-          <SelectTrigger className="h-9 text-sm flex-1 min-w-0">
-            <Building2 className="h-4 w-4 mr-1.5 shrink-0" />
+          <SelectTrigger className="h-10 text-base flex-1 min-w-0">
+            <Building2 className="h-4 w-4 mr-2 shrink-0" />
             <SelectValue placeholder="Selecciona organización" />
           </SelectTrigger>
           <SelectContent>
@@ -136,7 +136,7 @@ export function OrganizationSelector({
         </Select>
         <CreateOrganizationDialog
           trigger={
-            <Button variant="outline" size="sm" className="h-9 shrink-0 px-2.5">
+            <Button variant="outline" size="sm" className="h-10 shrink-0 px-3">
               <Plus className="h-4 w-4" />
             </Button>
           }

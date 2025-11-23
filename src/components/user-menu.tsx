@@ -34,12 +34,12 @@ export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 md:h-9 md:w-9 rounded-full">
-          <Avatar className="h-8 w-8 md:h-9 md:w-9">
+        <Button variant="ghost" className="relative h-10 w-10 md:h-9 md:w-9 rounded-full">
+          <Avatar className="h-10 w-10 md:h-9 md:w-9">
             {userImage && (
               <AvatarImage src={userImage} alt={userName || ""} />
             )}
-            <AvatarFallback className="text-xs md:text-sm font-semibold">
+            <AvatarFallback className="text-sm md:text-sm font-semibold">
               {getInitials(userName)}
             </AvatarFallback>
           </Avatar>

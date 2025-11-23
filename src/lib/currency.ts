@@ -130,21 +130,15 @@ export function formatCurrency(
     return `${getCurrencySymbol(currency)}0.00`;
   }
 
-  // Para UYU, usar formato personalizado sin decimales si es entero
+  // Para UYU, siempre mostrar dos decimales
   if (currency === "UYU") {
-    if (Number.isInteger(amount)) {
-      return `${getCurrencySymbol(currency)}${amount.toLocaleString("es-UY")}`;
-    }
     return `${getCurrencySymbol(currency)}${amount.toLocaleString("es-UY", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   }
 
-  // Para USD, usar formato personalizado con US$
-  if (Number.isInteger(amount)) {
-    return `${getCurrencySymbol(currency)}${amount.toLocaleString("en-US")}`;
-  }
+  // Para USD, siempre mostrar dos decimales
   return `${getCurrencySymbol(currency)}${amount.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

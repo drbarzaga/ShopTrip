@@ -2,33 +2,32 @@
 
 import { db } from "@/db";
 import { trip, tripItem } from "@/db/schema";
-import { eq, and, sql, inArray, or, isNull } from "drizzle-orm";
+import { eq, and, sql, isNull } from "drizzle-orm";
 import { getUserOrganizations } from "@/actions/organizations";
+import { getActiveOrganizationId } from "@/lib/auth-server";
 
 export async function getDashboardStats(userId: string) {
   try {
-    // Obtener todas las organizaciones de las que el usuario es miembro
-    const userOrganizations = await getUserOrganizations(userId);
-    const organizationIds = userOrganizations.map(org => org.id);
+    // Obtener organización activa
+    const activeOrganizationId = await getActiveOrganizationId();
+    let whereCondition;
 
-    // Construir condiciones: viajes de las organizaciones del usuario O viajes personales (sin organización) creados por el usuario
-    const conditions = [
-      // Viajes personales del usuario (sin organización)
-      and(
-        eq(trip.userId, userId),
-        isNull(trip.organizationId)
-      )
-    ];
+    // Si hay una organización activa, mostrar solo los viajes de esa organización
+    if (activeOrganizationId) {
+      // Verificar que el usuario sea miembro de la organización activa
+      const userOrganizations = await getUserOrganizations(userId);
+      const isMember = userOrganizations.some(org => org.id === activeOrganizationId);
 
-    // Si el usuario es miembro de organizaciones, agregar condición para viajes de esas organizaciones
-    if (organizationIds.length > 0) {
-      conditions.push(inArray(trip.organizationId, organizationIds));
+      if (isMember) {
+        whereCondition = eq(trip.organizationId, activeOrganizationId);
+      } else {
+        // Si no es miembro, usar condición vacía que no devuelva nada
+        whereCondition = eq(trip.id, "never-match");
+      }
+    } else {
+      // Si no hay organización activa, mostrar solo viajes personales (sin organización)
+      whereCondition = and(eq(trip.userId, userId), isNull(trip.organizationId));
     }
-
-    // Si solo hay una condición, usar esa condición directamente; si hay múltiples, usar or()
-    const whereCondition = conditions.length === 1 
-      ? conditions[0] 
-      : or(...conditions);
 
     // Get all trips accessible to the user
     const userTrips = await db

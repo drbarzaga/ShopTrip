@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Package, Pencil, Trash2 } from "lucide-react";
+import { DollarSign, Package, Pencil, Trash2, Calendar } from "lucide-react";
 import { getItemIcon } from "@/lib/item-icons";
 import { toggleItemPurchasedAction, deleteTripItemAction } from "@/actions/trip-items";
 import { CurrencyFormatter } from "@/components/currency-formatter";
@@ -33,6 +33,7 @@ interface TripItemCardProps {
     purchasedBy: string | null;
     purchasedByName: string | null;
     purchasedByImage: string | null;
+    createdAt: Date | null;
   };
   canEdit?: boolean;
 }
@@ -255,25 +256,44 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                 </Badge>
               </div>
 
-              {/* Información del comprador */}
-              {purchased && item.purchasedByName && (
-                <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-green-100/80 dark:bg-green-900/30 border border-green-200/50 dark:border-green-800/30">
-                  <Avatar className="h-5 w-5 border border-green-300/50 dark:border-green-700/50">
-                    {item.purchasedByImage && (
-                      <AvatarImage
-                        src={item.purchasedByImage}
-                        alt={item.purchasedByName}
-                      />
-                    )}
-                    <AvatarFallback className="text-[10px] font-semibold bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200">
-                      {getInitials(item.purchasedByName)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-xs font-medium text-foreground truncate max-w-[100px]">
-                    {item.purchasedByName}
-                  </span>
-                </div>
-              )}
+              {/* Información del comprador y fecha */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Información del comprador */}
+                {purchased && item.purchasedByName && (
+                  <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-green-100/80 dark:bg-green-900/30 border border-green-200/50 dark:border-green-800/30">
+                    <Avatar className="h-5 w-5 border border-green-300/50 dark:border-green-700/50">
+                      {item.purchasedByImage && (
+                        <AvatarImage
+                          src={item.purchasedByImage}
+                          alt={item.purchasedByName}
+                        />
+                      )}
+                      <AvatarFallback className="text-[10px] font-semibold bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200">
+                        {getInitials(item.purchasedByName)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-xs font-medium text-foreground truncate max-w-[100px]">
+                      {item.purchasedByName}
+                    </span>
+                  </div>
+                )}
+                {/* Fecha de creación */}
+                {item.createdAt && (
+                  <Badge
+                    variant="outline"
+                    className="h-6 gap-1 px-2 text-xs font-medium border-border/50 bg-muted/30 text-muted-foreground"
+                  >
+                    <Calendar className="h-3 w-3" />
+                    <span>
+                      {new Intl.DateTimeFormat("es-ES", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      }).format(new Date(item.createdAt))}
+                    </span>
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
         </div>

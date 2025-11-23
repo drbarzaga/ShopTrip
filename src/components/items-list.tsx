@@ -17,6 +17,7 @@ interface Item {
   purchasedBy: string | null;
   purchasedByName: string | null;
   purchasedByImage: string | null;
+  createdAt: Date | null;
 }
 
 interface ItemsListProps {

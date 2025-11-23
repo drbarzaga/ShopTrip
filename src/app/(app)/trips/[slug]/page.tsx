@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 import { TripItemCard } from "@/components/trip-item-card";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { CreateTripItemDialog } from "@/components/create-trip-item-dialog";
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
@@ -134,10 +135,7 @@ export default async function TripDetailPage({
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h2 className="text-lg sm:text-xl font-bold">Artículos</h2>
-            <Button size="sm" className="w-full sm:w-auto h-10 text-sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Agregar Artículo
-            </Button>
+            <CreateTripItemDialog tripId={tripData.id} />
           </div>
 
           {items.length === 0 ? (
@@ -147,10 +145,15 @@ export default async function TripDetailPage({
                 <p className="text-muted-foreground text-sm mb-4">
                   Aún no hay artículos
                 </p>
-                <Button size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Agregar Primer Artículo
-                </Button>
+                <CreateTripItemDialog 
+                  tripId={tripData.id}
+                  trigger={
+                    <Button size="sm">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Agregar Primer Artículo
+                    </Button>
+                  }
+                />
               </CardContent>
             </Card>
           ) : (

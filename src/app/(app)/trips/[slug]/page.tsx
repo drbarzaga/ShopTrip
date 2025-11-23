@@ -153,7 +153,7 @@ export default async function TripDetailPage({
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h2 className="text-lg sm:text-xl font-bold">Artículos</h2>
-            {canEdit && <CreateTripItemDialog tripId={tripData.id} />}
+            {canEdit && items.length > 0 && <CreateTripItemDialog tripId={tripData.id} />}
           </div>
 
           {items.length === 0 ? (

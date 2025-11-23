@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useRef, useEffect } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -53,17 +53,9 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [purchased, setPurchased] = useState(item.purchased);
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [isSwiping, setIsSwiping] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const startXRef = useRef<number>(0);
-  const currentXRef = useRef<number>(0);
   
   // Verificar si el producto tiene precio
   const hasPrice = item.price !== null && item.price > 0;
-  
-  // Umbral para activar la eliminación (80px)
-  const DELETE_THRESHOLD = 80;
 
   // Renderizar el icono directamente sin crear una variable de componente
   const renderIcon = () => {
@@ -99,7 +91,6 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
       const result = await deleteTripItemAction(item.id);
       if (result.success) {
         setDeleteDialogOpen(false);
-        setSwipeOffset(0);
         router.refresh();
       } else {
         setIsDeleting(false);
@@ -107,163 +98,22 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
     });
   };
 
-  // Gestos de swipe
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!canEdit || isPending || isDeleting) return;
-    startXRef.current = e.touches[0].clientX;
-    currentXRef.current = startXRef.current;
-    setIsSwiping(true);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isSwiping || !canEdit) return;
-    currentXRef.current = e.touches[0].clientX;
-    const diff = startXRef.current - currentXRef.current;
-    
-    // Solo permitir deslizar hacia la izquierda (valores positivos)
-    if (diff > 0) {
-      setSwipeOffset(Math.min(diff, DELETE_THRESHOLD * 1.5));
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (!isSwiping) return;
-    setIsSwiping(false);
-    
-    // Si se deslizó más del umbral, mostrar diálogo de confirmación
-    if (swipeOffset >= DELETE_THRESHOLD) {
-      setDeleteDialogOpen(true);
-      setSwipeOffset(0);
-    } else {
-      // Volver a la posición original
-      setSwipeOffset(0);
-    }
-  };
-
-  // Manejar eventos de mouse para desktop (opcional, solo horizontal)
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!canEdit || isPending || isDeleting) return;
-    e.preventDefault();
-    startXRef.current = e.clientX;
-    currentXRef.current = startXRef.current;
-    setIsSwiping(true);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isSwiping || !canEdit) return;
-    e.preventDefault();
-    currentXRef.current = e.clientX;
-    const diff = startXRef.current - currentXRef.current;
-    
-    if (diff > 0) {
-      setSwipeOffset(Math.min(diff, DELETE_THRESHOLD * 1.5));
-    }
-  };
-
-  const handleMouseUp = () => {
-    if (!isSwiping) return;
-    setIsSwiping(false);
-    
-    if (swipeOffset >= DELETE_THRESHOLD) {
-      setDeleteDialogOpen(true);
-      setSwipeOffset(0);
-    } else {
-      setSwipeOffset(0);
-    }
-  };
-
-  // Limpiar eventos cuando el componente se desmonta o cuando se suelta el mouse fuera
-  useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      if (isSwiping) {
-        setIsSwiping(false);
-        if (swipeOffset >= DELETE_THRESHOLD) {
-          setDeleteDialogOpen(true);
-        }
-        setSwipeOffset(0);
-      }
-    };
-
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (isSwiping && canEdit) {
-        currentXRef.current = e.clientX;
-        const diff = startXRef.current - currentXRef.current;
-        
-        if (diff > 0) {
-          setSwipeOffset(Math.min(diff, DELETE_THRESHOLD * 1.5));
-        }
-      }
-    };
-
-    if (isSwiping) {
-      document.addEventListener("mouseup", handleGlobalMouseUp);
-      document.addEventListener("mousemove", handleGlobalMouseMove);
-      return () => {
-        document.removeEventListener("mouseup", handleGlobalMouseUp);
-        document.removeEventListener("mousemove", handleGlobalMouseMove);
-      };
-    }
-  }, [isSwiping, swipeOffset, canEdit]);
-
   const totalPrice =
     item.price && item.quantity ? item.price * item.quantity : item.price;
-  
-  const deleteButtonWidth = Math.min(swipeOffset, DELETE_THRESHOLD);
-  const isDeleteThresholdReached = swipeOffset >= DELETE_THRESHOLD;
 
   return (
-    <div className="relative overflow-hidden rounded-lg">
-      {/* Botón de eliminar que aparece al deslizar */}
-      {canEdit && swipeOffset > 0 && (
-        <div
-          className="absolute right-0 top-0 bottom-0 flex items-center justify-center bg-gradient-to-l from-destructive to-destructive/90 z-10 rounded-r-lg shadow-lg"
-          style={{
-            width: `${deleteButtonWidth}px`,
-            transition: isSwiping ? "none" : "width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease-out",
-            opacity: swipeOffset > 10 ? 1 : swipeOffset / 10,
-          }}
-        >
-          <div
-            className={`flex items-center justify-center transition-all duration-300 ${
-              isDeleteThresholdReached ? "scale-110 rotate-0" : "scale-100 rotate-0"
-            }`}
-            style={{
-              transform: `scale(${1 + (swipeOffset / DELETE_THRESHOLD) * 0.1})`,
-            }}
-          >
-            <Trash2 className="h-5 w-5 text-destructive-foreground drop-shadow-sm" />
-          </div>
-        </div>
-      )}
-      
+    <div className="relative">
       <Card
-        ref={cardRef}
         className={`group relative overflow-hidden border transition-all duration-300 ${
           purchased
             ? "bg-gradient-to-r from-green-50/70 via-green-50/40 to-background dark:from-green-950/40 dark:via-green-950/20 dark:to-background border-green-300/60 dark:border-green-700/50"
             : "bg-card hover:shadow-xl hover:border-primary/60"
-        } ${canEdit ? "cursor-grab active:cursor-grabbing" : ""} ${
-          swipeOffset > 0 ? "shadow-xl" : ""
         }`}
         style={{
-          transform: swipeOffset > 0
-            ? `translateX(-${swipeOffset}px) scale(${1 - swipeOffset / 1000})`
-            : purchased
-            ? "translateX(0) scale(1)"
-            : "translateX(0) scale(1)",
-          transition: isSwiping ? "none" : "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease-out",
-          touchAction: canEdit ? "pan-y" : "auto",
-          boxShadow: swipeOffset > 0
-            ? `0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(239, 68, 68, 0.1)`
-            : purchased
+          boxShadow: purchased
             ? "0 4px 12px -2px rgba(34, 197, 94, 0.15)"
             : undefined,
         }}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onMouseDown={handleMouseDown}
-        onMouseLeave={handleMouseUp}
       >
       {/* Efecto de brillo sutil */}
       <div
@@ -328,7 +178,7 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                 {purchased && (
                   <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400 mt-0.5 animate-in fade-in zoom-in duration-200" />
                 )}
-                {canEdit && swipeOffset === 0 && (
+                {canEdit && (
                   <>
                     <EditTripItemDialog
                       item={{

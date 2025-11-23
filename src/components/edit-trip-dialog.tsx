@@ -71,8 +71,16 @@ export function EditTripDialog({
     });
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      // Resetear el estado cuando se cierra el diálogo
+      setState(null);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger ?? (
           <Button
@@ -92,7 +100,7 @@ export function EditTripDialog({
             Modifica los detalles de tu viaje.
           </DialogDescription>
         </DialogHeader>
-        <form action={handleSubmit}>
+        <form key={open ? "open" : "closed"} action={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">

@@ -10,6 +10,44 @@ import { redirect } from "next/navigation";
 import { eq, desc, and, isNull } from "drizzle-orm";
 import { generateSlug, generateUniqueSlug } from "@/lib/utils";
 import { getUserOrganizations } from "@/actions/organizations";
+import { getUserRoleInTripOrganization } from "@/actions/trip-items";
+
+/**
+ * Verifica si el usuario puede eliminar un viaje (solo owner)
+ */
+export async function canUserDeleteTrip(
+  userId: string,
+  tripId: string
+): Promise<boolean> {
+  try {
+    const tripData = await db
+      .select({
+        userId: trip.userId,
+        organizationId: trip.organizationId,
+      })
+      .from(trip)
+      .where(eq(trip.id, tripId))
+      .limit(1);
+
+    if (tripData.length === 0) {
+      return false;
+    }
+
+    const tripRecord = tripData[0];
+
+    // Si es un viaje personal, solo el creador puede eliminarlo
+    if (!tripRecord.organizationId) {
+      return tripRecord.userId === userId;
+    }
+
+    // Si es un viaje de organización, solo el owner puede eliminarlo
+    const userRole = await getUserRoleInTripOrganization(userId, tripId);
+    return userRole === "owner";
+  } catch (error) {
+    console.error("Error checking if user can delete trip:", error);
+    return false;
+  }
+}
 
 // -------------------------------- Trips Actions --------------------------------
 
@@ -166,5 +204,145 @@ export async function getTripBySlug(tripSlug: string, userId: string) {
   } catch (error) {
     console.error("Error getting trip:", error);
     return null;
+  }
+}
+
+export const updateTripAction = async (
+  prevState: ActionResult<{ slug: string }> | null,
+  formData: FormData
+): Promise<ActionResult<{ slug: string }>> => {
+  const session = await getSession();
+  if (!session) {
+    redirect("/login");
+  }
+
+  return withValidation(formData, createTripSchema, async (data) => {
+    try {
+      const tripId = formData.get("tripId") as string;
+      
+      if (!tripId) {
+        return await failure("El ID del viaje es requerido");
+      }
+
+      // Verificar que el viaje existe
+      const tripData = await db
+        .select({
+          id: trip.id,
+          organizationId: trip.organizationId,
+          userId: trip.userId,
+        })
+        .from(trip)
+        .where(eq(trip.id, tripId))
+        .limit(1);
+
+      if (tripData.length === 0) {
+        return await failure("Viaje no encontrado");
+      }
+
+      const tripRecord = tripData[0];
+
+      // Verificar permisos: si es personal, debe ser el creador; si es de organización, debe ser owner o admin
+      if (!tripRecord.organizationId) {
+        if (tripRecord.userId !== session.user.id) {
+          return await failure("No tienes permisos para editar este viaje");
+        }
+      } else {
+        const userRole = await getUserRoleInTripOrganization(
+          session.user.id,
+          tripId
+        );
+        if (userRole !== "owner" && userRole !== "admin") {
+          return await failure("Solo los propietarios y administradores pueden editar viajes");
+        }
+      }
+
+      const startDate = data.startDate ? new Date(data.startDate) : null;
+      const endDate = data.endDate ? new Date(data.endDate) : null;
+
+      // Actualizar el viaje
+      await db
+        .update(trip)
+        .set({
+          name: data.name,
+          destination: data.destination || null,
+          startDate: startDate,
+          endDate: endDate,
+        })
+        .where(eq(trip.id, tripId));
+
+      // Obtener el slug actualizado
+      const updatedTrip = await db
+        .select({ slug: trip.slug })
+        .from(trip)
+        .where(eq(trip.id, tripId))
+        .limit(1);
+
+      return await success(
+        { slug: updatedTrip[0]?.slug || "" },
+        "¡Viaje actualizado exitosamente!"
+      );
+    } catch (error) {
+      const message =
+        (error as Error).message || "Ocurrió un error al actualizar el viaje";
+      return await failure(message, undefined, data);
+    }
+  });
+};
+
+/**
+ * Elimina un viaje
+ * Solo el owner puede eliminar viajes
+ */
+export async function deleteTripAction(
+  tripId: string
+): Promise<ActionResult<void>> {
+  const session = await getSession();
+  if (!session) {
+    redirect("/login");
+  }
+
+  try {
+    // Verificar que el viaje existe y obtener información
+    const tripData = await db
+      .select({
+        id: trip.id,
+        userId: trip.userId,
+        organizationId: trip.organizationId,
+      })
+      .from(trip)
+      .where(eq(trip.id, tripId))
+      .limit(1);
+
+    if (tripData.length === 0) {
+      return await failure("Viaje no encontrado");
+    }
+
+    const tripRecord = tripData[0];
+
+    // Si es un viaje personal, solo el creador puede eliminarlo
+    if (!tripRecord.organizationId) {
+      if (tripRecord.userId !== session.user.id) {
+        return await failure("Solo el propietario del viaje puede eliminarlo");
+      }
+    } else {
+      // Si es un viaje de organización, solo el owner puede eliminarlo
+      const userRole = await getUserRoleInTripOrganization(
+        session.user.id,
+        tripId
+      );
+      if (userRole !== "owner") {
+        return await failure("Solo el propietario de la organización puede eliminar viajes");
+      }
+    }
+
+    // Eliminar el viaje (los items se eliminarán automáticamente por cascade)
+    await db.delete(trip).where(eq(trip.id, tripId));
+
+    return await success(undefined, "Viaje eliminado exitosamente");
+  } catch (error) {
+    console.error("Error deleting trip:", error);
+    const message =
+      (error as Error).message || "Ocurrió un error al eliminar el viaje";
+    return await failure(message);
   }
 }

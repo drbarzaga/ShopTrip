@@ -20,17 +20,17 @@ export function DashboardProgress({
       <CardHeader className="pb-3 p-4">
         <div className="flex items-center justify-between mb-2">
           <CardTitle className="text-xs font-medium text-muted-foreground">
-            Progress
+            Progreso
           </CardTitle>
-          <span className="text-xs font-semibold text-foreground">
+          <span className="text-sm sm:text-base font-bold text-foreground">
             {purchasedItems} / {totalItems}
           </span>
         </div>
         <Progress value={percentage} className="h-2" />
         <p className="text-xs text-muted-foreground mt-2">
           {totalItems > 0
-            ? `${Math.round(percentage)}% completed`
-            : "No items yet"}
+            ? `${purchasedItems} de ${totalItems} productos completados (${Math.round(percentage)}%)`
+            : "Aún no hay productos"}
         </p>
       </CardHeader>
     </Card>

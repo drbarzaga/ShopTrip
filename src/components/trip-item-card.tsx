@@ -224,7 +224,7 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
             {/* Metadata inferior */}
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-2 flex-wrap">
-                {item.quantity && item.quantity > 1 && (
+                {item.quantity && item.quantity >= 1 && (
                   <Badge
                     variant="outline"
                     className="h-6 gap-1 px-2 text-xs font-medium border-border/50 bg-muted/30"

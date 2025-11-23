@@ -9,15 +9,15 @@ import { getAppName } from "@/lib/utils";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useActionState } from "react";
-import { signInAction } from "@/actions/auth";
+import { signUpAction } from "@/actions/auth";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect");
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(signInAction, null);
+  const [state, formAction, isPending] = useActionState(signUpAction, null);
 
   useEffect(() => {
     if (state?.success) {
@@ -39,12 +39,25 @@ export default function LoginPage() {
               <LogoIcon />
             </Link>
             <h1 className="mb-1 mt-4 text-xl font-semibold">
-              Iniciar Sesión en {getAppName()}
+              Crear cuenta en {getAppName()}
             </h1>
-            <p className="text-sm">¡Bienvenido de nuevo! Inicia sesión para continuar</p>
+            <p className="text-sm">Crea tu cuenta para comenzar</p>
           </div>
 
           <div className="mt-6 space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="block text-sm">
+                Nombre
+              </Label>
+              <Input
+                type="text"
+                required
+                name="name"
+                id="name"
+                defaultValue={state?.formData?.name}
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="email" className="block text-sm">
                 Correo Electrónico
@@ -59,26 +72,20 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-0.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="pwd" className="text-sm">
-                  Contraseña
-                </Label>
-                <Button asChild variant="link" size="sm">
-                  <Link
-                    href="#"
-                    className="link intent-info variant-ghost text-sm"
-                  >
-                    ¿Olvidaste tu Contraseña?
-                  </Link>
-                </Button>
-              </div>
+              <Label htmlFor="pwd" className="text-sm">
+                Contraseña
+              </Label>
               <Input
                 type="password"
                 required
                 name="password"
                 id="pwd"
                 className="input sz-md variant-mixed"
+                minLength={6}
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Mínimo 6 caracteres
+              </p>
             </div>
 
             {state && !state.success && (
@@ -86,7 +93,7 @@ export default function LoginPage() {
             )}
 
             <Button className="w-full" type="submit" disabled={isPending}>
-              {isPending ? "Iniciando sesión..." : "Iniciar Sesión"}
+              {isPending ? "Creando cuenta..." : "Crear cuenta"}
             </Button>
           </div>
 
@@ -105,10 +112,10 @@ export default function LoginPage() {
 
         <div className="p-3">
           <p className="text-accent-foreground text-center text-sm">
-            ¿No tienes una cuenta?
+            ¿Ya tienes una cuenta?
             <Button asChild variant="link" className="px-2">
-              <Link href={redirectTo ? `/register?redirect=${encodeURIComponent(redirectTo)}` : "/register"}>
-                Crear cuenta
+              <Link href={redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : "/login"}>
+                Iniciar sesión
               </Link>
             </Button>
           </p>
@@ -117,3 +124,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

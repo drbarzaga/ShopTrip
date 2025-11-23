@@ -335,6 +335,39 @@ export async function getUserInvitations(userEmail: string) {
   }
 }
 
+export async function getInvitationById(invitationId: string) {
+  try {
+    const now = new Date();
+    const invitations = await db
+      .select({
+        id: invitation.id,
+        organizationId: invitation.organizationId,
+        organizationName: organization.name,
+        email: invitation.email,
+        role: invitation.role,
+        status: invitation.status,
+        expiresAt: invitation.expiresAt,
+        createdAt: invitation.createdAt,
+        inviterId: invitation.inviterId,
+      })
+      .from(invitation)
+      .innerJoin(organization, eq(organization.id, invitation.organizationId))
+      .where(
+        and(
+          eq(invitation.id, invitationId),
+          eq(invitation.status, "pending"),
+          gt(invitation.expiresAt, now)
+        )
+      )
+      .limit(1);
+
+    return invitations.length > 0 ? invitations[0] : null;
+  } catch (error) {
+    console.error("Error getting invitation by ID:", error);
+    return null;
+  }
+}
+
 export async function acceptInvitationAction(invitationId: string) {
   "use server";
   try {

@@ -4,11 +4,15 @@ import React from "react";
 import { Button } from "../ui/button";
 import { authClient } from "@/lib/auth-client";
 
-export default function GoogleButton() {
+interface GoogleButtonProps {
+  redirectTo?: string | null;
+}
+
+export default function GoogleButton({ redirectTo }: GoogleButtonProps) {
   const handleSignInWithGoogle = async () => {
     await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/dashboard",
+      callbackURL: redirectTo || "/dashboard",
     });
   };
 

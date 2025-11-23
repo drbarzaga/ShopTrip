@@ -11,12 +11,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles, FileText } from "lucide-react";
 import { createTripItemAction } from "@/actions/trip-items";
+import { createItemFromAIPromptAction } from "@/actions/ai/create-item";
+import { AIPromptInput } from "@/components/ai-prompt-input";
 import type { ActionResult } from "@/types/actions";
 
 interface CreateTripItemDialogProps {
@@ -56,6 +59,23 @@ export function CreateTripItemDialog({
     });
   };
 
+  const handleAIPrompt = async (prompt: string) => {
+    startTransition(async () => {
+      const result = await createItemFromAIPromptAction(prompt, tripId);
+      setState(result);
+
+      if (result.success && result.data) {
+        setOpen(false);
+        setState(null);
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          router.refresh();
+        }
+      }
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -69,15 +89,27 @@ export function CreateTripItemDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <form action={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Agregar Artículo</DialogTitle>
-            <DialogDescription>
-              Agrega un nuevo artículo a tu lista de compras para este viaje.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Agregar Artículo</DialogTitle>
+          <DialogDescription>
+            Agrega un nuevo artículo a tu lista de compras para este viaje.
+          </DialogDescription>
+        </DialogHeader>
+        <Tabs defaultValue="manual" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="manual" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Manual
+            </TabsTrigger>
+            <TabsTrigger value="ai" className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              Con IA
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="manual" className="mt-4">
+            <form action={handleSubmit}>
+              <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">
                 Nombre del Artículo <span className="text-destructive">*</span>
@@ -165,32 +197,65 @@ export function CreateTripItemDialog({
                 )}
               </div>
             </div>
-            {state && !state.success && (
-              <p className="text-sm text-destructive">{state.message}</p>
-            )}
-          </div>
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setOpen(false);
-                setState(null);
-              }}
-              disabled={isPending}
-              className="w-full sm:w-auto h-10"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="w-full sm:w-auto h-10"
-            >
-              {isPending ? "Agregando..." : "Agregar Artículo"}
-            </Button>
-          </DialogFooter>
-        </form>
+                {state && !state.success && (
+                  <p className="text-sm text-destructive">{state.message}</p>
+                )}
+              </div>
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setOpen(false);
+                    setState(null);
+                  }}
+                  disabled={isPending}
+                  className="w-full sm:w-auto h-10"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full sm:w-auto h-10"
+                >
+                  {isPending ? "Agregando..." : "Agregar Artículo"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </TabsContent>
+          <TabsContent value="ai" className="mt-4">
+            <div className="space-y-4">
+              <AIPromptInput
+                onPromptSubmit={handleAIPrompt}
+                placeholder="Ej: Protector solar factor 50, resistente al agua, precio 15 dólares, cantidad 2"
+                disabled={isPending}
+              />
+              {state && !state.success && (
+                <p className="text-sm text-destructive">{state.message}</p>
+              )}
+              {state && state.success && (
+                <p className="text-sm text-green-600">
+                  ¡Artículo agregado exitosamente!
+                </p>
+              )}
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setOpen(false);
+                    setState(null);
+                  }}
+                  disabled={isPending}
+                  className="w-full sm:w-auto h-10"
+                >
+                  Cerrar
+                </Button>
+              </DialogFooter>
+            </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

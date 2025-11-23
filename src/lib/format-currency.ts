@@ -6,11 +6,11 @@ import type { Currency } from "@/lib/currency";
 
 /**
  * Formatea un monto usando la moneda preferida del usuario
- * Si el monto está almacenado en otra moneda, lo convierte automáticamente
+ * Los precios están almacenados en UYU, solo se convierten si la moneda preferida es USD
  */
 export async function formatCurrencyWithUserPreference(
   amount: number | null,
-  storedCurrency: Currency = "USD" // Por defecto, los precios están en USD
+  storedCurrency: Currency = "UYU" // Los precios están almacenados en UYU
 ): Promise<string> {
   if (amount === null || amount === undefined) {
     const preferredCurrency = await getUserPreferredCurrency();
@@ -20,29 +20,30 @@ export async function formatCurrencyWithUserPreference(
   const preferredCurrency = await getUserPreferredCurrency();
 
   // Si la moneda almacenada es diferente a la preferida, convertir
-  if (storedCurrency !== preferredCurrency) {
+  // Solo convertir cuando la preferida es USD (de UYU a USD)
+  if (storedCurrency !== preferredCurrency && preferredCurrency === "USD") {
     try {
       const convertedAmount = await convertCurrency(
         amount,
-        storedCurrency,
-        preferredCurrency
+        storedCurrency, // UYU
+        preferredCurrency // USD
       );
       return formatCurrencyUtil(convertedAmount, preferredCurrency);
     } catch (error) {
       console.error("Error converting currency:", error);
-      // Si falla la conversión, mostrar en la moneda almacenada
+      // Si falla la conversión, mostrar en la moneda almacenada (UYU)
       return formatCurrencyUtil(amount, storedCurrency);
     }
   }
 
+  // Si la moneda preferida es UYU o es la misma que la almacenada, mostrar tal cual
   return formatCurrencyUtil(amount, preferredCurrency);
 }
 
 /**
- * Versión simplificada que asume que los montos están en USD
- * (para mantener compatibilidad con código existente)
+ * Versión simplificada que asume que los montos están en UYU
  */
 export async function formatCurrency(amount: number | null): Promise<string> {
-  return formatCurrencyWithUserPreference(amount, "USD");
+  return formatCurrencyWithUserPreference(amount, "UYU");
 }
 

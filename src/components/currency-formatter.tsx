@@ -12,7 +12,7 @@ interface CurrencyFormatterProps {
 
 export function CurrencyFormatter({ 
   amount, 
-  storedCurrency = "USD",
+  storedCurrency = "UYU",
   className 
 }: CurrencyFormatterProps) {
   const [formatted, setFormatted] = useState<string>("");

@@ -4,11 +4,17 @@ import { getUserPreferredCurrency } from "@/actions/settings";
 import { CurrencySelector } from "@/components/currency-selector";
 import { ProfileSection } from "@/components/profile-section";
 import { DeleteAccountSection } from "@/components/delete-account-section";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Settings } from "lucide-react";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const session = await getSession();
@@ -24,7 +30,7 @@ export default async function SettingsPage() {
       <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl">
         {/* Breadcrumbs */}
         <Breadcrumbs items={[{ label: "Configuración" }]} />
-        
+
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
@@ -38,8 +44,8 @@ export default async function SettingsPage() {
           {/* Profile Section */}
           <ProfileSection
             userName={session.user.name}
-            userEmail={session.user.email}
-            userImage={session.user.image}
+            userEmail={session.user.email || null}
+            userImage={session.user.image || null}
           />
 
           {/* Currency Preferences */}
@@ -47,7 +53,9 @@ export default async function SettingsPage() {
             <CardHeader>
               <CardTitle>Preferencias de Moneda</CardTitle>
               <CardDescription>
-                Selecciona la moneda en la que deseas ver los precios. Los valores se convertirán automáticamente según el tipo de cambio vigente.
+                Selecciona la moneda en la que deseas ver los precios. Los
+                valores se convertirán automáticamente según el tipo de cambio
+                vigente.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -62,4 +70,3 @@ export default async function SettingsPage() {
     </div>
   );
 }
-

@@ -11,11 +11,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles, FileText } from "lucide-react";
 import { createTripAction } from "@/actions/trips";
+import { createTripFromAIPromptAction } from "@/actions/ai/create-trip";
+import { AIPromptInput } from "@/components/ai-prompt-input";
 import type { ActionResult } from "@/types/actions";
 
 interface CreateTripDialogProps {
@@ -59,6 +62,26 @@ export function CreateTripDialog({
     });
   };
 
+  const handleAIPrompt = async (prompt: string) => {
+    startTransition(async () => {
+      const result = await createTripFromAIPromptAction(prompt);
+      setState(result);
+
+      if (result.success && result.data) {
+        setOpen(false);
+        setState(null);
+        
+        if (onSuccess) {
+          onSuccess();
+        } else if (redirectOnSuccess) {
+          router.push(`/trips/${result.data.slug}`);
+        } else {
+          router.refresh();
+        }
+      }
+    });
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -72,15 +95,27 @@ export function CreateTripDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <form action={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Crear Nuevo Viaje</DialogTitle>
-            <DialogDescription>
-              Agrega un nuevo viaje para organizar tu lista de compras.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Crear Nuevo Viaje</DialogTitle>
+          <DialogDescription>
+            Agrega un nuevo viaje para organizar tu lista de compras.
+          </DialogDescription>
+        </DialogHeader>
+        <Tabs defaultValue="manual" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="manual" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Manual
+            </TabsTrigger>
+            <TabsTrigger value="ai" className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              Con IA
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="manual" className="mt-4">
+            <form action={handleSubmit}>
+              <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="name">
                 Nombre del Viaje <span className="text-destructive">*</span>
@@ -152,32 +187,65 @@ export function CreateTripDialog({
                 />
               </div>
             </div>
-            {state && !state.success && (
-              <p className="text-sm text-destructive">{state.message}</p>
-            )}
-          </div>
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setOpen(false);
-                setState(null);
-              }}
-              disabled={isPending}
-              className="w-full sm:w-auto h-10"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="w-full sm:w-auto h-10"
-            >
-              {isPending ? "Creando..." : "Crear Viaje"}
-            </Button>
-          </DialogFooter>
-        </form>
+                {state && !state.success && (
+                  <p className="text-sm text-destructive">{state.message}</p>
+                )}
+              </div>
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setOpen(false);
+                    setState(null);
+                  }}
+                  disabled={isPending}
+                  className="w-full sm:w-auto h-10"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full sm:w-auto h-10"
+                >
+                  {isPending ? "Creando..." : "Crear Viaje"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </TabsContent>
+          <TabsContent value="ai" className="mt-4">
+            <div className="space-y-4">
+              <AIPromptInput
+                onPromptSubmit={handleAIPrompt}
+                placeholder="Ej: Crear un viaje a París del 15 al 20 de marzo de 2024"
+                disabled={isPending}
+              />
+              {state && !state.success && (
+                <p className="text-sm text-destructive">{state.message}</p>
+              )}
+              {state && state.success && (
+                <p className="text-sm text-green-600">
+                  ¡Viaje creado exitosamente!
+                </p>
+              )}
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setOpen(false);
+                    setState(null);
+                  }}
+                  disabled={isPending}
+                  className="w-full sm:w-auto h-10"
+                >
+                  Cerrar
+                </Button>
+              </DialogFooter>
+            </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

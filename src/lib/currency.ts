@@ -31,11 +31,18 @@ export async function getExchangeRate(
       messages: [
         {
           role: "system",
-          content: `Eres un asistente experto en tipos de cambio de moneda. Responde SOLO con el número del tipo de cambio actual, sin texto adicional, sin explicaciones, solo el número decimal. Por ejemplo, si 1 ${from} = 0.025 ${to}, responde solo: 0.025`,
+          content: `Eres un asistente experto en tipos de cambio de moneda. 
+Responde SOLO con el número decimal del tipo de cambio actual, sin texto adicional, sin explicaciones, solo el número.
+
+Para convertir de ${from} a ${to}:
+- Si ${from} es UYU y ${to} es USD: responde cuántos USD equivalen a 1 UYU (ejemplo: 0.025)
+- Si ${from} es USD y ${to} es UYU: responde cuántos UYU equivalen a 1 USD (ejemplo: 40)
+
+Responde SOLO con el número decimal.`,
         },
         {
           role: "user",
-          content: `¿Cuál es el tipo de cambio actual de ${from} a ${to}? Responde solo con el número decimal.`,
+          content: `¿Cuál es el tipo de cambio actual de ${from} a ${to}? ¿Cuántos ${to} equivalen a 1 ${from}? Responde solo con el número decimal.`,
         },
       ],
       model: "llama-3.1-8b-instant",

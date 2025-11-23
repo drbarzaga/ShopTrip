@@ -1,7 +1,7 @@
 "use server";
 
 import { getAppName } from "../utils";
-import { resend, FROM_EMAIL, APP_URL } from "./resend";
+import { resend, FROM_EMAIL } from "./resend";
 import { InvitationEmail } from "./templates/invitation";
 import { render } from "@react-email/render";
 

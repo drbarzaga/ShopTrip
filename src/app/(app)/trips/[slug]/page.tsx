@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { TripItemCard } from "@/components/trip-item-card";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
@@ -60,6 +61,14 @@ export default async function TripDetailPage({
   return (
     <div className="min-h-screen bg-background pb-16">
       <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl">
+        {/* Breadcrumbs */}
+        <Breadcrumbs 
+          items={[
+            { label: "Mis Viajes", href: "/trips" },
+            { label: tripData.name }
+          ]} 
+        />
+        
         {/* Header */}
         <div className="mb-4 sm:mb-6">
           <Link href="/trips">

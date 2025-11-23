@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Building2, Users, UserPlus, Mail, Trash2 } from "lucide-react";
 import { DeleteOrganizationDialog } from "@/components/delete-organization-dialog";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 export default async function OrganizationsPage() {
   const session = await getSession();
@@ -28,6 +29,9 @@ export default async function OrganizationsPage() {
   return (
     <div className="min-h-screen bg-background pb-16">
       <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl">
+        {/* Breadcrumbs */}
+        <Breadcrumbs items={[{ label: "Organizaciones" }]} />
+        
         {/* Header */}
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">

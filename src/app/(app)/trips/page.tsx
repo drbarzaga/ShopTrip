@@ -5,6 +5,7 @@ import { CreateTripDialog } from "@/components/create-trip-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, MapPin, Calendar, Plane } from "lucide-react";
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
@@ -27,6 +28,9 @@ export default async function TripsPage() {
   return (
     <div className="min-h-screen bg-background pb-16">
       <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl">
+        {/* Breadcrumbs */}
+        <Breadcrumbs items={[{ label: "Mis Viajes" }]} />
+        
         {/* Header */}
         <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">

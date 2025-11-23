@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Mail, Check, X, Building2 } from "lucide-react";
 import { AcceptInvitationButton } from "@/components/accept-invitation-button";
 import { RejectInvitationButton } from "@/components/reject-invitation-button";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 
 export default async function InvitationsPage() {
   const session = await getSession();
@@ -19,6 +20,9 @@ export default async function InvitationsPage() {
   return (
     <div className="min-h-screen bg-background pb-16">
       <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl">
+        {/* Breadcrumbs */}
+        <Breadcrumbs items={[{ label: "Invitaciones" }]} />
+        
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold">Invitaciones</h1>

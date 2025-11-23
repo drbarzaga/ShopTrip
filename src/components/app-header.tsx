@@ -38,14 +38,14 @@ export async function AppHeader() {
     <>
       {/* Header móvil - diseño optimizado */}
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">
-        <div className="px-3 py-2.5">
+        <div className="px-3 py-3.5">
           {/* Primera fila: Logo y menú de usuario */}
           <div className="flex items-center justify-between mb-2.5 gap-2">
             <Link 
               href="/dashboard" 
-              className="flex items-center gap-1.5 hover:opacity-80 transition-opacity min-w-0 flex-shrink"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-shrink"
             >
-              <LogoIcon className="shrink-0 h-5 w-5" />
+              <LogoIcon className="shrink-0" />
               <h1 className="text-sm font-semibold truncate">
                 {getAppName()}
               </h1>
@@ -71,7 +71,7 @@ export async function AppHeader() {
       
       {/* Header desktop */}
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 hidden md:block">
-        <div className="container mx-auto px-4 py-3 max-w-7xl">
+        <div className="container mx-auto px-4 py-4 max-w-7xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Link 

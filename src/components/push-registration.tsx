@@ -58,17 +58,40 @@ export function PushRegistration() {
       if (!subscription) {
         const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
         if (!vapidPublicKey) {
-          console.error("[Push Client] VAPID public key not configured");
+          console.warn("[Push Client] VAPID public key not configured - skipping push registration");
+          console.warn("[Push Client] Push notifications will not work without VAPID keys");
           return;
         }
 
-        console.log("[Push Client] Creating new subscription...");
-        const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
-        subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: applicationServerKey.buffer as ArrayBuffer,
-        });
-        console.log("[Push Client] Subscription created successfully");
+        // Verificar si el navegador soporta push subscriptions
+        if (!registration.pushManager) {
+          console.warn("[Push Client] PushManager not available - push notifications not supported");
+          return;
+        }
+
+        try {
+          console.log("[Push Client] Creating new subscription...");
+          const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: applicationServerKey.buffer as ArrayBuffer,
+          });
+          console.log("[Push Client] Subscription created successfully");
+        } catch (subscribeError: unknown) {
+          const error = subscribeError as { name?: string; message?: string };
+          console.error("[Push Client] Error creating push subscription:", error);
+          
+          // Si es un error de aborto o servicio no disponible, solo loguear y continuar
+          // No es crítico si las push notifications no funcionan
+          if (error.name === "AbortError" || error.message?.includes("push service")) {
+            console.warn("[Push Client] Push service unavailable - this is normal in some browsers/environments");
+            console.warn("[Push Client] Real-time notifications via SSE will still work when the app is open");
+            return;
+          }
+          
+          // Para otros errores, re-lanzar
+          throw subscribeError;
+        }
       }
 
       // Enviar suscripción al servidor

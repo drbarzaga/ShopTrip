@@ -54,19 +54,30 @@ export function PWAInstallPrompt() {
       return;
     }
 
+    // Para iOS y otros navegadores que no soportan beforeinstallprompt,
+    // mostrar el prompt después de un delay
+    let timer: NodeJS.Timeout | null = null;
+
     // Escuchar el evento beforeinstallprompt (Chrome, Edge, etc.)
     const handleBeforeInstallPrompt = (e: Event) => {
       console.log("[PWA Install] beforeinstallprompt event received");
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      const promptEvent = e as BeforeInstallPromptEvent;
+      setDeferredPrompt(promptEvent);
+      // Mostrar inmediatamente cuando recibimos el evento
       setShowPrompt(true);
+      // Cancelar cualquier timer pendiente ya que tenemos el evento nativo
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-
-    // Para iOS y otros navegadores que no soportan beforeinstallprompt,
-    // mostrar el prompt después de un delay
-    let timer: NodeJS.Timeout | null = null;
+    
+    // Detectar Edge/Chrome para mejor timing
+    const isEdge = /Edg/i.test(navigator.userAgent);
+    const isChrome = /Chrome/i.test(navigator.userAgent) && !isEdge;
     
     // Mostrar para iOS después de 3 segundos
     if (iOS && !standalone) {
@@ -75,12 +86,18 @@ export function PWAInstallPrompt() {
         setShowPrompt(true);
       }, 3000);
     } 
-    // Para otros navegadores (Chrome en desktop, etc.), mostrar después de 5 segundos
-    // si no se recibió el evento beforeinstallprompt
+    // Para Edge/Chrome, mostrar después de 2 segundos si no se recibió el evento
+    // (el evento debería dispararse antes, pero por si acaso)
+    else if ((isEdge || isChrome) && !standalone) {
+      timer = setTimeout(() => {
+        console.log("[PWA Install] Edge/Chrome delay - showing prompt");
+        setShowPrompt(true);
+      }, 2000);
+    }
+    // Para otros navegadores, mostrar después de 5 segundos
     else if (!standalone) {
       timer = setTimeout(() => {
-        // Solo mostrar si no se recibió el evento beforeinstallprompt
-        console.log("[PWA Install] Checking if should show prompt...");
+        console.log("[PWA Install] Showing generic prompt after delay");
         setShowPrompt(true);
       }, 5000);
     }
@@ -155,7 +172,11 @@ export function PWAInstallPrompt() {
             <div className="text-sm text-muted-foreground">
               <p className="font-medium mb-2">Pasos para instalar:</p>
               <ol className="list-decimal list-inside space-y-1.5">
-                <li>Toca el botón <Share2 className="h-3 w-3 inline" /> Compartir</li>
+                <li>
+                  <span>Toca el botón </span>
+                  <Share2 className="h-3 w-3 inline" />
+                  <span> Compartir</span>
+                </li>
                 <li>Selecciona &quot;Agregar a pantalla de inicio&quot;</li>
                 <li>Toca &quot;Agregar&quot;</li>
               </ol>

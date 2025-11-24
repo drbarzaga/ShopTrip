@@ -61,37 +61,70 @@ export async function sendPushNotification(
     // Formatear payload según especificación Web Push
     // El service worker espera title, body, data, tripId e itemId en el nivel superior
     const notificationData = notification.data || {};
+    
+    // Payload optimizado para iOS y otros navegadores
     const payload = JSON.stringify({
       title: notification.title,
       body: notification.body,
       ...notificationData, // Incluir tripId, itemId, type directamente en el nivel superior
       data: notificationData, // También mantener en data para compatibilidad
+      // Campos adicionales para mejor compatibilidad con iOS
+      icon: "/icon.svg",
+      badge: "/icon.svg",
     });
 
     console.log(`[Push] Payload: ${payload}`);
+    console.log(`[Push] Payload length: ${payload.length} bytes`);
 
     // Enviar notificación a cada token
     const results = await Promise.allSettled(
       tokens.map(async (token) => {
         try {
           const subscription = JSON.parse(token);
+          const endpoint = subscription.endpoint || "";
+          const isIOS = /apple/i.test(endpoint) || /safari/i.test(endpoint);
+          
           console.log(
             `[Push] Sending to token: ${subscription.keys?.p256dh?.substring(0, 20)}...`
           );
-          await webpush.sendNotification(subscription, payload);
-          console.log(`[Push] Successfully sent notification`);
-          return { success: true, token };
+          console.log(`[Push] Endpoint: ${endpoint.substring(0, 80)}...`);
+          console.log(`[Push] Detected iOS: ${isIOS}`);
+          
+          // Opciones específicas para webpush
+          const options = {
+            TTL: 86400, // 24 horas
+            urgency: "normal" as const,
+          };
+          
+          await webpush.sendNotification(subscription, payload, options);
+          console.log(`[Push] ✅ Successfully sent notification${isIOS ? " (iOS)" : ""}`);
+          return { success: true, token, isIOS };
         } catch (error: unknown) {
           const pushError = error as {
             statusCode?: number;
             message?: string;
             endpoint?: string;
+            body?: string;
           };
-          console.error(`[Push] Error sending notification:`, {
+          const endpoint = subscription?.endpoint || "";
+          const isIOS = /apple/i.test(endpoint) || /safari/i.test(endpoint);
+          
+          console.error(`[Push] ❌ Error sending notification${isIOS ? " (iOS)" : ""}:`, {
             statusCode: pushError.statusCode,
             message: pushError.message,
-            endpoint: pushError.endpoint,
+            endpoint: endpoint.substring(0, 80),
+            body: pushError.body,
           });
+          
+          // Logging adicional para iOS
+          if (isIOS) {
+            console.error(`[Push] iOS-specific error details:`, {
+              hasKeys: !!subscription?.keys,
+              hasP256dh: !!subscription?.keys?.p256dh,
+              hasAuth: !!subscription?.keys?.auth,
+              endpointType: endpoint.includes("apple") ? "Apple Push" : "Other",
+            });
+          }
 
           // Si el token es inválido o expiró, eliminarlo
           if (pushError.statusCode === 410 || pushError.statusCode === 404) {

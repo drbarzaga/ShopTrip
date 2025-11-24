@@ -94,6 +94,18 @@ export function PushRegistration() {
         }
       }
 
+      // Detectar información del dispositivo
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+      const deviceInfo = `${navigator.userAgent} | PWA: ${isStandalone} | iOS: ${isIOS}`;
+      
+      console.log("[Push Client] Device info:", deviceInfo);
+      console.log("[Push Client] Subscription endpoint:", subscription.endpoint?.substring(0, 80));
+      console.log("[Push Client] Has keys:", {
+        p256dh: !!subscription.getKey("p256dh"),
+        auth: !!subscription.getKey("auth"),
+      });
+
       // Enviar suscripción al servidor
       console.log("[Push Client] Sending subscription to server...");
       const response = await fetch("/api/push/register", {
@@ -103,16 +115,20 @@ export function PushRegistration() {
         },
         body: JSON.stringify({
           subscription: JSON.stringify(subscription),
-          deviceInfo: navigator.userAgent,
+          deviceInfo: deviceInfo,
         }),
       });
 
       if (response.ok) {
-        console.log("[Push Client] Successfully registered push subscription");
+        console.log("[Push Client] ✅ Successfully registered push subscription");
+        if (isIOS) {
+          console.log("[Push Client] ⚠️ iOS: Make sure the app is installed as PWA from Safari");
+          console.log("[Push Client] ⚠️ iOS: Push notifications only work when app is closed (iOS 16.4+)");
+        }
       } else {
         const errorText = await response.text();
         console.error(
-          `[Push Client] Failed to register push subscription: ${response.status} - ${errorText}`
+          `[Push Client] ❌ Failed to register push subscription: ${response.status} - ${errorText}`
         );
       }
     } catch (error) {

@@ -51,6 +51,23 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    // Eliminar tokens antiguos que no sean de OneSignal (limpieza)
+    const tokensToDelete = existing.filter((t) => {
+      try {
+        const parsed = JSON.parse(t.token);
+        return parsed.type !== "onesignal";
+      } catch {
+        return true; // Eliminar tokens inválidos también
+      }
+    });
+
+    if (tokensToDelete.length > 0) {
+      console.log(`[OneSignal Register] Cleaning up ${tokensToDelete.length} old tokens`);
+      for (const token of tokensToDelete) {
+        await db.delete(fcmToken).where(eq(fcmToken.id, token.id));
+      }
+    }
+
     if (existingOneSignal) {
       // Ya existe este player ID, actualizar timestamp
       console.log(`[OneSignal Register] Player ID already registered, updating timestamp`);

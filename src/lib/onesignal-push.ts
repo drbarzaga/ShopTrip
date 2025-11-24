@@ -30,14 +30,9 @@ export async function sendOneSignalNotification(
       return { success: false, error: "OneSignal not configured" };
     }
 
-    // Obtener tokens de suscripción (OneSignal usa los mismos tokens)
+    // Obtener OneSignal player IDs de los usuarios
     const tokens = await getUserFCMTokens(userIds);
     
-    if (tokens.length === 0) {
-      console.warn("[OneSignal] No tokens found for users");
-      return { success: false, error: "No tokens found" };
-    }
-
     // Extraer OneSignal player IDs de los tokens almacenados
     const playerIds: string[] = [];
     
@@ -53,28 +48,28 @@ export async function sendOneSignalNotification(
       }
     }
 
-    // Si no hay player IDs de OneSignal, intentar enviar a todos los usuarios
-    // o usar los tokens de Web Push como fallback
+    if (playerIds.length === 0) {
+      console.warn(`[OneSignal] No OneSignal player IDs found for ${userIds.length} users`);
+      console.warn(`[OneSignal] Users need to open the app and grant notification permissions`);
+      return { success: false, error: "No OneSignal player IDs found" };
+    }
+
+    console.log(`[OneSignal] Found ${playerIds.length} OneSignal player IDs for ${userIds.length} users`);
+
+    // Construir el cuerpo de la petición
     const requestBody: Record<string, unknown> = {
       app_id: appId,
       headings: { en: notification.title },
       contents: { en: notification.body },
       data: notification.data || {},
+      include_player_ids: playerIds, // Enviar solo a los usuarios específicos
     };
 
     if (notification.url) {
       requestBody.url = notification.url;
     }
 
-    // Si tenemos player IDs específicos, usarlos; sino enviar a todos
-    if (playerIds.length > 0) {
-      requestBody.include_player_ids = playerIds;
-      console.log(`[OneSignal] Sending to ${playerIds.length} specific players`);
-    } else {
-      // Enviar a todos los usuarios suscritos (útil para desarrollo)
-      requestBody.included_segments = ["Subscribed Users"];
-      console.log(`[OneSignal] No specific player IDs, sending to all subscribed users`);
-    }
+    console.log(`[OneSignal] Sending notification to ${playerIds.length} players`);
 
     const response = await fetch("https://onesignal.com/api/v1/notifications", {
       method: "POST",

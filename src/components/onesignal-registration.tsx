@@ -1,74 +1,118 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Componente para registrar usuarios en OneSignal
  * OneSignal tiene mejor soporte para PWAs en iOS
  */
 export function OneSignalRegistration() {
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || typeof window === "undefined") {
+      return;
+    }
+
     const initializeOneSignal = async () => {
       const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
       
       if (!appId) {
-        console.log("[OneSignal] App ID not configured, skipping OneSignal registration");
+        console.warn("[OneSignal] App ID not configured. Set NEXT_PUBLIC_ONESIGNAL_APP_ID in .env");
         return;
       }
 
-      // Verificar que OneSignal esté disponible
-      if (typeof window === "undefined" || !(window as any).OneSignal) {
-        // Cargar OneSignal SDK dinámicamente
-        try {
+      console.log("[OneSignal] Starting initialization...");
+
+      // Cargar OneSignal SDK
+      const loadOneSignalSDK = (): Promise<void> => {
+        return new Promise((resolve, reject) => {
+          // Verificar si ya está cargado
+          if ((window as any).OneSignal) {
+            console.log("[OneSignal] SDK already loaded");
+            resolve();
+            return;
+          }
+
           const script = document.createElement("script");
           script.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";
           script.async = true;
-          document.head.appendChild(script);
-
           script.onload = () => {
-            initializeOneSignalSDK(appId);
+            console.log("[OneSignal] SDK loaded successfully");
+            resolve();
           };
-        } catch (error) {
-          console.error("[OneSignal] Error loading SDK:", error);
-        }
-      } else {
-        initializeOneSignalSDK(appId);
-      }
-    };
+          script.onerror = () => {
+            console.error("[OneSignal] Failed to load SDK");
+            reject(new Error("Failed to load OneSignal SDK"));
+          };
+          document.head.appendChild(script);
+        });
+      };
 
-    const initializeOneSignalSDK = (appId: string) => {
       try {
+        await loadOneSignalSDK();
+        
         const OneSignal = (window as any).OneSignal;
+        
+        if (!OneSignal) {
+          console.error("[OneSignal] OneSignal object not available after loading SDK");
+          return;
+        }
+
+        console.log("[OneSignal] Initializing SDK with App ID:", appId);
         
         OneSignal.init({
           appId: appId,
-          safari_web_id: process.env.NEXT_PUBLIC_ONESIGNAL_SAFARI_WEB_ID, // Opcional para Safari
+          safari_web_id: process.env.NEXT_PUBLIC_ONESIGNAL_SAFARI_WEB_ID || undefined,
           notifyButton: {
             enable: false, // No mostrar botón, usar el nuestro
           },
           allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",
         });
 
+        // Verificar estado de suscripción inicial
+        OneSignal.isPushNotificationsEnabled((isEnabled: boolean) => {
+          console.log("[OneSignal] Push notifications enabled:", isEnabled);
+          
+          if (isEnabled) {
+            OneSignal.getUserId((userId: string | null) => {
+              if (userId) {
+                console.log("[OneSignal] User ID:", userId);
+                registerOneSignalUserId(userId);
+              }
+            });
+          } else {
+            console.log("[OneSignal] Push notifications not enabled, user needs to grant permission");
+          }
+        });
+
+        // Escuchar cambios en la suscripción
         OneSignal.on("subscriptionChange", (isSubscribed: boolean) => {
           console.log("[OneSignal] Subscription changed:", isSubscribed);
           
           if (isSubscribed) {
-            OneSignal.getUserId().then((userId: string) => {
-              console.log("[OneSignal] User ID:", userId);
-              // Enviar userId al servidor para asociarlo con el usuario
-              registerOneSignalUserId(userId);
+            OneSignal.getUserId((userId: string | null) => {
+              if (userId) {
+                console.log("[OneSignal] User subscribed with ID:", userId);
+                registerOneSignalUserId(userId);
+              }
             });
           }
         });
 
-        console.log("[OneSignal] Initialized successfully");
+        console.log("[OneSignal] ✅ Initialized successfully");
       } catch (error) {
-        console.error("[OneSignal] Error initializing:", error);
+        console.error("[OneSignal] ❌ Error initializing:", error);
       }
     };
 
     const registerOneSignalUserId = async (userId: string) => {
       try {
+        console.log("[OneSignal] Registering user ID on server:", userId);
         const response = await fetch("/api/push/register-onesignal", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -76,17 +120,18 @@ export function OneSignalRegistration() {
         });
 
         if (response.ok) {
-          console.log("[OneSignal] User ID registered successfully");
+          console.log("[OneSignal] ✅ User ID registered successfully on server");
         } else {
-          console.error("[OneSignal] Failed to register user ID");
+          const errorText = await response.text();
+          console.error("[OneSignal] ❌ Failed to register user ID:", response.status, errorText);
         }
       } catch (error) {
-        console.error("[OneSignal] Error registering user ID:", error);
+        console.error("[OneSignal] ❌ Error registering user ID:", error);
       }
     };
 
     void initializeOneSignal();
-  }, []);
+  }, [mounted]);
 
   return null;
 }

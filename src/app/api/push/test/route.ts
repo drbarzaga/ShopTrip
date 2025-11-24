@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth-server";
-import { sendPushNotification } from "@/lib/web-push";
+import { sendOneSignalNotification } from "@/lib/onesignal-push";
 
 /**
- * Endpoint de prueba para enviar notificaciones push
+ * Endpoint de prueba para enviar notificaciones push usando OneSignal
  * GET /api/push/test?userId=xxx&title=Test&body=Test message
  */
 export async function GET(request: NextRequest) {
@@ -19,9 +19,11 @@ export async function GET(request: NextRequest) {
     const title = searchParams.get("title") || "Test Notification";
     const body = searchParams.get("body") || "This is a test notification";
 
-    console.log(`[Push Test] Sending test notification to user ${userId}`);
+    console.log(
+      `[Push Test] Sending OneSignal test notification to user ${userId}`
+    );
 
-    await sendPushNotification([userId], {
+    const result = await sendOneSignalNotification([userId], {
       title,
       body,
       data: {
@@ -31,11 +33,23 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      message: "Test notification sent",
-      userId,
-    });
+    if (result.success) {
+      return NextResponse.json({
+        success: true,
+        message: "Test notification sent via OneSignal",
+        messageId: result.messageId,
+        userId,
+      });
+    } else {
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.error || "Failed to send notification",
+          userId,
+        },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("[Push Test] Error:", error);
     return NextResponse.json(

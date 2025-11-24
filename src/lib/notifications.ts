@@ -91,11 +91,12 @@ export async function createNotification(
       itemId,
     });
 
-    // Enviar notificación push (funciona cuando la app está cerrada)
-    // Usar sistema mejorado con mejor manejo de errores
+    // Enviar notificación push usando OneSignal (funciona cuando la app está cerrada)
     try {
-      const { sendEnhancedPushNotification } = await import("@/lib/push-notifications-enhanced");
-      const result = await sendEnhancedPushNotification(userIds, {
+      const { sendOneSignalNotification } = await import("@/lib/onesignal-push");
+      const url = tripId ? `/trips/${tripId}` : undefined;
+      
+      const result = await sendOneSignalNotification(userIds, {
         title,
         body: message,
         data: {
@@ -103,17 +104,17 @@ export async function createNotification(
           tripId: tripId || "",
           itemId: itemId || "",
         },
-        icon: "/icon.svg",
-        badge: "/icon.svg",
+        url,
       });
       
-      if (result.success > 0) {
-        console.log(`[Notifications] Push sent successfully via ${result.method}: ${result.success} successful, ${result.failed} failed`);
+      if (result.success) {
+        console.log(`[Notifications] OneSignal notification sent successfully: ${result.messageId}`);
       } else {
-        console.warn(`[Notifications] Push notifications unavailable, using SSE only (${result.method})`);
+        console.warn(`[Notifications] OneSignal notification failed: ${result.error}`);
+        console.warn(`[Notifications] Using SSE only for real-time notifications when app is open`);
       }
     } catch (pushError) {
-      console.error("[Notifications] Error sending push notification:", pushError);
+      console.error("[Notifications] Error sending OneSignal notification:", pushError);
       // No fallar si falla el push, SSE ya funcionó
     }
   } catch (error) {

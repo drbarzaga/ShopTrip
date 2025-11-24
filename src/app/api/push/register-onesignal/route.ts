@@ -27,42 +27,51 @@ export async function POST(request: NextRequest) {
 
     console.log(`[OneSignal Register] Registering OneSignal User ID ${onesignalUserId} for user ${session.user.id}`);
 
-    // Almacenar el OneSignal User ID asociado con el usuario
-    // Por ahora, lo almacenamos en la tabla fcm_tokens con un formato especial
-    // En producción, podrías crear una tabla separada para OneSignal IDs
-    
-    const tokenId = crypto.randomUUID();
+    // Almacenar el OneSignal User ID (Player ID) asociado con el usuario
+    // Usamos la tabla fcm_tokens para almacenar los OneSignal Player IDs
     const onesignalToken = JSON.stringify({
       type: "onesignal",
       userId: onesignalUserId,
       endpoint: `onesignal://${onesignalUserId}`,
     });
 
-    // Verificar si ya existe
+    // Verificar si ya existe un token de OneSignal para este usuario
     const existing = await db
-      .select({ id: fcmToken.id })
+      .select({ id: fcmToken.id, token: fcmToken.token })
       .from(fcmToken)
-      .where(eq(fcmToken.userId, session.user.id))
-      .limit(1);
+      .where(eq(fcmToken.userId, session.user.id));
 
-    if (existing.length > 0) {
-      // Actualizar token existente
+    // Buscar si ya existe este player ID específico
+    const existingOneSignal = existing.find((t) => {
+      try {
+        const parsed = JSON.parse(t.token);
+        return parsed.type === "onesignal" && parsed.userId === onesignalUserId;
+      } catch {
+        return false;
+      }
+    });
+
+    if (existingOneSignal) {
+      // Ya existe este player ID, actualizar timestamp
+      console.log(`[OneSignal Register] Player ID already registered, updating timestamp`);
       await db
         .update(fcmToken)
         .set({
-          token: onesignalToken,
-          deviceInfo: "OneSignal",
           updatedAt: new Date(),
         })
-        .where(eq(fcmToken.userId, session.user.id));
+        .where(eq(fcmToken.id, existingOneSignal.id));
     } else {
-      // Crear nuevo token
+      // Crear nuevo registro para este player ID
+      const tokenId = crypto.randomUUID();
+      const deviceInfo = `OneSignal | ${new Date().toISOString()}`;
+      
       await db.insert(fcmToken).values({
         id: tokenId,
         userId: session.user.id,
         token: onesignalToken,
-        deviceInfo: "OneSignal",
+        deviceInfo: deviceInfo,
       });
+      console.log(`[OneSignal Register] New player ID registered: ${onesignalUserId}`);
     }
 
     console.log(`[OneSignal Register] Successfully registered OneSignal User ID`);

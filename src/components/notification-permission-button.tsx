@@ -10,9 +10,12 @@ export function NotificationPermissionButton() {
   const [permission, setPermission] =
     useState<NotificationPermission>("default");
   const [isRequesting, setIsRequesting] = useState(false);
+  const [isSupported, setIsSupported] = useState(false);
 
   useEffect(() => {
-    if ("Notification" in window) {
+    // Verificar soporte solo en el cliente
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setIsSupported(true);
       setPermission(Notification.permission);
     }
   }, []);
@@ -21,7 +24,7 @@ export function NotificationPermissionButton() {
     setIsRequesting(true);
     try {
       const granted = await requestPermission();
-      if ("Notification" in window) {
+      if (typeof window !== "undefined" && "Notification" in window) {
         setPermission(Notification.permission);
       }
     } catch (error) {
@@ -31,8 +34,9 @@ export function NotificationPermissionButton() {
     }
   };
 
-  if (!("Notification" in window)) {
-    return null; // No soportado en este navegador
+  // No renderizar nada hasta que sepamos si está soportado
+  if (!isSupported) {
+    return null;
   }
 
   if (permission === "granted") {

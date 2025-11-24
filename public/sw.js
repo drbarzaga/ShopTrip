@@ -2,7 +2,21 @@
 // Este archivo debe estar en la carpeta public/
 
 self.addEventListener("push", function (event) {
-  const data = event.data?.json() || {};
+  console.log("[SW] Push event received", event);
+  
+  let data = {};
+  try {
+    if (event.data) {
+      data = event.data.json();
+      console.log("[SW] Parsed push data:", data);
+    } else {
+      console.warn("[SW] No data in push event");
+    }
+  } catch (error) {
+    console.error("[SW] Error parsing push data:", error);
+    data = {};
+  }
+
   const title = data.title || "Shop Trip";
   const options = {
     body: data.body || data.message || "Nueva notificación",
@@ -13,7 +27,15 @@ self.addEventListener("push", function (event) {
     requireInteraction: false,
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  console.log("[SW] Showing notification:", title, options);
+
+  event.waitUntil(
+    self.registration.showNotification(title, options).then(() => {
+      console.log("[SW] Notification shown successfully");
+    }).catch((error) => {
+      console.error("[SW] Error showing notification:", error);
+    })
+  );
 });
 
 self.addEventListener("notificationclick", function (event) {

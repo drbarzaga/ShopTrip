@@ -27,35 +27,52 @@ export function PushRegistration() {
 
   const initializePush = useCallback(async () => {
     try {
+      console.log("[Push Client] Starting push initialization...");
+
       // Solicitar permiso de notificaciones
       const permission = await requestPermission();
+      console.log(`[Push Client] Notification permission: ${permission}`);
       if (!permission) {
+        console.warn(
+          "[Push Client] Permission denied, skipping push registration"
+        );
         return;
       }
 
       // Registrar Service Worker
+      console.log("[Push Client] Registering service worker...");
       const registration = await navigator.serviceWorker.register("/sw.js");
+      console.log(
+        "[Push Client] Service worker registered, waiting for ready..."
+      );
       await navigator.serviceWorker.ready;
+      console.log("[Push Client] Service worker ready");
 
       // Verificar si ya hay una suscripción
       let subscription = await registration.pushManager.getSubscription();
+      console.log(
+        `[Push Client] Existing subscription: ${subscription ? "found" : "not found"}`
+      );
 
       // Si no hay suscripción, crear una nueva
       if (!subscription) {
         const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
         if (!vapidPublicKey) {
-          console.warn("VAPID public key not configured");
+          console.error("[Push Client] VAPID public key not configured");
           return;
         }
 
+        console.log("[Push Client] Creating new subscription...");
         const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: applicationServerKey.buffer as ArrayBuffer,
         });
+        console.log("[Push Client] Subscription created successfully");
       }
 
       // Enviar suscripción al servidor
+      console.log("[Push Client] Sending subscription to server...");
       const response = await fetch("/api/push/register", {
         method: "POST",
         headers: {
@@ -67,11 +84,19 @@ export function PushRegistration() {
         }),
       });
 
-      if (!response.ok) {
-        console.error("Failed to register push subscription");
+      if (response.ok) {
+        console.log("[Push Client] Successfully registered push subscription");
+      } else {
+        const errorText = await response.text();
+        console.error(
+          `[Push Client] Failed to register push subscription: ${response.status} - ${errorText}`
+        );
       }
     } catch (error) {
-      console.error("Error initializing push notifications:", error);
+      console.error(
+        "[Push Client] Error initializing push notifications:",
+        error
+      );
     }
   }, [requestPermission, urlBase64ToUint8Array]);
 

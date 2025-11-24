@@ -13,6 +13,8 @@ export async function registerFCMToken(
   deviceInfo?: string
 ): Promise<void> {
   try {
+    console.log(`[FCM Register] Registering token for user ${userId}`);
+    
     // Verificar si el token ya existe
     const existing = await db
       .select({ id: fcmToken.id })
@@ -22,6 +24,7 @@ export async function registerFCMToken(
 
     if (existing.length > 0) {
       // Actualizar el token existente
+      console.log(`[FCM Register] Updating existing token ${existing[0].id}`);
       await db
         .update(fcmToken)
         .set({
@@ -30,18 +33,21 @@ export async function registerFCMToken(
           updatedAt: new Date(),
         })
         .where(eq(fcmToken.token, subscription));
+      console.log(`[FCM Register] Token updated successfully`);
     } else {
       // Crear nuevo token
       const tokenId = crypto.randomUUID();
+      console.log(`[FCM Register] Creating new token ${tokenId}`);
       await db.insert(fcmToken).values({
         id: tokenId,
         userId,
         token: subscription,
         deviceInfo: deviceInfo || null,
       });
+      console.log(`[FCM Register] Token created successfully`);
     }
   } catch (error) {
-    console.error("Error registering push token:", error);
+    console.error("[FCM Register] Error registering push token:", error);
     throw error;
   }
 }

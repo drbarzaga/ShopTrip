@@ -33,103 +33,80 @@ export function OneSignalRegistration() {
     window.OneSignalDeferred = window.OneSignalDeferred || [];
 
     window.OneSignalDeferred.push(async function (OneSignal: any) {
-      await OneSignal.init({
-        appId: appId,
-        safari_web_id: safariWebId || undefined,
-        notifyButton: {
-          enable: true, // Mostrar el botón de notificaciones de OneSignal
-        },
-        allowLocalhostAsSecureOrigin: true, // Permitir localhost para desarrollo
-      });
-
-      // Función helper para registrar el Player ID
-      const registerPlayerId = async () => {
-        try {
-          console.log("[OneSignal] Attempting to register Player ID...");
-
-          // Esperar un momento para que OneSignal procese la suscripción
-          await new Promise((resolve) => setTimeout(resolve, 1500));
-
-          // Intentar obtener el User ID
-          let userId: string | null = null;
-
-          try {
-            userId = await OneSignal.getUserId();
-            console.log("[OneSignal] getUserId() returned:", userId);
-          } catch (error) {
-            console.error("[OneSignal] Error calling getUserId():", error);
-          }
-
-          console.log("[OneSignal] Final User ID:", userId);
-
-          if (userId) {
-            // Registrar el Player ID en el servidor
-            console.log(
-              "[OneSignal] Sending registration request to server..."
-            );
-            const response = await fetch("/api/push/register-onesignal", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ onesignalUserId: userId }),
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              console.log(
-                "[OneSignal] ✅ Player ID registered successfully:",
-                result
-              );
-            } else {
-              const error = await response.text();
-              console.error(
-                "[OneSignal] ❌ Failed to register Player ID:",
-                response.status,
-                error
-              );
-            }
-          } else {
-            console.warn("[OneSignal] ⚠️ User ID is null");
-          }
-        } catch (error) {
-          console.error("[OneSignal] ❌ Error registering Player ID:", error);
-        }
-      };
-
-      // Verificar si ya está suscrito al inicializar
       try {
-        const isEnabled = await OneSignal.isPushNotificationsEnabled();
-        console.log("[OneSignal] Push notifications enabled:", isEnabled);
+        await OneSignal.init({
+          appId: appId,
+          safari_web_id: safariWebId || undefined,
+          notifyButton: {
+            enable: true,
+          },
+          allowLocalhostAsSecureOrigin: true,
+        });
 
-        if (isEnabled) {
-          await registerPlayerId();
-        } else {
-          console.log("[OneSignal] User not subscribed yet");
-        }
+        console.log("[OneSignal] SDK initialized");
 
-        // Verificar periódicamente cada 5 segundos por si el usuario se suscribe
-        const checkInterval = setInterval(async () => {
+        // Función para registrar el Player ID
+        const registerPlayerId = async () => {
           try {
-            const isEnabled = await OneSignal.isPushNotificationsEnabled();
-            if (isEnabled) {
-              await registerPlayerId();
-              // Limpiar el intervalo después de registrar exitosamente
-              clearInterval(checkInterval);
+            // Esperar un momento para que OneSignal esté listo
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+
+            // Obtener el User ID (Player ID)
+            let userId: string | null = null;
+
+            try {
+              // Intentar obtener el ID usando el método estándar
+              if (typeof OneSignal.getUserId === "function") {
+                userId = await OneSignal.getUserId();
+              }
+            } catch (error) {
+              console.error("[OneSignal] Error getting User ID:", error);
+            }
+
+            if (userId) {
+              console.log("[OneSignal] Player ID:", userId);
+
+              // Registrar en el servidor
+              const response = await fetch("/api/push/register-onesignal", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ onesignalUserId: userId }),
+              });
+
+              if (response.ok) {
+                const result = await response.json();
+                console.log("[OneSignal] ✅ Player ID registered:", result);
+              } else {
+                const error = await response.text();
+                console.error("[OneSignal] ❌ Registration failed:", error);
+              }
+            } else {
+              console.warn("[OneSignal] ⚠️ User ID not available yet");
             }
           } catch (error) {
-            console.error("[OneSignal] Error checking subscription:", error);
+            console.error("[OneSignal] Error in registerPlayerId:", error);
           }
-        }, 5000);
+        };
 
-        // Limpiar después de 60 segundos
-        setTimeout(() => clearInterval(checkInterval), 60000);
+        // Intentar registrar el Player ID después de un delay
+        setTimeout(() => {
+          registerPlayerId();
+        }, 3000);
+
+        // También intentar cada 10 segundos por si el usuario se suscribe después
+        const checkInterval = setInterval(() => {
+          registerPlayerId();
+        }, 10000);
+
+        // Limpiar después de 2 minutos
+        setTimeout(() => {
+          clearInterval(checkInterval);
+        }, 120000);
+
+        console.log("[OneSignal] ✅ Initialized successfully");
       } catch (error) {
-        console.error(
-          "[OneSignal] Error checking initial subscription:",
-          error
-        );
+        console.error("[OneSignal] ❌ Initialization error:", error);
       }
-
-      console.log("[OneSignal] Initialized successfully");
     });
   }, []);
 

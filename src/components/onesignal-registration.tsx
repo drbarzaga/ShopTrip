@@ -28,7 +28,7 @@ export function OneSignalRegistration() {
 
       console.log("[OneSignal] Starting initialization...");
 
-      // Cargar OneSignal SDK
+      // Cargar OneSignal SDK y esperar a que esté disponible
       const loadOneSignalSDK = (): Promise<void> => {
         return new Promise((resolve, reject) => {
           // Verificar si ya está cargado
@@ -38,17 +38,57 @@ export function OneSignalRegistration() {
             return;
           }
 
+          // Verificar si el script ya está en el DOM
+          const existingScript = document.querySelector('script[src*="OneSignalSDK"]');
+          if (existingScript) {
+            // Esperar a que OneSignal esté disponible
+            const checkInterval = setInterval(() => {
+              if ((window as any).OneSignal) {
+                console.log("[OneSignal] SDK became available");
+                clearInterval(checkInterval);
+                resolve();
+              }
+            }, 100);
+
+            // Timeout después de 10 segundos
+            setTimeout(() => {
+              clearInterval(checkInterval);
+              if (!(window as any).OneSignal) {
+                reject(new Error("OneSignal SDK timeout"));
+              }
+            }, 10000);
+            return;
+          }
+
           const script = document.createElement("script");
           script.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";
           script.async = true;
+          
           script.onload = () => {
-            console.log("[OneSignal] SDK loaded successfully");
-            resolve();
+            console.log("[OneSignal] Script loaded, waiting for OneSignal object...");
+            // Esperar a que OneSignal esté disponible (puede tardar un momento)
+            const checkInterval = setInterval(() => {
+              if ((window as any).OneSignal) {
+                console.log("[OneSignal] SDK object available");
+                clearInterval(checkInterval);
+                resolve();
+              }
+            }, 100);
+
+            // Timeout después de 5 segundos
+            setTimeout(() => {
+              clearInterval(checkInterval);
+              if (!(window as any).OneSignal) {
+                reject(new Error("OneSignal object not available after script load"));
+              }
+            }, 5000);
           };
+          
           script.onerror = () => {
-            console.error("[OneSignal] Failed to load SDK");
+            console.error("[OneSignal] Failed to load SDK script");
             reject(new Error("Failed to load OneSignal SDK"));
           };
+          
           document.head.appendChild(script);
         });
       };

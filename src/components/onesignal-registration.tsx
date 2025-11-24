@@ -45,14 +45,28 @@ export function OneSignalRegistration() {
       // Función helper para registrar el Player ID
       const registerPlayerId = async () => {
         try {
-          // Esperar un momento para que OneSignal procese la suscripción
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          console.log("[OneSignal] Attempting to register Player ID...");
 
-          const userId = await OneSignal.getUserId();
-          console.log("[OneSignal] Got User ID:", userId);
+          // Esperar un momento para que OneSignal procese la suscripción
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+
+          // Intentar obtener el User ID
+          let userId: string | null = null;
+
+          try {
+            userId = await OneSignal.getUserId();
+            console.log("[OneSignal] getUserId() returned:", userId);
+          } catch (error) {
+            console.error("[OneSignal] Error calling getUserId():", error);
+          }
+
+          console.log("[OneSignal] Final User ID:", userId);
 
           if (userId) {
             // Registrar el Player ID en el servidor
+            console.log(
+              "[OneSignal] Sending registration request to server..."
+            );
             const response = await fetch("/api/push/register-onesignal", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -69,40 +83,19 @@ export function OneSignalRegistration() {
               const error = await response.text();
               console.error(
                 "[OneSignal] ❌ Failed to register Player ID:",
+                response.status,
                 error
               );
             }
           } else {
-            console.warn("[OneSignal] ⚠️ User ID is null, will retry...");
-            // Reintentar después de 2 segundos
-            setTimeout(async () => {
-              const retryUserId = await OneSignal.getUserId();
-              if (retryUserId) {
-                await fetch("/api/push/register-onesignal", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ onesignalUserId: retryUserId }),
-                }).catch(console.error);
-              }
-            }, 2000);
+            console.warn("[OneSignal] ⚠️ User ID is null");
           }
         } catch (error) {
           console.error("[OneSignal] ❌ Error registering Player ID:", error);
         }
       };
 
-      // Registrar el Player ID cuando el usuario se suscribe
-      OneSignal.on(
-        "subscriptionChange",
-        async function (isSubscribed: boolean) {
-          console.log("[OneSignal] Subscription changed:", isSubscribed);
-          if (isSubscribed) {
-            await registerPlayerId();
-          }
-        }
-      );
-
-      // También verificar si ya está suscrito al inicializar
+      // Verificar si ya está suscrito al inicializar
       try {
         const isEnabled = await OneSignal.isPushNotificationsEnabled();
         console.log("[OneSignal] Push notifications enabled:", isEnabled);
@@ -112,6 +105,23 @@ export function OneSignalRegistration() {
         } else {
           console.log("[OneSignal] User not subscribed yet");
         }
+
+        // Verificar periódicamente cada 5 segundos por si el usuario se suscribe
+        const checkInterval = setInterval(async () => {
+          try {
+            const isEnabled = await OneSignal.isPushNotificationsEnabled();
+            if (isEnabled) {
+              await registerPlayerId();
+              // Limpiar el intervalo después de registrar exitosamente
+              clearInterval(checkInterval);
+            }
+          } catch (error) {
+            console.error("[OneSignal] Error checking subscription:", error);
+          }
+        }, 5000);
+
+        // Limpiar después de 60 segundos
+        setTimeout(() => clearInterval(checkInterval), 60000);
       } catch (error) {
         console.error(
           "[OneSignal] Error checking initial subscription:",

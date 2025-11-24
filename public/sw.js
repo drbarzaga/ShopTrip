@@ -110,13 +110,25 @@ self.addEventListener("push", function (event) {
   };
 
   console.log("[SW] Showing notification:", title, options);
+  console.log("[SW] Registration available:", !!self.registration);
 
   event.waitUntil(
-    self.registration.showNotification(title, options).then(() => {
-      console.log("[SW] Notification shown successfully");
-    }).catch((error) => {
-      console.error("[SW] Error showing notification:", error);
-    })
+    self.registration.showNotification(title, options)
+      .then(() => {
+        console.log("[SW] Notification shown successfully");
+      })
+      .catch((error) => {
+        console.error("[SW] Error showing notification:", error);
+        console.error("[SW] Error details:", {
+          name: error?.name,
+          message: error?.message,
+          stack: error?.stack,
+        });
+        // Si falla por permisos, intentar obtenerlos desde el cliente
+        if (error?.name === "NotAllowedError" || error?.message?.includes("permission")) {
+          console.warn("[SW] Notification permission denied - user needs to grant permission in the app");
+        }
+      })
   );
 });
 

@@ -133,8 +133,12 @@ export function PWAInstallPrompt() {
     }
   };
 
-  // No renderizar hasta que esté montado en el cliente
-  if (!mounted || !showPrompt || isStandalone) {
+  // No renderizar hasta que esté montado en el cliente para evitar problemas de hidratación
+  if (typeof window === "undefined" || !mounted) {
+    return null;
+  }
+
+  if (!showPrompt || isStandalone) {
     return null;
   }
 
@@ -204,9 +208,9 @@ export function PWAInstallPrompt() {
                 <div className="text-sm text-muted-foreground">
                   <p className="font-medium mb-2">Instalación manual:</p>
                   <ul className="list-disc list-inside space-y-1.5 text-xs">
-                    <li>Chrome/Edge: Menú (⋮) → &quot;Instalar Shop Trip&quot;</li>
-                    <li>Safari: Menú → &quot;Agregar a pantalla de inicio&quot;</li>
-                    <li>Firefox: Menú → &quot;Instalar&quot;</li>
+                    <li>Chrome/Edge: Menú (⋮) - &quot;Instalar Shop Trip&quot;</li>
+                    <li>Safari: Menú - &quot;Agregar a pantalla de inicio&quot;</li>
+                    <li>Firefox: Menú - &quot;Instalar&quot;</li>
                   </ul>
                 </div>
                 <Button

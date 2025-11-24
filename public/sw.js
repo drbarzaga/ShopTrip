@@ -55,14 +55,48 @@ self.addEventListener("push", function (event) {
   let data = {};
   try {
     if (event.data) {
-      data = event.data.json();
-      console.log("[SW] Parsed push data:", data);
+      // Intentar parsear como JSON primero
+      try {
+        data = event.data.json();
+        console.log("[SW] Parsed push data as JSON:", data);
+      } catch (jsonError) {
+        // Si falla, intentar como texto
+        try {
+          const text = event.data.text();
+          console.log("[SW] Push data as text:", text);
+          // Intentar parsear el texto como JSON
+          data = JSON.parse(text);
+          console.log("[SW] Parsed text as JSON:", data);
+        } catch (parseError) {
+          // Si tampoco es JSON válido, usar el texto como mensaje
+          const text = event.data.text();
+          console.log("[SW] Using text as message:", text);
+          data = {
+            title: "Shop Trip",
+            body: text,
+            message: text,
+          };
+        }
+      }
     } else {
       console.warn("[SW] No data in push event");
     }
   } catch (error) {
     console.error("[SW] Error parsing push data:", error);
-    data = {};
+    // Intentar obtener el texto como fallback
+    try {
+      const text = event.data?.text() || "Nueva notificación";
+      data = {
+        title: "Shop Trip",
+        body: text,
+        message: text,
+      };
+    } catch {
+      data = {
+        title: "Shop Trip",
+        body: "Nueva notificación",
+      };
+    }
   }
 
   const title = data.title || "Shop Trip";

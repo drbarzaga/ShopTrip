@@ -36,33 +36,35 @@ function NotificationItem({
     switch (notification.type) {
       case "trip_created":
       case "trip_updated":
-        return <Plane className="h-4 w-4" />;
+        return <Plane className="h-5 w-5" />;
       case "item_created":
       case "item_updated":
-        return <Package className="h-4 w-4" />;
+        return <Package className="h-5 w-5" />;
       case "item_purchased":
-        return <ShoppingCart className="h-4 w-4" />;
+        return <ShoppingCart className="h-5 w-5" />;
       default:
-        return <Bell className="h-4 w-4" />;
+        return <Bell className="h-5 w-5" />;
     }
   };
 
   return (
     <div
-      className={`group relative p-3 border-b last:border-b-0 hover:bg-accent transition-colors ${
-        !notification.read ? "bg-blue-50/50 dark:bg-blue-950/20" : ""
+      className={`group relative p-4 border-b last:border-b-0 hover:bg-accent/50 transition-all ${
+        !notification.read 
+          ? "bg-blue-50/80 dark:bg-blue-950/30 border-blue-200/50 dark:border-blue-800/30" 
+          : "bg-background"
       }`}
     >
       <div
-        className="flex items-start gap-3 cursor-pointer pr-8"
+        className="flex items-start gap-3 cursor-pointer pr-12"
         onClick={onClick}
       >
         {/* Icono */}
         <div
-          className={`shrink-0 flex items-center justify-center w-8 h-8 rounded-lg ${
+          className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-xl transition-all ${
             !notification.read
-              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-              : "bg-muted text-muted-foreground"
+              ? "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 shadow-sm"
+              : "bg-muted/60 text-muted-foreground"
           }`}
         >
           {renderIcon()}
@@ -70,18 +72,22 @@ function NotificationItem({
 
         {/* Contenido */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className="text-sm font-semibold truncate">
-              {notification.title}
-            </h4>
-            {!notification.read && (
-              <div className="h-2 w-2 rounded-full bg-blue-600 shrink-0" />
-            )}
+          <div className="flex items-start justify-between gap-2 mb-1.5">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <h4 className={`text-sm font-semibold truncate ${
+                !notification.read ? "text-foreground" : "text-foreground/90"
+              }`}>
+                {notification.title}
+              </h4>
+              {!notification.read && (
+                <div className="h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400 shrink-0 animate-pulse" />
+              )}
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground line-clamp-2 mb-1">
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-2 leading-relaxed">
             {notification.message}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground/70">
             {formatDistanceToNow(new Date(notification.createdAt), {
               addSuffix: true,
               locale: es,
@@ -90,15 +96,15 @@ function NotificationItem({
         </div>
       </div>
 
-      {/* Botón de eliminar */}
+      {/* Botón de eliminar - Siempre visible */}
       <Button
         variant="ghost"
         size="icon"
-        className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive z-10"
+        className="absolute top-3 right-3 h-8 w-8 opacity-70 hover:opacity-100 transition-all text-muted-foreground hover:text-destructive hover:bg-destructive/10 z-10"
         onClick={onDelete}
         aria-label="Eliminar notificación"
       >
-        <Trash2 className="h-3.5 w-3.5" />
+        <Trash2 className="h-4 w-4" />
       </Button>
     </div>
   );
@@ -147,18 +153,25 @@ export function NotificationsDropdown() {
         sideOffset={4}
         side="bottom"
       >
-        <div className="p-4 border-b">
+        <div className="p-4 border-b bg-muted/30">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm">Notificaciones</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-base">Notificaciones</h3>
+              {unreadCount > 0 && (
+                <Badge variant="secondary" className="h-5 px-2 text-xs">
+                  {unreadCount} nueva{unreadCount > 1 ? "s" : ""}
+                </Badge>
+              )}
+            </div>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 text-xs"
+                className="h-8 text-xs"
                 onClick={markAllAsRead}
               >
-                <CheckCheck className="h-3 w-3 mr-1" />
-                Marcar todas como leídas
+                <CheckCheck className="h-3.5 w-3.5 mr-1.5" />
+                Marcar todas
               </Button>
             )}
           </div>

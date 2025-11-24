@@ -161,79 +161,89 @@ export function NotificationsList({
         </div>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {notifications.map((notification) => (
           <Card
             key={notification.id}
-            className={`group relative cursor-pointer transition-all hover:shadow-md ${
+            className={`group relative cursor-pointer transition-all hover:shadow-lg border-2 ${
               !notification.read
-                ? "border-blue-300/50 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20"
-                : ""
+                ? "border-blue-300/60 bg-blue-50/50 dark:border-blue-700/60 dark:bg-blue-950/30 shadow-sm"
+                : "border-border/50 hover:border-border"
             }`}
             onClick={() => handleClick(notification)}
           >
-            <CardContent className="p-4 pr-12">
-              <div className="flex items-start gap-3">
+            <CardContent className="p-5 pr-16">
+              <div className="flex items-start gap-4">
                 {/* Icono */}
                 <div
-                  className={`shrink-0 flex items-center justify-center w-10 h-10 rounded-lg ${
+                  className={`shrink-0 flex items-center justify-center w-12 h-12 rounded-xl transition-all ${
                     !notification.read
-                      ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                      : "bg-muted text-muted-foreground"
+                      ? "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 shadow-sm"
+                      : "bg-muted/60 text-muted-foreground"
                   }`}
                 >
                   {renderIcon(notification.type)}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-sm">{notification.title}</h3>
-                    {!notification.read && (
-                      <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-                        Nuevo
-                      </Badge>
-                    )}
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <h3 className={`font-semibold text-base ${
+                        !notification.read ? "text-foreground" : "text-foreground/90"
+                      }`}>
+                        {notification.title}
+                      </h3>
+                      {!notification.read && (
+                        <Badge variant="secondary" className="h-5 px-2 text-xs shrink-0">
+                          Nuevo
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mb-2">
+                  <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
                     {notification.message}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(notification.createdAt), {
-                      addSuffix: true,
-                      locale: es,
-                    })}
-                  </p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-xs text-muted-foreground/70">
+                      {formatDistanceToNow(new Date(notification.createdAt), {
+                        addSuffix: true,
+                        locale: es,
+                      })}
+                    </p>
+                  </div>
                 </div>
               </div>
             </CardContent>
 
-            {/* Botones de acción */}
-            <div className="absolute top-3 right-3 flex items-center gap-1">
+            {/* Botones de acción - Siempre visibles */}
+            <div className="absolute top-4 right-4 flex items-center gap-1.5">
               {!notification.read && (
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="h-9 w-9 shrink-0 opacity-70 hover:opacity-100 transition-all hover:bg-green-100 dark:hover:bg-green-900/20"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleMarkAsRead(notification.id);
                   }}
                   disabled={isPending}
                   aria-label="Marcar como leída"
+                  title="Marcar como leída"
                 >
-                  <Check className="h-4 w-4" />
+                  <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </Button>
               )}
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                className="h-9 w-9 shrink-0 opacity-70 hover:opacity-100 transition-all text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDelete(notification.id);
                 }}
                 disabled={isPending}
                 aria-label="Eliminar notificación"
+                title="Eliminar notificación"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

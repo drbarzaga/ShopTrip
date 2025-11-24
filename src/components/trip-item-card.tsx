@@ -34,6 +34,8 @@ interface TripItemCardProps {
     purchasedByName: string | null;
     purchasedByImage: string | null;
     createdAt: Date | null;
+    formattedPrice?: string; // Precio total ya formateado
+    formattedUnitPrice?: string; // Precio unitario ya formateado
   };
   canEdit?: boolean;
 }
@@ -99,10 +101,15 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
     });
   };
 
+  // Usar precios formateados si están disponibles, sino calcular
   const totalPrice =
     item.price !== null && item.quantity
       ? item.price * item.quantity
       : (item.price ?? 0);
+  
+  // Si tenemos precios formateados del servidor, usarlos directamente
+  const displayPrice = item.formattedPrice;
+  const displayUnitPrice = item.formattedUnitPrice;
 
   return (
     <Card
@@ -244,10 +251,18 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                   }`}
                 >
                   <span>
-                    <CurrencyFormatter amount={totalPrice ?? 0} />
+                    {displayPrice ? (
+                      displayPrice
+                    ) : (
+                      <CurrencyFormatter amount={totalPrice ?? 0} />
+                    )}
                     {item.quantity && item.quantity > 1 && item.price !== null && (
                       <span className="ml-1.5 text-[10px] opacity-75 font-normal">
-                        · <CurrencyFormatter amount={item.price} /> c/u
+                        · {displayUnitPrice ? (
+                          displayUnitPrice
+                        ) : (
+                          <CurrencyFormatter amount={item.price} />
+                        )} c/u
                       </span>
                     )}
                   </span>

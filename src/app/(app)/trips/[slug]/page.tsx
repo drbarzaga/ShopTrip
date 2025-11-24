@@ -61,7 +61,28 @@ export default async function TripDetailPage({
     .filter((item) => item.purchased)
     .reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
   
-  const formattedTotalSpent = await formatCurrency(totalSpent);
+  // Formatear todos los precios de una vez en el servidor
+  const { formatMultipleCurrencies } = await import("@/lib/format-currency");
+  const itemPrices = items.map((item) => {
+    const totalPrice = item.price !== null && item.quantity
+      ? item.price * item.quantity
+      : (item.price ?? 0);
+    return totalPrice;
+  });
+  const itemUnitPrices = items.map((item) => item.price ?? 0);
+  
+  const [formattedPrices, formattedUnitPrices, formattedTotalSpent] = await Promise.all([
+    formatMultipleCurrencies(itemPrices),
+    formatMultipleCurrencies(itemUnitPrices),
+    formatCurrency(totalSpent),
+  ]);
+
+  // Agregar los precios formateados a los items
+  const itemsWithFormattedPrices = items.map((item, index) => ({
+    ...item,
+    formattedPrice: formattedPrices[index],
+    formattedUnitPrice: formattedUnitPrices[index],
+  }));
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -179,7 +200,7 @@ export default async function TripDetailPage({
               </CardContent>
             </Card>
           ) : (
-            <ItemsList items={items} canEdit={canEdit} />
+            <ItemsList items={itemsWithFormattedPrices} canEdit={canEdit} />
           )}
         </div>
       </div>

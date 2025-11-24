@@ -18,6 +18,8 @@ interface Item {
   purchasedByName: string | null;
   purchasedByImage: string | null;
   createdAt: Date | null;
+  formattedPrice?: string; // Precio total ya formateado
+  formattedUnitPrice?: string; // Precio unitario ya formateado
 }
 
 interface ItemsListProps {

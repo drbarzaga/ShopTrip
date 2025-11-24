@@ -47,3 +47,47 @@ export async function formatCurrency(amount: number | null): Promise<string> {
   return formatCurrencyWithUserPreference(amount, "UYU");
 }
 
+/**
+ * Formatea múltiples montos de una vez usando la moneda preferida del usuario
+ * Optimizado para formatear muchos precios sin hacer múltiples llamadas a getUserPreferredCurrency
+ */
+export async function formatMultipleCurrencies(
+  amounts: (number | null)[],
+  storedCurrency: Currency = "UYU"
+): Promise<string[]> {
+  const preferredCurrency = await getUserPreferredCurrency();
+  
+  // Si no hay conversión necesaria, formatear directamente
+  if (storedCurrency === preferredCurrency || preferredCurrency === "UYU") {
+    return amounts.map((amount) => {
+      if (amount === null || amount === undefined) {
+        return formatCurrencyUtil(0, preferredCurrency);
+      }
+      return formatCurrencyUtil(amount, preferredCurrency);
+    });
+  }
+
+  // Si necesitamos convertir (UYU a USD), hacer todas las conversiones
+  const results = await Promise.all(
+    amounts.map(async (amount) => {
+      if (amount === null || amount === undefined) {
+        return formatCurrencyUtil(0, preferredCurrency);
+      }
+
+      try {
+        const convertedAmount = await convertCurrency(
+          amount,
+          storedCurrency,
+          preferredCurrency
+        );
+        return formatCurrencyUtil(convertedAmount, preferredCurrency);
+      } catch (error) {
+        console.error("Error converting currency:", error);
+        return formatCurrencyUtil(amount, storedCurrency);
+      }
+    })
+  );
+
+  return results;
+}
+

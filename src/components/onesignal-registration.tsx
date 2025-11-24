@@ -41,6 +41,10 @@ export function OneSignalRegistration() {
             enable: true,
           },
           allowLocalhostAsSecureOrigin: true,
+          serviceWorkerParam: {
+            scope: "/",
+          },
+          serviceWorkerPath: "OneSignalSDKWorker.js",
         });
 
         console.log("[OneSignal] SDK initialized");

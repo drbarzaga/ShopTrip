@@ -1,3 +1,3 @@
 // OneSignal Service Worker
-// Este archivo será usado automáticamente por OneSignal SDK desde el CDN
-// No necesita contenido, OneSignal lo maneja automáticamente
+// Importar el Service Worker de OneSignal desde el CDN
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");

@@ -6,6 +6,7 @@ import { Plane } from "lucide-react";
 import Link from "next/link";
 import { OrganizationSelector } from "@/components/organization-selector";
 import { UserMenu } from "@/components/user-menu";
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import { getUserOrganizations } from "@/actions/organizations";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -51,6 +52,7 @@ export async function AppHeader() {
               </h1>
             </Link>
             <div className="flex items-center gap-2 shrink-0">
+              <NotificationsDropdown />
               <ThemeToggle />
               <UserMenu
                 userName={session.user.name}
@@ -95,6 +97,7 @@ export async function AppHeader() {
                   Mis Viajes
                 </Button>
               </Link>
+              <NotificationsDropdown />
               <ThemeToggle />
               <UserMenu
                 userName={session.user.name}

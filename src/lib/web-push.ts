@@ -61,7 +61,7 @@ export async function sendPushNotification(
     // Formatear payload según especificación Web Push
     // El service worker espera title, body, data, tripId e itemId en el nivel superior
     const notificationData = notification.data || {};
-    
+
     // Payload optimizado para iOS y otros navegadores
     const payload = JSON.stringify({
       title: notification.title,
@@ -79,25 +79,28 @@ export async function sendPushNotification(
     // Enviar notificación a cada token
     const results = await Promise.allSettled(
       tokens.map(async (token) => {
+        let subscription: ReturnType<typeof JSON.parse> | null = null;
         try {
-          const subscription = JSON.parse(token);
+          subscription = JSON.parse(token);
           const endpoint = subscription.endpoint || "";
           const isIOS = /apple/i.test(endpoint) || /safari/i.test(endpoint);
-          
+
           console.log(
             `[Push] Sending to token: ${subscription.keys?.p256dh?.substring(0, 20)}...`
           );
           console.log(`[Push] Endpoint: ${endpoint.substring(0, 80)}...`);
           console.log(`[Push] Detected iOS: ${isIOS}`);
-          
+
           // Opciones específicas para webpush
           const options = {
             TTL: 86400, // 24 horas
             urgency: "normal" as const,
           };
-          
+
           await webpush.sendNotification(subscription, payload, options);
-          console.log(`[Push] ✅ Successfully sent notification${isIOS ? " (iOS)" : ""}`);
+          console.log(
+            `[Push] ✅ Successfully sent notification${isIOS ? " (iOS)" : ""}`
+          );
           return { success: true, token, isIOS };
         } catch (error: unknown) {
           const pushError = error as {
@@ -108,14 +111,17 @@ export async function sendPushNotification(
           };
           const endpoint = subscription?.endpoint || "";
           const isIOS = /apple/i.test(endpoint) || /safari/i.test(endpoint);
-          
-          console.error(`[Push] ❌ Error sending notification${isIOS ? " (iOS)" : ""}:`, {
-            statusCode: pushError.statusCode,
-            message: pushError.message,
-            endpoint: endpoint.substring(0, 80),
-            body: pushError.body,
-          });
-          
+
+          console.error(
+            `[Push] ❌ Error sending notification${isIOS ? " (iOS)" : ""}:`,
+            {
+              statusCode: pushError.statusCode,
+              message: pushError.message,
+              endpoint: endpoint.substring(0, 80),
+              body: pushError.body,
+            }
+          );
+
           // Logging adicional para iOS
           if (isIOS) {
             console.error(`[Push] iOS-specific error details:`, {

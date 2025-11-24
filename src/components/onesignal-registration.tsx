@@ -18,7 +18,7 @@ export function OneSignalRegistration() {
       return;
     }
 
-    const initializeOneSignal = async () => {
+    const initializeOneSignal = () => {
       const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
       
       if (!appId) {
@@ -28,126 +28,85 @@ export function OneSignalRegistration() {
 
       console.log("[OneSignal] Starting initialization...");
 
-      // Cargar OneSignal SDK y esperar a que esté disponible
-      const loadOneSignalSDK = (): Promise<void> => {
-        return new Promise((resolve, reject) => {
-          // Verificar si ya está cargado
-          if ((window as any).OneSignal) {
-            console.log("[OneSignal] SDK already loaded");
-            resolve();
-            return;
-          }
-
-          // Verificar si el script ya está en el DOM
-          const existingScript = document.querySelector('script[src*="OneSignalSDK"]');
-          if (existingScript) {
-            // Esperar a que OneSignal esté disponible
-            const checkInterval = setInterval(() => {
-              if ((window as any).OneSignal) {
-                console.log("[OneSignal] SDK became available");
-                clearInterval(checkInterval);
-                resolve();
-              }
-            }, 100);
-
-            // Timeout después de 10 segundos
-            setTimeout(() => {
-              clearInterval(checkInterval);
-              if (!(window as any).OneSignal) {
-                reject(new Error("OneSignal SDK timeout"));
-              }
-            }, 10000);
-            return;
-          }
-
-          const script = document.createElement("script");
-          script.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";
-          script.async = true;
-          
-          script.onload = () => {
-            console.log("[OneSignal] Script loaded, waiting for OneSignal object...");
-            // Esperar a que OneSignal esté disponible (puede tardar un momento)
-            const checkInterval = setInterval(() => {
-              if ((window as any).OneSignal) {
-                console.log("[OneSignal] SDK object available");
-                clearInterval(checkInterval);
-                resolve();
-              }
-            }, 100);
-
-            // Timeout después de 5 segundos
-            setTimeout(() => {
-              clearInterval(checkInterval);
-              if (!(window as any).OneSignal) {
-                reject(new Error("OneSignal object not available after script load"));
-              }
-            }, 5000);
-          };
-          
-          script.onerror = () => {
-            console.error("[OneSignal] Failed to load SDK script");
-            reject(new Error("Failed to load OneSignal SDK"));
-          };
-          
-          document.head.appendChild(script);
-        });
-      };
-
-      try {
-        await loadOneSignalSDK();
-        
-        const OneSignal = (window as any).OneSignal;
-        
-        if (!OneSignal) {
-          console.error("[OneSignal] OneSignal object not available after loading SDK");
-          return;
-        }
-
-        console.log("[OneSignal] Initializing SDK with App ID:", appId);
-        
-        OneSignal.init({
-          appId: appId,
-          safari_web_id: process.env.NEXT_PUBLIC_ONESIGNAL_SAFARI_WEB_ID || undefined,
-          notifyButton: {
-            enable: false, // No mostrar botón, usar el nuestro
-          },
-          allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",
-        });
-
-        // Verificar estado de suscripción inicial
-        OneSignal.isPushNotificationsEnabled((isEnabled: boolean) => {
-          console.log("[OneSignal] Push notifications enabled:", isEnabled);
-          
-          if (isEnabled) {
-            OneSignal.getUserId((userId: string | null) => {
-              if (userId) {
-                console.log("[OneSignal] User ID:", userId);
-                registerOneSignalUserId(userId);
-              }
-            });
-          } else {
-            console.log("[OneSignal] Push notifications not enabled, user needs to grant permission");
-          }
-        });
-
-        // Escuchar cambios en la suscripción
-        OneSignal.on("subscriptionChange", (isSubscribed: boolean) => {
-          console.log("[OneSignal] Subscription changed:", isSubscribed);
-          
-          if (isSubscribed) {
-            OneSignal.getUserId((userId: string | null) => {
-              if (userId) {
-                console.log("[OneSignal] User subscribed with ID:", userId);
-                registerOneSignalUserId(userId);
-              }
-            });
-          }
-        });
-
-        console.log("[OneSignal] ✅ Initialized successfully");
-      } catch (error) {
-        console.error("[OneSignal] ❌ Error initializing:", error);
+      // Inicializar OneSignal usando el patrón push (recomendado por OneSignal)
+      const OneSignalWindow = window as any;
+      
+      // Inicializar OneSignal como array si no existe
+      if (!OneSignalWindow.OneSignal) {
+        OneSignalWindow.OneSignal = [];
       }
+      
+      // Cargar el SDK si no está cargado
+      if (!document.querySelector('script[src*="OneSignalSDK"]')) {
+        const script = document.createElement("script");
+        script.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";
+        script.async = true;
+        document.head.appendChild(script);
+      }
+
+      console.log("[OneSignal] Initializing SDK with App ID:", appId);
+      
+      // Inicializar usando el patrón push
+      OneSignalWindow.OneSignal.push(function() {
+        try {
+          OneSignalWindow.OneSignal.init({
+            appId: appId,
+            safari_web_id: process.env.NEXT_PUBLIC_ONESIGNAL_SAFARI_WEB_ID || undefined,
+            notifyButton: {
+              enable: false,
+            },
+            allowLocalhostAsSecureOrigin: process.env.NODE_ENV === "development",
+            serviceWorkerParam: {
+              scope: "/",
+            },
+            serviceWorkerPath: "OneSignalSDKWorker.js",
+          });
+          
+          console.log("[OneSignal] SDK initialized");
+          
+          // Verificar estado después de inicializar
+          OneSignalWindow.OneSignal.push(async function() {
+            try {
+              // Verificar si las notificaciones están habilitadas
+              const isEnabled = await OneSignalWindow.OneSignal.isPushNotificationsEnabled();
+              console.log("[OneSignal] Push notifications enabled:", isEnabled);
+              
+              if (isEnabled) {
+                const userId = await OneSignalWindow.OneSignal.getUserId();
+                if (userId) {
+                  console.log("[OneSignal] User ID:", userId);
+                  registerOneSignalUserId(userId);
+                }
+              } else {
+                console.log("[OneSignal] Push notifications not enabled");
+              }
+            } catch (error) {
+              console.error("[OneSignal] Error checking status:", error);
+            }
+          });
+
+          // Escuchar cambios en la suscripción
+          OneSignalWindow.OneSignal.on("subscriptionChange", async function(isSubscribed: boolean) {
+            console.log("[OneSignal] Subscription changed:", isSubscribed);
+            
+            if (isSubscribed) {
+              try {
+                const userId = await OneSignalWindow.OneSignal.getUserId();
+                if (userId) {
+                  console.log("[OneSignal] User subscribed with ID:", userId);
+                  registerOneSignalUserId(userId);
+                }
+              } catch (error) {
+                console.error("[OneSignal] Error getting user ID:", error);
+              }
+            }
+          });
+
+          console.log("[OneSignal] ✅ Initialized successfully");
+        } catch (error) {
+          console.error("[OneSignal] ❌ Error initializing:", error);
+        }
+      });
     };
 
     const registerOneSignalUserId = async (userId: string) => {
@@ -170,9 +129,8 @@ export function OneSignalRegistration() {
       }
     };
 
-    void initializeOneSignal();
+    initializeOneSignal();
   }, [mounted]);
 
   return null;
 }
-

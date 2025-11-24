@@ -45,80 +45,43 @@ export function OneSignalRegistration() {
 
         console.log("[OneSignal] SDK initialized");
 
-        // Función para registrar el Player ID
+        // Función para registrar el Player ID usando la API correcta
         const registerPlayerId = async () => {
           try {
-            console.log("[OneSignal] Attempting to get Player ID...");
-            console.log("[OneSignal] OneSignal object:", OneSignal);
-            console.log(
-              "[OneSignal] Available methods:",
-              Object.keys(OneSignal).filter(
-                (k) => typeof OneSignal[k] === "function"
-              )
-            );
-
-            // Esperar un momento para que OneSignal esté listo
+            // Esperar un momento para que OneSignal esté completamente inicializado
             await new Promise((resolve) => setTimeout(resolve, 2000));
 
-            // Obtener el User ID (Player ID) - intentar múltiples métodos
+            // Obtener el Player ID desde OneSignal.User.PushSubscription.id
             let userId: string | null = null;
 
-            // Método 1: getUserId()
             try {
-              if (typeof OneSignal.getUserId === "function") {
-                userId = await OneSignal.getUserId();
-                console.log("[OneSignal] getUserId() returned:", userId);
+              // La API correcta es OneSignal.User.PushSubscription.id
+              if (OneSignal.User && OneSignal.User.PushSubscription) {
+                userId = OneSignal.User.PushSubscription.id || null;
+                console.log(
+                  "[OneSignal] Player ID from PushSubscription.id:",
+                  userId
+                );
               }
             } catch (error) {
-              console.error("[OneSignal] Error with getUserId():", error);
+              console.error(
+                "[OneSignal] Error accessing PushSubscription.id:",
+                error
+              );
             }
 
-            // Método 2: getUser() y acceder a .id
-            if (!userId) {
-              try {
-                if (typeof OneSignal.getUser === "function") {
-                  const user = await OneSignal.getUser();
-                  console.log("[OneSignal] getUser() returned:", user);
-                  userId = user?.id || user?.userId || null;
-                }
-              } catch (error) {
-                console.error("[OneSignal] Error with getUser():", error);
-              }
-            }
-
-            // Método 3: Acceso directo a User.PushSubscription.id
-            if (!userId && OneSignal.User) {
-              try {
-                console.log(
-                  "[OneSignal] Checking OneSignal.User:",
-                  OneSignal.User
-                );
-                if (OneSignal.User.PushSubscription) {
-                  userId = OneSignal.User.PushSubscription.id || null;
-                  console.log("[OneSignal] User.PushSubscription.id:", userId);
-                }
-              } catch (error) {
-                console.error(
-                  "[OneSignal] Error accessing User.PushSubscription:",
-                  error
-                );
-              }
-            }
-
-            // Método 4: Acceso directo a User.id
+            // Si aún no tenemos el ID, intentar acceder a User.id directamente
             if (!userId && OneSignal.User) {
               try {
                 userId = OneSignal.User.id || null;
-                console.log("[OneSignal] User.id:", userId);
+                console.log("[OneSignal] Player ID from User.id:", userId);
               } catch (error) {
                 console.error("[OneSignal] Error accessing User.id:", error);
               }
             }
 
-            console.log("[OneSignal] Final Player ID:", userId);
-
             if (userId) {
-              console.log("[OneSignal] Player ID found:", userId);
+              console.log("[OneSignal] ✅ Player ID found:", userId);
 
               // Registrar en el servidor
               const response = await fetch("/api/push/register-onesignal", {
@@ -129,7 +92,10 @@ export function OneSignalRegistration() {
 
               if (response.ok) {
                 const result = await response.json();
-                console.log("[OneSignal] ✅ Player ID registered:", result);
+                console.log(
+                  "[OneSignal] ✅ Player ID registered successfully:",
+                  result
+                );
               } else {
                 const error = await response.text();
                 console.error(
@@ -139,10 +105,8 @@ export function OneSignalRegistration() {
                 );
               }
             } else {
-              console.warn("[OneSignal] ⚠️ User ID not available yet");
               console.warn(
-                "[OneSignal] OneSignal object structure:",
-                JSON.stringify(OneSignal, null, 2).substring(0, 500)
+                "[OneSignal] ⚠️ Player ID not available yet - user may not be subscribed"
               );
             }
           } catch (error) {

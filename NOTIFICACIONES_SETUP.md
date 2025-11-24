@@ -125,3 +125,5 @@ Asegúrate de que `NEXT_PUBLIC_VAPID_PUBLIC_KEY` esté en tu archivo `.env` y qu
 - [VAPID Specification](https://datatracker.ietf.org/doc/html/rfc8292)
 - [Service Workers](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
 
+
+

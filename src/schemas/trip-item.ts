@@ -17,3 +17,5 @@ export const createTripItemSchema = z.object({
 
 export type CreateTripItemInput = z.infer<typeof createTripItemSchema>;
 
+
+

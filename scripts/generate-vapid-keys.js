@@ -18,3 +18,5 @@ console.log("\nEmail (VAPID_EMAIL):");
 console.log("mailto:your-email@example.com");
 console.log("\n=== Add these to your .env file ===\n");
 
+
+

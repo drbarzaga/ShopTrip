@@ -75,3 +75,5 @@ class NotificationEventEmitter {
 // Instancia global del emisor de eventos
 export const notificationEmitter = new NotificationEventEmitter();
 
+
+

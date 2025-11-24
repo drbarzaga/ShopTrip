@@ -11,34 +11,40 @@ export interface Notification {
   timestamp: Date;
 }
 
-// Guardar el título original de la página
-let originalTitle: string | null = null;
-
-// Función helper para actualizar el badge en el título de la página
-const updatePageTitleBadge = (count: number) => {
-  if (typeof window === "undefined") return;
-  
-  // Guardar el título original la primera vez
-  if (originalTitle === null) {
-    originalTitle = document.title.replace(/^\(\d+\)\s*/, "");
-  }
-  
-  if (count > 0 && originalTitle) {
-    document.title = `(${count}) ${originalTitle}`;
-  } else if (originalTitle) {
-    document.title = originalTitle;
-  }
-};
-
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [originalTitle, setOriginalTitle] = useState<string | null>(null);
+
+  // Marcar como montado solo en el cliente
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      // Guardar el título original la primera vez
+      const currentTitle = document.title.replace(/^\(\d+\)\s*/, "");
+      setOriginalTitle(currentTitle);
+    }
+  }, []);
+
+  // Función helper para actualizar el badge en el título de la página
+  const updatePageTitleBadge = useCallback((count: number) => {
+    if (typeof window === "undefined" || !mounted || !originalTitle) return;
+    
+    if (count > 0) {
+      document.title = `(${count}) ${originalTitle}`;
+    } else {
+      document.title = originalTitle;
+    }
+  }, [mounted, originalTitle]);
 
   // Actualizar badge en el título cuando cambian las notificaciones
   useEffect(() => {
-    updatePageTitleBadge(notifications.length);
-  }, [notifications]);
+    if (mounted) {
+      updatePageTitleBadge(notifications.length);
+    }
+  }, [notifications, mounted, updatePageTitleBadge]);
 
   useEffect(() => {
     let eventSource: EventSource | null = null;
@@ -79,8 +85,9 @@ export function useNotifications() {
 
             // Mostrar notificación del navegador - funciona mejor en iPhone cuando la app está abierta
             // En iPhone, las notificaciones del navegador funcionan incluso sin Web Push
-            if ("Notification" in window && Notification.permission === "granted") {
+            if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
               try {
+                console.log("[Notifications] Showing browser notification:", data.title);
                 const browserNotification = new Notification(data.title, {
                   body: data.message,
                   icon: "/icon.svg",
@@ -90,6 +97,8 @@ export function useNotifications() {
                   silent: false,
                 });
 
+                console.log("[Notifications] Browser notification created successfully");
+
                 // Cerrar automáticamente después de 5 segundos
                 setTimeout(() => {
                   browserNotification.close();
@@ -97,12 +106,20 @@ export function useNotifications() {
 
                 // Manejar click en la notificación para enfocar la ventana
                 browserNotification.onclick = () => {
-                  window.focus();
+                  if (typeof window !== "undefined" && window.focus) {
+                    window.focus();
+                  }
                   browserNotification.close();
                 };
               } catch (err) {
-                console.error("Error showing browser notification:", err);
+                console.error("[Notifications] Error showing browser notification:", err);
               }
+            } else {
+              console.log("[Notifications] Cannot show browser notification:", {
+                hasWindow: typeof window !== "undefined",
+                hasNotification: typeof window !== "undefined" && "Notification" in window,
+                permission: typeof window !== "undefined" && "Notification" in window ? Notification.permission : "N/A",
+              });
             }
           } catch (err) {
             console.error("Error parsing notification:", err);
@@ -135,17 +152,25 @@ export function useNotifications() {
   }, []);
 
   const requestPermission = useCallback(async () => {
-    if ("Notification" in window) {
-      const permission = await Notification.requestPermission();
-      return permission === "granted";
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      return false;
     }
-    return false;
+    try {
+      const permission = await Notification.requestPermission();
+      console.log("[Notifications] Permission requested, result:", permission);
+      return permission === "granted";
+    } catch (error) {
+      console.error("[Notifications] Error requesting permission:", error);
+      return false;
+    }
   }, []);
 
   const clearNotifications = useCallback(() => {
     setNotifications([]);
-    updatePageTitleBadge(0);
-  }, []);
+    if (mounted) {
+      updatePageTitleBadge(0);
+    }
+  }, [mounted, updatePageTitleBadge]);
 
   const removeNotification = useCallback((index: number) => {
     setNotifications((prev) => prev.filter((_, i) => i !== index));

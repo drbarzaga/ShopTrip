@@ -23,6 +23,42 @@ export async function GET(request: NextRequest) {
       `[Push Test] Sending OneSignal test notification to user ${userId}`
     );
 
+    // Verificar primero si el usuario tiene un Player ID registrado
+    const { getUserFCMTokens } = await import("@/lib/fcm-tokens");
+    const tokens = await getUserFCMTokens([userId]);
+
+    let hasPlayerId = false;
+    const playerIds: string[] = [];
+
+    for (const token of tokens) {
+      try {
+        const parsed = JSON.parse(token);
+        if (parsed.type === "onesignal" && parsed.userId) {
+          hasPlayerId = true;
+          playerIds.push(parsed.userId);
+        }
+      } catch {
+        // Ignore
+      }
+    }
+
+    if (!hasPlayerId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "No OneSignal Player ID found for this user. Please subscribe to notifications first.",
+          userId,
+          tokensFound: tokens.length,
+        },
+        { status: 400 }
+      );
+    }
+
+    console.log(
+      `[Push Test] Found ${playerIds.length} Player ID(s): ${playerIds.join(", ")}`
+    );
+
     const result = await sendOneSignalNotification([userId], {
       title,
       body,
@@ -39,6 +75,7 @@ export async function GET(request: NextRequest) {
         message: "Test notification sent via OneSignal",
         messageId: result.messageId,
         userId,
+        playerIds,
       });
     } else {
       return NextResponse.json(
@@ -46,6 +83,7 @@ export async function GET(request: NextRequest) {
           success: false,
           error: result.error || "Failed to send notification",
           userId,
+          playerIds,
         },
         { status: 500 }
       );

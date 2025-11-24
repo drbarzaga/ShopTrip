@@ -78,6 +78,7 @@ export async function sendOneSignalNotification(
     }
 
     console.log(`[OneSignal] Sending notification to ${playerIds.length} players`);
+    console.log(`[OneSignal] Request body:`, JSON.stringify(requestBody, null, 2));
 
     const response = await fetch("https://onesignal.com/api/v1/notifications", {
       method: "POST",
@@ -88,14 +89,24 @@ export async function sendOneSignalNotification(
       body: JSON.stringify(requestBody),
     });
 
+    const responseText = await response.text();
+    console.log(`[OneSignal] Response status: ${response.status}`);
+    console.log(`[OneSignal] Response body:`, responseText);
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("[OneSignal] Error sending notification:", errorText);
-      return { success: false, error: errorText };
+      console.error("[OneSignal] Error sending notification:", responseText);
+      return { success: false, error: responseText };
     }
 
-    const result = await response.json();
-    console.log("[OneSignal] Notification sent successfully:", result.id);
+    let result;
+    try {
+      result = JSON.parse(responseText);
+      console.log("[OneSignal] Notification sent successfully:", result.id);
+      console.log("[OneSignal] Full response:", JSON.stringify(result, null, 2));
+    } catch (error) {
+      console.error("[OneSignal] Error parsing response:", error);
+      return { success: false, error: "Invalid response from OneSignal" };
+    }
     
     return { success: true, messageId: result.id };
   } catch (error) {

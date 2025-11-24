@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Bell,
   CheckCheck,
@@ -133,31 +133,6 @@ export function NotificationsDropdown() {
     }
   };
 
-  // Ajustar posicionamiento en móvil usando CSS y JS como fallback
-  useEffect(() => {
-    if (open && typeof window !== "undefined") {
-      const isMobile = window.innerWidth < 768;
-      if (isMobile) {
-        // Ajustar posicionamiento después de que Radix UI posicione el elemento
-        const adjustPosition = () => {
-          const wrapper = document.querySelector(
-            "[data-radix-popper-content-wrapper]"
-          ) as HTMLElement;
-          if (wrapper) {
-            wrapper.style.left = "0";
-            wrapper.style.right = "0";
-            wrapper.style.width = "100vw";
-            wrapper.style.maxWidth = "100vw";
-            wrapper.style.transform = "none";
-          }
-        };
-
-        // Esperar a que Radix UI monte el elemento
-        setTimeout(adjustPosition, 0);
-        setTimeout(adjustPosition, 10);
-      }
-    }
-  }, [open]);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -176,9 +151,9 @@ export function NotificationsDropdown() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-screen md:w-80 lg:w-96 p-0 rounded-none md:rounded-md border-x-0 md:border-x border-t-0 md:border-t mt-0 md:mt-1 notifications-dropdown-content max-h-[calc(100vh-80px)] md:max-h-[500px]"
+        className="w-screen md:w-80 lg:w-96 p-0 rounded-none md:rounded-md border-x-0 md:border-x border-t-0 md:border-t mt-0 md:mt-1 notifications-dropdown-content max-h-[calc(100vh-100px)] md:max-h-[500px]"
         align="end"
-        sideOffset={0}
+        sideOffset={4}
         side="bottom"
       >
         <div className="p-4 border-b">

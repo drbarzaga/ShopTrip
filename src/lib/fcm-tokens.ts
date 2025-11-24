@@ -52,17 +52,34 @@ export async function registerFCMToken(
 export async function getUserFCMTokens(userIds: string[]): Promise<string[]> {
   try {
     if (userIds.length === 0) {
+      console.log("[FCM] No user IDs provided");
       return [];
     }
+
+    console.log(`[FCM] Fetching tokens for ${userIds.length} users: ${userIds.join(", ")}`);
 
     const tokens = await db
       .select({ token: fcmToken.token })
       .from(fcmToken)
       .where(inArray(fcmToken.userId, userIds));
 
-    return tokens.map((t) => t.token);
+    console.log(`[FCM] Found ${tokens.length} tokens in database`);
+    
+    const tokenStrings = tokens.map((t) => t.token);
+    
+    // Log token details (sin exponer información sensible)
+    tokenStrings.forEach((token, index) => {
+      try {
+        const parsed = JSON.parse(token);
+        console.log(`[FCM] Token ${index + 1}: endpoint=${parsed.endpoint?.substring(0, 50)}...`);
+      } catch {
+        console.log(`[FCM] Token ${index + 1}: (invalid JSON)`);
+      }
+    });
+
+    return tokenStrings;
   } catch (error) {
-    console.error("Error getting FCM tokens:", error);
+    console.error("[FCM] Error getting FCM tokens:", error);
     return [];
   }
 }

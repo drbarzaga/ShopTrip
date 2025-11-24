@@ -40,13 +40,16 @@ export async function getUsersToNotifyForTrip(tripId: string): Promise<string[]>
       .limit(1);
 
     if (tripData.length === 0) {
+      console.warn(`[Notifications] Trip ${tripId} not found`);
       return [];
     }
 
     const tripRecord = tripData[0];
+    console.log(`[Notifications] Trip ${tripId} - Organization: ${tripRecord.organizationId || "none"}, Creator: ${tripRecord.userId}`);
 
     // Si el viaje no tiene organización, solo notificar al creador
     if (!tripRecord.organizationId) {
+      console.log(`[Notifications] No organization, notifying only creator: ${tripRecord.userId}`);
       return [tripRecord.userId];
     }
 
@@ -56,9 +59,11 @@ export async function getUsersToNotifyForTrip(tripId: string): Promise<string[]>
       .from(member)
       .where(eq(member.organizationId, tripRecord.organizationId));
 
-    return members.map((m) => m.userId);
+    const userIds = members.map((m) => m.userId);
+    console.log(`[Notifications] Organization ${tripRecord.organizationId} has ${userIds.length} members: ${userIds.join(", ")}`);
+    return userIds;
   } catch (error) {
-    console.error("Error getting users to notify:", error);
+    console.error("[Notifications] Error getting users to notify:", error);
     return [];
   }
 }
@@ -161,7 +166,9 @@ export async function notifyItemCreated(
   itemName: string,
   creatorName: string
 ): Promise<void> {
+  console.log(`[Notifications] notifyItemCreated called for trip ${tripId}, item: ${itemName}`);
   const userIds = await getUsersToNotifyForTrip(tripId);
+  console.log(`[Notifications] Will notify ${userIds.length} users: ${userIds.join(", ")}`);
   
   await createNotification(
     "item_created",

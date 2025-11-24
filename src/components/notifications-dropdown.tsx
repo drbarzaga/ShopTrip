@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Bell, CheckCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -75,7 +75,9 @@ export function NotificationsDropdown() {
       if (isMobile) {
         // Ajustar posicionamiento después de que Radix UI posicione el elemento
         const adjustPosition = () => {
-          const wrapper = document.querySelector('[data-radix-popper-content-wrapper]') as HTMLElement;
+          const wrapper = document.querySelector(
+            "[data-radix-popper-content-wrapper]"
+          ) as HTMLElement;
           if (wrapper) {
             wrapper.style.left = "0";
             wrapper.style.right = "0";
@@ -84,13 +86,13 @@ export function NotificationsDropdown() {
             wrapper.style.transform = "none";
           }
         };
-        
+
         // Esperar a que Radix UI monte el elemento
         setTimeout(adjustPosition, 0);
         setTimeout(adjustPosition, 10);
       }
     }
-  }, [open]););
+  }, [open]);
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -108,8 +110,8 @@ export function NotificationsDropdown() {
           <span className="sr-only">Notificaciones</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        className="w-screen md:w-80 lg:w-96 p-0 rounded-none md:rounded-md border-x-0 md:border-x border-t-0 md:border-t mt-0 md:mt-1 notifications-dropdown-content" 
+      <DropdownMenuContent
+        className="w-screen md:w-80 lg:w-96 p-0 rounded-none md:rounded-md border-x-0 md:border-x border-t-0 md:border-t mt-0 md:mt-1 notifications-dropdown-content"
         align="end"
         sideOffset={0}
         side="bottom"
@@ -167,4 +169,3 @@ export function NotificationsDropdown() {
     </DropdownMenu>
   );
 }
-

@@ -234,6 +234,29 @@ export async function getUnreadNotificationCount(userId: string): Promise<number
 }
 
 /**
+ * Elimina una notificación
+ */
+export async function deleteNotification(
+  notificationId: string,
+  userId: string
+): Promise<boolean> {
+  try {
+    await db
+      .delete(notification)
+      .where(
+        and(
+          eq(notification.id, notificationId),
+          eq(notification.userId, userId)
+        )
+      );
+    return true;
+  } catch (error) {
+    console.error("[Notifications] Error deleting notification:", error);
+    return false;
+  }
+}
+
+/**
  * Notifica cuando se crea un viaje
  */
 export async function notifyTripCreated(

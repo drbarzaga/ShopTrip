@@ -5,6 +5,7 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   getUnreadNotificationCount,
+  deleteNotification,
 } from "@/lib/notifications";
 
 /**
@@ -60,6 +61,46 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(
         { error: "notificationId or markAll is required" },
         { status: 400 }
+      );
+    }
+  } catch (error) {
+    console.error("[Notifications API] Error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE /api/notifications - Elimina una notificación
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getSession();
+
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const searchParams = request.nextUrl.searchParams;
+    const notificationId = searchParams.get("id");
+
+    if (!notificationId) {
+      return NextResponse.json(
+        { error: "notificationId is required" },
+        { status: 400 }
+      );
+    }
+
+    const success = await deleteNotification(notificationId, session.user.id);
+
+    if (success) {
+      return NextResponse.json({ success: true });
+    } else {
+      return NextResponse.json(
+        { error: "Failed to delete notification" },
+        { status: 500 }
       );
     }
   } catch (error) {

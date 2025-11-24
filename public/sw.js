@@ -178,11 +178,24 @@ self.addEventListener("notificationclick", function (event) {
   event.notification.close();
 
   const data = event.notification.data || {};
-  let url = "/dashboard";
+  
+  // OneSignal puede pasar la URL directamente en el evento o en los datos
+  let url = event.notification.url || data.url || "/dashboard";
 
-  // Determinar la URL basada en el tipo de notificación
-  if (data.tripId) {
-    url = "/trips"; // Redirigir a la lista de viajes
+  // Si no hay URL pero hay tripId, construir la URL del viaje
+  if (!url || url === "/dashboard") {
+    if (data.tripId) {
+      // Necesitamos obtener el slug del viaje, pero como no tenemos acceso a la BD aquí,
+      // redirigimos a la lista de viajes y el cliente puede manejar la navegación
+      url = "/trips";
+    } else {
+      url = "/dashboard";
+    }
+  }
+
+  // Asegurar que la URL sea absoluta si es relativa
+  if (url.startsWith("/")) {
+    url = self.location.origin + url;
   }
 
   event.waitUntil(
@@ -192,9 +205,15 @@ self.addEventListener("notificationclick", function (event) {
         includeUncontrolled: true,
       })
       .then((clientList) => {
-        // Buscar si hay una ventana abierta con la misma URL
+        // Buscar si hay una ventana abierta
         for (const client of clientList) {
-          if (client.url.includes(url.split("/")[1]) && "focus" in client) {
+          if ("focus" in client) {
+            // Enviar mensaje al cliente con la URL para navegar
+            client.postMessage({
+              type: "NOTIFICATION_CLICK",
+              url: url,
+              data: data,
+            });
             return client.focus();
           }
         }

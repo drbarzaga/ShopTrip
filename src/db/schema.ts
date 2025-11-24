@@ -228,6 +228,34 @@ export const fcmToken = pgTable(
 
 // -------------------------------- End of FCM Tokens Table --------------------------------
 
+// -------------------------------- Notifications Table --------------------------------
+
+export const notification = pgTable(
+  "notification",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    type: text("type").notNull(), // trip_created, item_created, etc.
+    title: text("title").notNull(),
+    message: text("message").notNull(),
+    tripId: text("trip_id").references(() => trip.id, {
+      onDelete: "set null",
+    }),
+    itemId: text("item_id"),
+    read: boolean("read").default(false).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("notification_userId_idx").on(table.userId),
+    index("notification_read_idx").on(table.read),
+    index("notification_createdAt_idx").on(table.createdAt),
+  ]
+);
+
+// -------------------------------- End of Notifications Table --------------------------------
+
 // -------------------------------- Relations ---------------------------------------------------
 
 export const userRelations = relations(user, ({ many }) => ({

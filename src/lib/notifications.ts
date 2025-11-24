@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { user, trip, tripItem, member } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { user, trip, tripItem, member, notification } from "@/db/schema";
+import { eq, and, desc } from "drizzle-orm";
 import { getActiveOrganizationId } from "@/lib/auth-server";
 
 export type NotificationType =
@@ -53,7 +53,7 @@ export async function getUsersToNotifyForTrip(tripId: string): Promise<string[]>
 }
 
 /**
- * Envía notificación usando OneSignal
+ * Envía notificación usando OneSignal y la guarda en la base de datos
  */
 export async function createNotification(
   type: NotificationType,
@@ -65,8 +65,29 @@ export async function createNotification(
 ): Promise<void> {
   try {
     const { sendOneSignalNotification } = await import("@/lib/onesignal-push");
-    const url = tripId ? `/trips/${tripId}` : undefined;
     
+    // Obtener el slug del viaje si hay tripId
+    let url: string | undefined = undefined;
+    if (tripId) {
+      try {
+        const tripData = await db
+          .select({ slug: trip.slug })
+          .from(trip)
+          .where(eq(trip.id, tripId))
+          .limit(1);
+        
+        if (tripData.length > 0) {
+          url = `/trips/${tripData[0].slug}`;
+        } else {
+          url = "/trips"; // Fallback si no se encuentra el viaje
+        }
+      } catch (error) {
+        console.error("[Notifications] Error getting trip slug:", error);
+        url = "/trips"; // Fallback en caso de error
+      }
+    }
+    
+    // Enviar notificación push usando OneSignal
     const result = await sendOneSignalNotification(userIds, {
       title,
       body: message,
@@ -83,8 +104,132 @@ export async function createNotification(
     } else {
       console.warn(`[Notifications] OneSignal notification failed: ${result.error}`);
     }
+    
+    // Guardar notificaciones en la base de datos para cada usuario
+    try {
+      const notificationPromises = userIds.map((userId) => {
+        const notificationId = crypto.randomUUID();
+        return db.insert(notification).values({
+          id: notificationId,
+          userId,
+          type,
+          title,
+          message,
+          tripId: tripId || null,
+          itemId: itemId || null,
+          read: false,
+        });
+      });
+      
+      await Promise.all(notificationPromises);
+      console.log(`[Notifications] Saved ${userIds.length} notifications to database`);
+    } catch (dbError) {
+      console.error("[Notifications] Error saving notifications to database:", dbError);
+      // No fallar si falla guardar en BD, la notificación push ya se envió
+    }
   } catch (error) {
     console.error("[Notifications] Error sending notification:", error);
+  }
+}
+
+/**
+ * Obtiene las notificaciones de un usuario
+ */
+export async function getUserNotifications(
+  userId: string,
+  limit: number = 50
+): Promise<Array<{
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  tripId: string | null;
+  itemId: string | null;
+  read: boolean;
+  createdAt: Date;
+}>> {
+  try {
+    const notifications = await db
+      .select({
+        id: notification.id,
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        tripId: notification.tripId,
+        itemId: notification.itemId,
+        read: notification.read,
+        createdAt: notification.createdAt,
+      })
+      .from(notification)
+      .where(eq(notification.userId, userId))
+      .orderBy(desc(notification.createdAt))
+      .limit(limit);
+
+    return notifications;
+  } catch (error) {
+    console.error("[Notifications] Error getting user notifications:", error);
+    return [];
+  }
+}
+
+/**
+ * Marca una notificación como leída
+ */
+export async function markNotificationAsRead(
+  notificationId: string,
+  userId: string
+): Promise<boolean> {
+  try {
+    await db
+      .update(notification)
+      .set({ read: true })
+      .where(
+        and(
+          eq(notification.id, notificationId),
+          eq(notification.userId, userId)
+        )
+      );
+    return true;
+  } catch (error) {
+    console.error("[Notifications] Error marking notification as read:", error);
+    return false;
+  }
+}
+
+/**
+ * Marca todas las notificaciones de un usuario como leídas
+ */
+export async function markAllNotificationsAsRead(userId: string): Promise<boolean> {
+  try {
+    await db
+      .update(notification)
+      .set({ read: true })
+      .where(eq(notification.userId, userId));
+    return true;
+  } catch (error) {
+    console.error("[Notifications] Error marking all notifications as read:", error);
+    return false;
+  }
+}
+
+/**
+ * Obtiene el conteo de notificaciones no leídas de un usuario
+ */
+export async function getUnreadNotificationCount(userId: string): Promise<number> {
+  try {
+    const result = await db
+      .select({ count: notification.id })
+      .from(notification)
+      .where(
+        and(
+          eq(notification.userId, userId),
+          eq(notification.read, false)
+        )
+      );
+    return result.length;
+  } catch (error) {
+    console.error("[Notifications] Error getting unread notification count:", error);
+    return 0;
   }
 }
 

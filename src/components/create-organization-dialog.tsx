@@ -63,7 +63,7 @@ export function CreateOrganizationDialog({
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       {!trigger && (
         <DialogTrigger asChild>
-          <Button size="sm" className={`h-10 text-sm w-full sm:w-auto ${className || ""}`}>
+          <Button size="sm" className={`h-8 text-sm w-full sm:w-auto ${className || ""}`}>
             <Plus className="mr-2 h-4 w-4" />
             Nueva Organización
           </Button>

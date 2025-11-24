@@ -69,7 +69,7 @@ export function OrganizationSelector({
       <>
         <CreateOrganizationDialog
           trigger={
-            <Button variant="outline" size="sm" className="hidden md:flex">
+            <Button variant="outline" size="sm" className="hidden md:flex h-8 text-sm">
               <Building2 className="mr-2 h-4 w-4" />
               Crear Organización
             </Button>
@@ -77,7 +77,7 @@ export function OrganizationSelector({
         />
         <CreateOrganizationDialog
           trigger={
-            <Button variant="outline" size="sm" className="w-full md:hidden">
+            <Button variant="outline" size="sm" className="w-full md:hidden h-8 text-sm">
               <Building2 className="mr-2 h-4 w-4" />
               Crear Organización
             </Button>
@@ -136,7 +136,7 @@ export function OrganizationSelector({
         </Select>
         <CreateOrganizationDialog
           trigger={
-            <Button variant="outline" size="sm" className="h-10 shrink-0 px-3">
+            <Button variant="outline" size="sm" className="h-8 shrink-0 px-3">
               <Plus className="h-4 w-4" />
             </Button>
           }

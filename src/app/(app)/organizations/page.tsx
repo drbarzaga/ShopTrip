@@ -87,7 +87,7 @@ export default async function OrganizationsPage() {
                         organizationId={org.id}
                         organizationName={org.name}
                         trigger={
-                          <Button variant="outline" size="sm" className="w-full h-10 text-sm">
+                          <Button variant="outline" size="sm" className="w-full h-8 text-sm">
                             <UserPlus className="mr-2 h-4 w-4" />
                             Invitar Miembro
                           </Button>
@@ -98,7 +98,7 @@ export default async function OrganizationsPage() {
                           organizationId={org.id}
                           organizationName={org.name}
                           trigger={
-                            <Button variant="destructive" size="sm" className="w-full h-10 text-sm">
+                            <Button variant="destructive" size="sm" className="w-full h-8 text-sm">
                               <Trash2 className="mr-2 h-4 w-4" />
                               Eliminar Organización
                             </Button>

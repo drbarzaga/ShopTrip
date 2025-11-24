@@ -92,9 +92,10 @@ export async function createNotification(
     });
 
     // Enviar notificación push (funciona cuando la app está cerrada)
+    // Usar sistema mejorado con mejor manejo de errores
     try {
-      const { sendPushNotification } = await import("@/lib/web-push");
-      await sendPushNotification(userIds, {
+      const { sendEnhancedPushNotification } = await import("@/lib/push-notifications-enhanced");
+      const result = await sendEnhancedPushNotification(userIds, {
         title,
         body: message,
         data: {
@@ -102,9 +103,17 @@ export async function createNotification(
           tripId: tripId || "",
           itemId: itemId || "",
         },
+        icon: "/icon.svg",
+        badge: "/icon.svg",
       });
+      
+      if (result.success > 0) {
+        console.log(`[Notifications] Push sent successfully via ${result.method}: ${result.success} successful, ${result.failed} failed`);
+      } else {
+        console.warn(`[Notifications] Push notifications unavailable, using SSE only (${result.method})`);
+      }
     } catch (pushError) {
-      console.error("Error sending push notification:", pushError);
+      console.error("[Notifications] Error sending push notification:", pushError);
       // No fallar si falla el push, SSE ya funcionó
     }
   } catch (error) {

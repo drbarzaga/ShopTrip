@@ -3,6 +3,7 @@
 import { createContext, useContext, ReactNode } from "react";
 import { useNotifications, type Notification } from "@/hooks/use-notifications";
 import { PushRegistration } from "@/components/push-registration";
+import { OneSignalRegistration } from "@/components/onesignal-registration";
 
 interface NotificationsContextType {
   notifications: Notification[];
@@ -23,6 +24,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   return (
     <NotificationsContext.Provider value={notifications}>
       <PushRegistration />
+      <OneSignalRegistration />
       {children}
     </NotificationsContext.Provider>
   );

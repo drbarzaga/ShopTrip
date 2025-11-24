@@ -9,7 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Package, Pencil, Trash2, Calendar, Sparkles } from "lucide-react";
 import { getItemIcon } from "@/lib/item-icons";
-import { toggleItemPurchasedAction, deleteTripItemAction } from "@/actions/trip-items";
+import {
+  toggleItemPurchasedAction,
+  deleteTripItemAction,
+} from "@/actions/trip-items";
 import { CurrencyFormatter } from "@/components/currency-formatter";
 import { EditTripItemDialog } from "@/components/edit-trip-item-dialog";
 import {
@@ -52,28 +55,35 @@ function getInitials(name: string | null | undefined): string {
 }
 
 /**
- * Determina si un producto es reciente (creado o editado en los últimos 5 minutos)
+ * Determina si un producto es reciente (creado o editado en la última hora)
  */
-function isRecentItem(createdAt: Date | null, updatedAt: Date | null): {
+function isRecentItem(
+  createdAt: Date | null,
+  updatedAt: Date | null
+): {
   isRecent: boolean;
   isNew: boolean;
   isEdited: boolean;
 } {
-  const RECENT_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutos
+  const RECENT_THRESHOLD_MS = 60 * 60 * 1000; // 1 hora
   const now = new Date();
-  
+
   if (!createdAt) {
     return { isRecent: false, isNew: false, isEdited: false };
   }
-  
+
   const createdTime = new Date(createdAt).getTime();
   const updatedTime = updatedAt ? new Date(updatedAt).getTime() : createdTime;
   const nowTime = now.getTime();
-  
-  const isNew = (nowTime - createdTime) < RECENT_THRESHOLD_MS;
-  const isEdited = updatedAt && updatedTime > createdTime && (nowTime - updatedTime) < RECENT_THRESHOLD_MS;
+
+  const isNew = nowTime - createdTime < RECENT_THRESHOLD_MS;
+  const isEdited = !!(
+    updatedAt &&
+    updatedTime > createdTime &&
+    nowTime - updatedTime < RECENT_THRESHOLD_MS
+  );
   const isRecent = isNew || isEdited;
-  
+
   return { isRecent, isNew, isEdited };
 }
 
@@ -82,13 +92,16 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [purchased, setPurchased] = useState(item.purchased);
-  
+  const [purchased, setPurchased] = useState(item.purchased ?? false);
+
   // Verificar si el producto tiene precio
   const hasPrice = item.price !== null && item.price > 0;
-  
+
   // Verificar si el producto es reciente
-  const { isRecent, isNew, isEdited } = isRecentItem(item.createdAt, item.updatedAt);
+  const { isRecent, isNew, isEdited } = isRecentItem(
+    item.createdAt,
+    item.updatedAt
+  );
 
   // Renderizar el icono directamente sin crear una variable de componente
   const renderIcon = () => {
@@ -136,7 +149,7 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
     item.price !== null && item.quantity
       ? item.price * item.quantity
       : (item.price ?? 0);
-  
+
   // Si tenemos precios formateados del servidor, usarlos directamente
   const displayPrice = item.formattedPrice;
   const displayUnitPrice = item.formattedUnitPrice;
@@ -147,8 +160,8 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
         purchased
           ? "border-green-200/50 bg-green-50/30 dark:border-green-800/30 dark:bg-green-950/20"
           : isRecent
-          ? "border-blue-300/50 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20 shadow-sm"
-          : "border-border/50 bg-card hover:border-primary/30 hover:shadow-sm"
+            ? "border-blue-300/50 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20 shadow-sm"
+            : "border-border/50 bg-card hover:border-primary/30 hover:shadow-sm"
       } ${isRecent ? "ring-2 ring-blue-400/20 dark:ring-blue-500/20" : ""}`}
     >
       <CardContent className="p-5">
@@ -185,11 +198,17 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                     <Badge
                       variant="outline"
                       className={`h-5 gap-1 px-2 text-xs font-semibold border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 animate-pulse ${
-                        isNew ? "border-green-300/50 bg-green-100/80 dark:bg-green-900/40 text-green-700 dark:text-green-300" : ""
+                        isNew
+                          ? "border-green-300/50 bg-green-100/80 dark:bg-green-900/40 text-green-700 dark:text-green-300"
+                          : ""
                       }`}
                     >
                       <Sparkles className="h-3 w-3" />
-                      <span>{isNew ? "Nuevo" : "Editado"}</span>
+                      <span>
+                        {isNew
+                          ? "Creado recientemente"
+                          : "Editado recientemente"}
+                      </span>
                     </Badge>
                   )}
                 </div>
@@ -224,7 +243,10 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                         </Button>
                       }
                     />
-                    <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                    <Dialog
+                      open={deleteDialogOpen}
+                      onOpenChange={setDeleteDialogOpen}
+                    >
                       <DialogTrigger asChild>
                         <Button
                           variant="ghost"
@@ -243,7 +265,8 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                         <DialogHeader>
                           <DialogTitle>¿Eliminar artículo?</DialogTitle>
                           <DialogDescription>
-                            Esta acción no se puede deshacer. El artículo &quot;{item.name}&quot; será eliminado permanentemente.
+                            Esta acción no se puede deshacer. El artículo &quot;
+                            {item.name}&quot; será eliminado permanentemente.
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
@@ -275,7 +298,11 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                     onCheckedChange={handleToggle}
                     disabled={isPending || !canEdit || !hasPrice}
                     className="h-5 w-5 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
-                    title={!hasPrice ? "Agrega un precio para marcar como comprado" : ""}
+                    title={
+                      !hasPrice
+                        ? "Agrega un precio para marcar como comprado"
+                        : ""
+                    }
                   />
                 </div>
               </div>
@@ -307,15 +334,19 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                     ) : (
                       <CurrencyFormatter amount={totalPrice ?? 0} />
                     )}
-                    {item.quantity && item.quantity > 1 && item.price !== null && (
-                      <span className="ml-1.5 text-[10px] opacity-75 font-normal">
-                        · {displayUnitPrice ? (
-                          displayUnitPrice
-                        ) : (
-                          <CurrencyFormatter amount={item.price} />
-                        )} c/u
-                      </span>
-                    )}
+                    {item.quantity &&
+                      item.quantity > 1 &&
+                      item.price !== null && (
+                        <span className="ml-1.5 text-[10px] opacity-75 font-normal">
+                          ·{" "}
+                          {displayUnitPrice ? (
+                            displayUnitPrice
+                          ) : (
+                            <CurrencyFormatter amount={item.price} />
+                          )}{" "}
+                          c/u
+                        </span>
+                      )}
                   </span>
                 </Badge>
               </div>

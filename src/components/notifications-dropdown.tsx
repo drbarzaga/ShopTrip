@@ -202,7 +202,7 @@ export function NotificationsDropdown() {
         </div>
         {notifications.length > 0 && (
           <div className="p-3 border-t">
-            <Link href="/notifications">
+            <Link href="/notifications" onClick={() => setOpen(false)}>
               <Button variant="ghost" size="sm" className="w-full text-xs">
                 Ver todas las notificaciones
               </Button>

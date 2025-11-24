@@ -100,36 +100,78 @@ self.addEventListener("push", function (event) {
   }
 
   const title = data.title || "Shop Trip";
+  const body = data.body || data.message || "Nueva notificación";
+  
+  // Opciones mínimas para máxima compatibilidad
   const options = {
-    body: data.body || data.message || "Nueva notificación",
+    body: body,
     icon: "/icon.svg",
     badge: "/icon.svg",
     data: data.data || {},
-    tag: data.tripId || data.itemId || "notification",
+    tag: data.tripId || data.itemId || "notification-" + Date.now(),
     requireInteraction: false,
+    silent: false,
+    vibrate: [200, 100, 200],
   };
 
   console.log("[SW] Showing notification:", title, options);
   console.log("[SW] Registration available:", !!self.registration);
+  console.log("[SW] Registration object:", self.registration);
 
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-      .then(() => {
-        console.log("[SW] Notification shown successfully");
-      })
-      .catch((error) => {
-        console.error("[SW] Error showing notification:", error);
-        console.error("[SW] Error details:", {
-          name: error?.name,
-          message: error?.message,
-          stack: error?.stack,
+  // Intentar mostrar la notificación
+  const showNotificationPromise = self.registration.showNotification(title, options)
+    .then(() => {
+      console.log("[SW] ✅ Notification shown successfully");
+      return true;
+    })
+    .catch((error) => {
+      console.error("[SW] ❌ Error showing notification:", error);
+      console.error("[SW] Error details:", {
+        name: error?.name,
+        message: error?.message,
+        code: error?.code,
+        stack: error?.stack,
+      });
+      
+      // Intentar con opciones mínimas si falla
+      console.log("[SW] Retrying with minimal options...");
+      const minimalOptions = {
+        body: body,
+        tag: "notification-" + Date.now(),
+      };
+      
+      return self.registration.showNotification(title, minimalOptions)
+        .then(() => {
+          console.log("[SW] ✅ Notification shown with minimal options");
+          return true;
+        })
+        .catch((minimalError) => {
+          console.error("[SW] ❌ Failed even with minimal options:", minimalError);
+          console.error("[SW] This usually means notification permissions are not granted");
+          console.error("[SW] User needs to grant notification permissions in the app");
+          return false;
         });
-        // Si falla por permisos, intentar obtenerlos desde el cliente
-        if (error?.name === "NotAllowedError" || error?.message?.includes("permission")) {
-          console.warn("[SW] Notification permission denied - user needs to grant permission in the app");
-        }
-      })
-  );
+    });
+
+  event.waitUntil(showNotificationPromise);
+});
+
+// Escuchar mensajes del cliente para mostrar notificaciones de prueba
+self.addEventListener("message", function (event) {
+  console.log("[SW] Message received:", event.data);
+  
+  if (event.data && event.data.type === "SHOW_NOTIFICATION") {
+    const { title, body } = event.data;
+    self.registration.showNotification(title || "Test", {
+      body: body || "Test notification",
+      icon: "/icon.svg",
+      badge: "/icon.svg",
+    }).then(() => {
+      console.log("[SW] Test notification shown");
+    }).catch((error) => {
+      console.error("[SW] Error showing test notification:", error);
+    });
+  }
 });
 
 self.addEventListener("notificationclick", function (event) {

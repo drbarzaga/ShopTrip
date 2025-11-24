@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Bell, CheckCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -68,6 +68,30 @@ export function NotificationsDropdown() {
     setOpen(false);
   };
 
+  // Ajustar posicionamiento en móvil usando CSS y JS como fallback
+  useEffect(() => {
+    if (open && typeof window !== "undefined") {
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        // Ajustar posicionamiento después de que Radix UI posicione el elemento
+        const adjustPosition = () => {
+          const wrapper = document.querySelector('[data-radix-popper-content-wrapper]') as HTMLElement;
+          if (wrapper) {
+            wrapper.style.left = "0";
+            wrapper.style.right = "0";
+            wrapper.style.width = "100vw";
+            wrapper.style.maxWidth = "100vw";
+            wrapper.style.transform = "none";
+          }
+        };
+        
+        // Esperar a que Radix UI monte el elemento
+        setTimeout(adjustPosition, 0);
+        setTimeout(adjustPosition, 10);
+      }
+    }
+  }, [open]););
+
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
@@ -84,7 +108,12 @@ export function NotificationsDropdown() {
           <span className="sr-only">Notificaciones</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-80 sm:w-96 p-0" align="end">
+      <DropdownMenuContent 
+        className="w-screen md:w-80 lg:w-96 p-0 rounded-none md:rounded-md border-x-0 md:border-x border-t-0 md:border-t mt-0 md:mt-1 notifications-dropdown-content" 
+        align="end"
+        sideOffset={0}
+        side="bottom"
+      >
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-sm">Notificaciones</h3>

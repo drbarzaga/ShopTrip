@@ -1,21 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, MapPin, Calendar, Plane, Trash2 } from "lucide-react";
-import { deleteTripAction } from "@/actions/trips";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { ArrowRight, MapPin, Calendar, Plane } from "lucide-react";
 
 interface TripCardProps {
   readonly trip: {
@@ -26,7 +13,6 @@ interface TripCardProps {
     readonly startDate: Date | null;
     readonly endDate: Date | null;
   };
-  readonly canDelete?: boolean;
 }
 
 function formatDate(date: Date | null): string {
@@ -38,25 +24,7 @@ function formatDate(date: Date | null): string {
   }).format(new Date(date));
 }
 
-export function TripCard({ trip, canDelete = false }: TripCardProps) {
-  const router = useRouter();
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [, startTransition] = useTransition();
-
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    startTransition(async () => {
-      const result = await deleteTripAction(trip.id);
-      if (result.success) {
-        setDeleteDialogOpen(false);
-        router.refresh();
-      } else {
-        setIsDeleting(false);
-      }
-    });
-  };
-
+export function TripCard({ trip }: TripCardProps) {
   return (
     <Card className="group relative overflow-hidden border border-border/50 bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-md">
       <CardContent className="p-5">
@@ -78,60 +46,6 @@ export function TripCard({ trip, canDelete = false }: TripCardProps) {
                 </h3>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                {canDelete && (
-                  <Dialog
-                    open={deleteDialogOpen}
-                    onOpenChange={setDeleteDialogOpen}
-                  >
-                    <div
-                      className="relative z-10"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-muted-foreground transition-all hover:text-destructive hover:bg-destructive/10"
-                          aria-label="Eliminar viaje"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                    </div>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>¿Eliminar viaje?</DialogTitle>
-                        <DialogDescription>
-                          Esta acción no se puede deshacer. El viaje &quot;
-                          {trip.name}&quot; y todos sus artículos serán
-                          eliminados permanentemente.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-                        <Button
-                          variant="outline"
-                          onClick={() => setDeleteDialogOpen(false)}
-                          disabled={isDeleting}
-                          className="w-full sm:w-auto"
-                        >
-                          Cancelar
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          onClick={handleDelete}
-                          disabled={isDeleting}
-                          className="w-full sm:w-auto"
-                        >
-                          {isDeleting ? "Eliminando..." : "Eliminar"}
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                )}
                 <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:text-primary group-hover:translate-x-1" />
               </div>
             </div>

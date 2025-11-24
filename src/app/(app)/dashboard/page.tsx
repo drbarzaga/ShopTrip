@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import { DashboardTripDialog } from "@/components/dashboard-trip-dialog";
 import { TripCard } from "@/components/trip-card";
-import { canUserDeleteTrip } from "@/actions/trips";
 import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
@@ -33,14 +32,6 @@ export default async function DashboardPage() {
   const stats = await getDashboardStats(session.user.id);
   const recentTrips = await getRecentTrips(session.user.id, 5);
   const formattedTotalSpent = await formatCurrency(stats.totalSpent);
-  
-  // Verificar permisos de eliminación para cada viaje
-  const tripsWithPermissions = await Promise.all(
-    recentTrips.map(async (trip) => ({
-      ...trip,
-      canDelete: await canUserDeleteTrip(session.user.id, trip.id),
-    }))
-  );
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -194,7 +185,7 @@ export default async function DashboardPage() {
             </Card>
           ) : (
             <div className="space-y-3">
-              {tripsWithPermissions.map((trip) => (
+              {recentTrips.map((trip) => (
                 <TripCard
                   key={trip.id}
                   trip={{
@@ -205,7 +196,6 @@ export default async function DashboardPage() {
                     startDate: trip.startDate,
                     endDate: trip.endDate,
                   }}
-                  canDelete={trip.canDelete}
                 />
               ))}
             </div>

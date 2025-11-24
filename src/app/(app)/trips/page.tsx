@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-server";
 
 export const dynamic = 'force-dynamic';
-import { getTrips, canUserDeleteTrip } from "@/actions/trips";
+import { getTrips } from "@/actions/trips";
 import { CreateTripDialog } from "@/components/create-trip-dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin } from "lucide-react";
@@ -17,14 +17,6 @@ export default async function TripsPage() {
   }
 
   const trips = await getTrips(session.user.id);
-  
-  // Verificar permisos de eliminación para cada viaje
-  const tripsWithPermissions = await Promise.all(
-    trips.map(async (trip) => ({
-      ...trip,
-      canDelete: await canUserDeleteTrip(session.user.id, trip.id),
-    }))
-  );
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -58,7 +50,7 @@ export default async function TripsPage() {
           </Card>
         ) : (
           <div className="space-y-3">
-            {tripsWithPermissions.map((trip) => (
+            {trips.map((trip) => (
               <TripCard
                 key={trip.id}
                 trip={{
@@ -69,7 +61,6 @@ export default async function TripsPage() {
                   startDate: trip.startDate,
                   endDate: trip.endDate,
                 }}
-                canDelete={trip.canDelete}
               />
             ))}
           </div>

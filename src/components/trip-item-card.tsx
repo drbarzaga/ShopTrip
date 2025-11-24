@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Package, Pencil, Trash2, Calendar } from "lucide-react";
+import { Package, Pencil, Trash2, Calendar, Sparkles } from "lucide-react";
 import { getItemIcon } from "@/lib/item-icons";
 import { toggleItemPurchasedAction, deleteTripItemAction } from "@/actions/trip-items";
 import { CurrencyFormatter } from "@/components/currency-formatter";
@@ -34,6 +34,7 @@ interface TripItemCardProps {
     purchasedByName: string | null;
     purchasedByImage: string | null;
     createdAt: Date | null;
+    updatedAt: Date | null;
     formattedPrice?: string; // Precio total ya formateado
     formattedUnitPrice?: string; // Precio unitario ya formateado
   };
@@ -50,6 +51,32 @@ function getInitials(name: string | null | undefined): string {
     .slice(0, 2);
 }
 
+/**
+ * Determina si un producto es reciente (creado o editado en los últimos 5 minutos)
+ */
+function isRecentItem(createdAt: Date | null, updatedAt: Date | null): {
+  isRecent: boolean;
+  isNew: boolean;
+  isEdited: boolean;
+} {
+  const RECENT_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutos
+  const now = new Date();
+  
+  if (!createdAt) {
+    return { isRecent: false, isNew: false, isEdited: false };
+  }
+  
+  const createdTime = new Date(createdAt).getTime();
+  const updatedTime = updatedAt ? new Date(updatedAt).getTime() : createdTime;
+  const nowTime = now.getTime();
+  
+  const isNew = (nowTime - createdTime) < RECENT_THRESHOLD_MS;
+  const isEdited = updatedAt && updatedTime > createdTime && (nowTime - updatedTime) < RECENT_THRESHOLD_MS;
+  const isRecent = isNew || isEdited;
+  
+  return { isRecent, isNew, isEdited };
+}
+
 export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -59,6 +86,9 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
   
   // Verificar si el producto tiene precio
   const hasPrice = item.price !== null && item.price > 0;
+  
+  // Verificar si el producto es reciente
+  const { isRecent, isNew, isEdited } = isRecentItem(item.createdAt, item.updatedAt);
 
   // Renderizar el icono directamente sin crear una variable de componente
   const renderIcon = () => {
@@ -116,8 +146,10 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
       className={`group relative overflow-hidden border transition-all duration-300 ${
         purchased
           ? "border-green-200/50 bg-green-50/30 dark:border-green-800/30 dark:bg-green-950/20"
+          : isRecent
+          ? "border-blue-300/50 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20 shadow-sm"
           : "border-border/50 bg-card hover:border-primary/30 hover:shadow-sm"
-      }`}
+      } ${isRecent ? "ring-2 ring-blue-400/20 dark:ring-blue-500/20" : ""}`}
     >
       <CardContent className="p-5">
         <div className="flex items-start gap-4">
@@ -139,15 +171,28 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
             {/* Header con título y acciones */}
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <h3
-                  className={`text-base font-medium leading-snug transition-all ${
-                    purchased
-                      ? "line-through text-muted-foreground/60"
-                      : "text-foreground"
-                  }`}
-                >
-                  {item.name}
-                </h3>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3
+                    className={`text-base font-medium leading-snug transition-all ${
+                      purchased
+                        ? "line-through text-muted-foreground/60"
+                        : "text-foreground"
+                    }`}
+                  >
+                    {item.name}
+                  </h3>
+                  {isRecent && (
+                    <Badge
+                      variant="outline"
+                      className={`h-5 gap-1 px-2 text-xs font-semibold border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 animate-pulse ${
+                        isNew ? "border-green-300/50 bg-green-100/80 dark:bg-green-900/40 text-green-700 dark:text-green-300" : ""
+                      }`}
+                    >
+                      <Sparkles className="h-3 w-3" />
+                      <span>{isNew ? "Nuevo" : "Editado"}</span>
+                    </Badge>
+                  )}
+                </div>
                 {item.description && (
                   <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
                     {item.description}

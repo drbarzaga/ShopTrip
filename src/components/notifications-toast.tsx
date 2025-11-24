@@ -51,17 +51,26 @@ export function NotificationsToast() {
     });
   }, [notifications, removeNotification]);
 
+  // Vibración en dispositivos móviles cuando llega una nueva notificación
+  useEffect(() => {
+    if (notifications.length > 0 && "vibrate" in navigator) {
+      // Vibración corta para notificaciones
+      navigator.vibrate(200);
+    }
+  }, [notifications.length]);
+
   if (notifications.length === 0) {
     return null;
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full sm:w-auto">
+    <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full sm:w-auto pointer-events-none">
       {notifications.slice(0, 5).map((notification, index) => (
         <div
           key={`${notification.timestamp.getTime()}-${index}`}
           className={cn(
-            "flex items-start gap-3 p-4 rounded-lg border shadow-lg animate-in slide-in-from-right",
+            "flex items-start gap-3 p-4 rounded-lg border shadow-2xl animate-in slide-in-from-right pointer-events-auto",
+            "ring-2 ring-primary/20",
             getColor(notification.type)
           )}
         >

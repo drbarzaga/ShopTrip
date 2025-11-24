@@ -2,6 +2,7 @@ import MobileNav from "@/components/mobile-nav";
 import { AppHeader } from "@/components/app-header";
 import { NotificationsProvider } from "@/components/notifications-provider";
 import { NotificationsToast } from "@/components/notifications-toast";
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 
 interface AppLayoutProps {
   readonly children: React.ReactNode;
@@ -15,6 +16,7 @@ function AppLayout({ children }: AppLayoutProps) {
         {children}
         <MobileNav />
         <NotificationsToast />
+        <PWAInstallPrompt />
       </div>
     </NotificationsProvider>
   );

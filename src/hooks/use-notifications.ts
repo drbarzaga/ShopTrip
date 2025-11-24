@@ -11,10 +11,34 @@ export interface Notification {
   timestamp: Date;
 }
 
+// Guardar el título original de la página
+let originalTitle: string | null = null;
+
+// Función helper para actualizar el badge en el título de la página
+const updatePageTitleBadge = (count: number) => {
+  if (typeof window === "undefined") return;
+  
+  // Guardar el título original la primera vez
+  if (originalTitle === null) {
+    originalTitle = document.title.replace(/^\(\d+\)\s*/, "");
+  }
+  
+  if (count > 0 && originalTitle) {
+    document.title = `(${count}) ${originalTitle}`;
+  } else if (originalTitle) {
+    document.title = originalTitle;
+  }
+};
+
 export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Actualizar badge en el título cuando cambian las notificaciones
+  useEffect(() => {
+    updatePageTitleBadge(notifications.length);
+  }, [notifications]);
 
   useEffect(() => {
     let eventSource: EventSource | null = null;
@@ -48,16 +72,37 @@ export function useNotifications() {
               timestamp: new Date(),
             };
 
-            setNotifications((prev) => [notification, ...prev].slice(0, 50)); // Mantener solo las últimas 50
+            setNotifications((prev) => {
+              const updated = [notification, ...prev].slice(0, 50);
+              return updated;
+            });
 
-            // Mostrar notificación del navegador si está permitido
+            // Mostrar notificación del navegador - funciona mejor en iPhone cuando la app está abierta
+            // En iPhone, las notificaciones del navegador funcionan incluso sin Web Push
             if ("Notification" in window && Notification.permission === "granted") {
-              new Notification(data.title, {
-                body: data.message,
-                icon: "/icon.svg",
-                badge: "/icon.svg",
-                tag: data.tripId || data.itemId || "notification",
-              });
+              try {
+                const browserNotification = new Notification(data.title, {
+                  body: data.message,
+                  icon: "/icon.svg",
+                  badge: "/icon.svg",
+                  tag: data.tripId || data.itemId || "notification",
+                  requireInteraction: false,
+                  silent: false,
+                });
+
+                // Cerrar automáticamente después de 5 segundos
+                setTimeout(() => {
+                  browserNotification.close();
+                }, 5000);
+
+                // Manejar click en la notificación para enfocar la ventana
+                browserNotification.onclick = () => {
+                  window.focus();
+                  browserNotification.close();
+                };
+              } catch (err) {
+                console.error("Error showing browser notification:", err);
+              }
             }
           } catch (err) {
             console.error("Error parsing notification:", err);
@@ -99,6 +144,7 @@ export function useNotifications() {
 
   const clearNotifications = useCallback(() => {
     setNotifications([]);
+    updatePageTitleBadge(0);
   }, []);
 
   const removeNotification = useCallback((index: number) => {

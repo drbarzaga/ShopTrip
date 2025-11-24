@@ -17,10 +17,18 @@ export const metadata: Metadata = {
   title: "Shop Trip",
   description:
     "A simple tool to manage and organize the items you need to buy for your trip",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Shop Trip",
+  },
   viewport: {
     width: "device-width",
     initialScale: 1,
     maximumScale: 5,
+    userScalable: true,
+    viewportFit: "cover",
   },
   icons: {
     icon: [
@@ -30,6 +38,12 @@ export const metadata: Metadata = {
     apple: [
       { url: "/apple-icon.svg", type: "image/svg+xml" },
     ],
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+    "apple-mobile-web-app-title": "Shop Trip",
   },
 };
 

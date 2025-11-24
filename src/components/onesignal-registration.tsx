@@ -63,50 +63,52 @@ export function OneSignalRegistration() {
           });
           
           console.log("[OneSignal] SDK initialized");
-          
-          // Verificar estado después de inicializar
-          OneSignalWindow.OneSignal.push(async function() {
-            try {
-              // Verificar si las notificaciones están habilitadas
-              const isEnabled = await OneSignalWindow.OneSignal.isPushNotificationsEnabled();
-              console.log("[OneSignal] Push notifications enabled:", isEnabled);
-              
-              if (isEnabled) {
-                const userId = await OneSignalWindow.OneSignal.getUserId();
-                if (userId) {
-                  console.log("[OneSignal] User ID:", userId);
-                  registerOneSignalUserId(userId);
-                }
-              } else {
-                console.log("[OneSignal] Push notifications not enabled");
-              }
-            } catch (error) {
-              console.error("[OneSignal] Error checking status:", error);
-            }
-          });
-
-          // Escuchar cambios en la suscripción
-          OneSignalWindow.OneSignal.on("subscriptionChange", async function(isSubscribed: boolean) {
-            console.log("[OneSignal] Subscription changed:", isSubscribed);
-            
-            if (isSubscribed) {
-              try {
-                const userId = await OneSignalWindow.OneSignal.getUserId();
-                if (userId) {
-                  console.log("[OneSignal] User subscribed with ID:", userId);
-                  registerOneSignalUserId(userId);
-                }
-              } catch (error) {
-                console.error("[OneSignal] Error getting user ID:", error);
-              }
-            }
-          });
-
-          console.log("[OneSignal] ✅ Initialized successfully");
         } catch (error) {
           console.error("[OneSignal] ❌ Error initializing:", error);
         }
       });
+
+      // Verificar estado y configurar listeners después de inicializar
+      OneSignalWindow.OneSignal.push(async function() {
+        try {
+          // Verificar si las notificaciones están habilitadas
+          const isEnabled = await OneSignalWindow.OneSignal.isPushNotificationsEnabled();
+          console.log("[OneSignal] Push notifications enabled:", isEnabled);
+          
+          if (isEnabled) {
+            const userId = await OneSignalWindow.OneSignal.getUserId();
+            if (userId) {
+              console.log("[OneSignal] User ID:", userId);
+              registerOneSignalUserId(userId);
+            }
+          } else {
+            console.log("[OneSignal] Push notifications not enabled");
+          }
+        } catch (error) {
+          console.error("[OneSignal] Error checking status:", error);
+        }
+      });
+
+      // Escuchar cambios en la suscripción
+      OneSignalWindow.OneSignal.push(function() {
+        OneSignalWindow.OneSignal.on("subscriptionChange", async function(isSubscribed: boolean) {
+          console.log("[OneSignal] Subscription changed:", isSubscribed);
+          
+          if (isSubscribed) {
+            try {
+              const userId = await OneSignalWindow.OneSignal.getUserId();
+              if (userId) {
+                console.log("[OneSignal] User subscribed with ID:", userId);
+                registerOneSignalUserId(userId);
+              }
+            } catch (error) {
+              console.error("[OneSignal] Error getting user ID:", error);
+            }
+          }
+        });
+      });
+
+      console.log("[OneSignal] ✅ Initialization setup complete");
     };
 
     const registerOneSignalUserId = async (userId: string) => {

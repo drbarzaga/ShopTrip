@@ -51,11 +51,12 @@ export function DeleteTripDialog({
         {trigger || (
           <Button
             variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            size="sm"
+            className="h-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 gap-2 px-2 sm:px-3"
             aria-label="Eliminar viaje"
           >
             <Trash2 className="h-4 w-4" />
+            <span className="hidden sm:inline">Eliminar</span>
           </Button>
         )}
       </DialogTrigger>

@@ -171,6 +171,9 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                           size="icon"
                           className="h-8 w-8 text-muted-foreground transition-all hover:text-foreground hover:bg-accent"
                           aria-label="Editar artículo"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -184,6 +187,9 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                           className="h-8 w-8 text-muted-foreground transition-all hover:text-destructive hover:bg-destructive/10"
                           aria-label="Eliminar artículo"
                           disabled={isDeleting}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

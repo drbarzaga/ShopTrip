@@ -83,21 +83,25 @@ export function TripCard({ trip, canDelete = false }: TripCardProps) {
                     open={deleteDialogOpen}
                     onOpenChange={setDeleteDialogOpen}
                   >
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10"
-                        aria-label="Eliminar viaje"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
+                    <div
+                      className="relative z-10"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground transition-all hover:text-destructive hover:bg-destructive/10"
+                          aria-label="Eliminar viaje"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                    </div>
                     <DialogContent className="sm:max-w-[425px]">
                       <DialogHeader>
                         <DialogTitle>¿Eliminar viaje?</DialogTitle>

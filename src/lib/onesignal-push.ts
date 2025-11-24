@@ -33,6 +33,8 @@ export async function sendOneSignalNotification(
     // Obtener OneSignal player IDs de los usuarios
     const tokens = await getUserFCMTokens(userIds);
     
+    console.log(`[OneSignal] Processing ${tokens.length} tokens for ${userIds.length} users`);
+    
     // Extraer OneSignal player IDs de los tokens almacenados
     const playerIds: string[] = [];
     
@@ -42,19 +44,25 @@ export async function sendOneSignalNotification(
         // Si es un token de OneSignal, extraer el player ID
         if (parsed.type === "onesignal" && parsed.userId) {
           playerIds.push(parsed.userId);
+          console.log(`[OneSignal] Found Player ID: ${parsed.userId}`);
+        } else {
+          console.log(`[OneSignal] Token is not OneSignal type: ${parsed.type || "unknown"}`);
         }
-      } catch {
-        // Ignorar tokens que no son de OneSignal
+      } catch (error) {
+        console.warn(`[OneSignal] Error parsing token:`, error);
       }
     }
 
     if (playerIds.length === 0) {
       console.warn(`[OneSignal] No OneSignal player IDs found for ${userIds.length} users`);
+      console.warn(`[OneSignal] Users: ${userIds.join(", ")}`);
+      console.warn(`[OneSignal] Total tokens found: ${tokens.length}`);
       console.warn(`[OneSignal] Users need to open the app and grant notification permissions`);
       return { success: false, error: "No OneSignal player IDs found" };
     }
 
     console.log(`[OneSignal] Found ${playerIds.length} OneSignal player IDs for ${userIds.length} users`);
+    console.log(`[OneSignal] Player IDs: ${playerIds.join(", ")}`);
 
     // Construir el cuerpo de la petición
     const requestBody: Record<string, unknown> = {

@@ -74,8 +74,12 @@ export async function POST(request: NextRequest) {
       console.log(`[OneSignal Register] New player ID registered: ${onesignalUserId}`);
     }
 
-    console.log(`[OneSignal Register] Successfully registered OneSignal User ID`);
-    return NextResponse.json({ success: true });
+    console.log(`[OneSignal Register] Successfully registered OneSignal User ID ${onesignalUserId} for user ${session.user.id}`);
+    return NextResponse.json({ 
+      success: true,
+      userId: session.user.id,
+      onesignalUserId: onesignalUserId 
+    });
   } catch (error) {
     console.error("[OneSignal Register] Error:", error);
     return NextResponse.json(

@@ -99,6 +99,8 @@ export async function notifyTripCreated(
   const userIds = await getUsersToNotifyForTrip(tripId);
   const activeOrgId = await getActiveOrganizationId();
   
+  console.log(`[Notifications] notifyTripCreated - Trip: ${tripId}, Users: ${userIds.join(", ")}`);
+  
   const title = activeOrgId 
     ? "Nuevo viaje creado"
     : "Viaje creado";
@@ -143,6 +145,8 @@ export async function notifyItemCreated(
   creatorName: string
 ): Promise<void> {
   const userIds = await getUsersToNotifyForTrip(tripId);
+  
+  console.log(`[Notifications] notifyItemCreated - Trip: ${tripId}, Item: ${itemName}, Users: ${userIds.join(", ")}`);
   
   await createNotification(
     "item_created",

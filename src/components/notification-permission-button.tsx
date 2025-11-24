@@ -7,7 +7,8 @@ import { useNotificationsContext } from "@/components/notifications-provider";
 
 export function NotificationPermissionButton() {
   const { requestPermission } = useNotificationsContext();
-  const [permission, setPermission] = useState<NotificationPermission>("default");
+  const [permission, setPermission] =
+    useState<NotificationPermission>("default");
   const [isRequesting, setIsRequesting] = useState(false);
 
   useEffect(() => {
@@ -61,4 +62,3 @@ export function NotificationPermissionButton() {
     </Button>
   );
 }
-

@@ -1,119 +1,110 @@
-# Configuración de OneSignal para Notificaciones Push
+# Configuración de OneSignal según el artículo de Medium
 
-## ¿Por qué OneSignal?
-
-OneSignal tiene mejor soporte para PWAs en iOS que Web Push nativo:
-- ✅ Funciona mejor en iOS (incluyendo versiones anteriores a 16.4)
-- ✅ Mejor soporte para PWAs
-- ✅ Plan gratuito generoso (10,000 suscriptores)
-- ✅ Dashboard para gestionar notificaciones
-- ✅ Analytics y segmentación
-- ✅ Fácil de integrar
+Este documento sigue los pasos del artículo:
+https://medium.com/@OneSignalDevs/web-push-notifications-are-a-versatile-channel-that-can-be-used-to-enhance-your-ux-re-engage-2d00c8bf1535
 
 ## Pasos de Configuración
 
-### 1. Crear Cuenta en OneSignal
+### 1. Descargar el SDK de OneSignal
 
-1. Ve a https://onesignal.com
-2. Crea una cuenta gratuita
-3. Crea una nueva aplicación
-4. Selecciona "Web Push" como plataforma
+1. Ve a https://documentation.onesignal.com/docs/web-push-sdk-setup
+2. Descarga el SDK de OneSignal para Web Push
+3. Descomprime el archivo
+4. Copia todos los archivos JavaScript de `OneSignal-Web-SDK/` a `public/` en tu proyecto
 
-### 2. Configurar la Aplicación
+**Archivos necesarios:**
+- `OneSignalSDK.js` → `public/OneSignalSDK.js`
+- `OneSignalSDKWorker.js` → `public/OneSignalSDKWorker.js`
+- `OneSignalSDKUpdaterWorker.js` → `public/OneSignalSDKUpdaterWorker.js`
 
-1. En el dashboard de OneSignal, ve a Settings → Platforms → Web Push
-2. Configura:
-   - **Site Name**: Shop Trip
-   - **Site URL**: https://shoptrip.app (o tu dominio)
-   - **Default Notification Icon URL**: https://shoptrip.app/icon.svg
-   - **Safari Web ID**: (opcional, para mejor soporte Safari)
+### 2. Configurar OneSignal en el Dashboard
 
-### 3. Obtener Credenciales
+1. Ve a https://onesignal.com y crea una cuenta (gratis)
+2. Crea una nueva aplicación seleccionando "Web Push"
+3. En la configuración:
+   - Selecciona "Custom Code" como método de integración
+   - Configura el Site URL (ej: `https://shoptrip.app` o `http://localhost:3000` para desarrollo)
+   - Guarda la configuración
+4. Copia el `appId` que aparece en el segundo script de la página final
 
-1. Ve a Settings → Keys & IDs
-2. Copia:
-   - **App ID** (OneSignal App ID)
-   - **REST API Key** (para enviar desde el servidor)
-
-### 4. Configurar Variables de Entorno
+### 3. Configurar Variables de Entorno
 
 Agrega estas variables a tu archivo `.env`:
 
 ```env
 # OneSignal Configuration
+NEXT_PUBLIC_ONESIGNAL_APP_ID=tu-app-id-aqui
 ONESIGNAL_APP_ID=tu-app-id-aqui
 ONESIGNAL_API_KEY=tu-api-key-aqui
-NEXT_PUBLIC_ONESIGNAL_APP_ID=tu-app-id-aqui
-NEXT_PUBLIC_ONESIGNAL_SAFARI_WEB_ID=tu-safari-web-id-aqui (opcional)
 ```
 
-**Importante:**
-- `ONESIGNAL_APP_ID` y `ONESIGNAL_API_KEY` son para el servidor (envío de notificaciones)
-- `NEXT_PUBLIC_ONESIGNAL_APP_ID` es para el cliente (registro de usuarios)
-- `NEXT_PUBLIC_ONESIGNAL_SAFARI_WEB_ID` es opcional pero mejora soporte Safari
+**Para obtener las credenciales:**
+- `NEXT_PUBLIC_ONESIGNAL_APP_ID`: Aparece en el script de inicialización del dashboard
+- `ONESIGNAL_APP_ID`: Mismo que arriba
+- `ONESIGNAL_API_KEY`: Ve a Settings → Keys & IDs → REST API Key
 
-### 5. Desplegar Cambios
+### 4. Verificar la Implementación
 
-1. Haz commit de los cambios
-2. Despliega a producción
-3. Configura las variables de entorno en tu plataforma de hosting
+El código ya está implementado según el artículo:
+
+1. **Script del SDK**: Agregado en `src/app/layout.tsx`
+2. **Inicialización**: Implementada en `src/components/onesignal-registration.tsx`
+3. **Service Worker**: Configurado en `public/OneSignalSDKWorker.js`
+
+### 5. Probar la Integración
+
+1. Inicia el servidor de desarrollo: `npm run dev`
+2. Abre la app en tu navegador
+3. Deberías ver un botón circular rojo con una campana en la esquina inferior derecha
+4. Haz clic en el botón para suscribirte a las notificaciones
+5. Acepta los permisos cuando el navegador lo solicite
+
+### 6. Enviar Notificaciones
+
+#### Desde el Dashboard de OneSignal:
+1. Ve a Messages → New Push
+2. Crea tu mensaje
+3. Selecciona "Send to All Users" o segmenta por audiencia
+4. Envía la notificación
+
+#### Desde el código:
+Las notificaciones se envían automáticamente cuando:
+- Se crea un viaje (`notifyTripCreated`)
+- Se crea un producto (`notifyItemCreated`)
+- Se actualiza un viaje (`notifyTripUpdated`)
+- Se marca un producto como comprado (`notifyItemPurchased`)
 
 ## Verificación
 
-### En el Cliente (Navegador):
+### En el Dashboard de OneSignal:
+1. Ve a Audience → All Users
+2. Deberías ver tu suscripción después de aceptar los permisos
 
-1. Abre la app en tu navegador
-2. Abre la consola (F12)
-3. Busca logs:
-   ```
-   [OneSignal] Initialized successfully
-   [OneSignal] Subscription changed: true
-   [OneSignal] User ID: [user-id]
-   ```
-
-### En el Servidor:
-
-Cuando se envía una notificación, deberías ver:
+### En la Consola del Navegador:
+Deberías ver:
 ```
-[OneSignal] Notification sent successfully: [message-id]
+[OneSignal] Initialized
 ```
 
-## Uso
+## Solución de Problemas
 
-El sistema ahora usa OneSignal automáticamente si está configurado, con fallback a Web Push si OneSignal no está disponible.
-
-Las notificaciones se envían automáticamente cuando:
-- Se crea un viaje
-- Se crea un producto
-- Se actualiza un producto
-- Se marca un producto como comprado
-
-## Troubleshooting
-
-### OneSignal no se inicializa
-
+### El botón de OneSignal no aparece:
+- Verifica que `OneSignalSDK.js` esté en `public/`
+- Verifica que el script esté cargándose (DevTools → Network)
 - Verifica que `NEXT_PUBLIC_ONESIGNAL_APP_ID` esté configurado
-- Verifica que el script de OneSignal se cargue correctamente
-- Revisa la consola para errores
 
-### Las notificaciones no se envían
+### Las notificaciones no llegan:
+- Verifica que hayas aceptado los permisos de notificaciones
+- Verifica que estés suscrito (botón debe mostrar estado "subscribed")
+- Verifica los logs del servidor al enviar notificaciones
+- Verifica que el User ID esté registrado en la base de datos
 
-- Verifica que `ONESIGNAL_APP_ID` y `ONESIGNAL_API_KEY` estén configurados
-- Verifica que los usuarios estén registrados (ver logs del cliente)
-- Revisa los logs del servidor para errores
+### Error 404 en Service Worker:
+- Verifica que `OneSignalSDKWorker.js` esté en `public/`
+- Verifica que el archivo sea accesible en `https://tudominio.com/OneSignalSDKWorker.js`
 
-### No funciona en iOS
+## Recursos
 
-- Asegúrate de que la app esté instalada como PWA
-- Verifica permisos de notificaciones
-- OneSignal debería funcionar mejor que Web Push nativo en iOS
-
-## Plan Gratuito
-
-OneSignal ofrece:
-- ✅ 10,000 suscriptores gratuitos
-- ✅ Notificaciones ilimitadas
-- ✅ Todas las características básicas
-
-Suficiente para la mayoría de aplicaciones pequeñas/medianas.
-
+- [Artículo Original](https://medium.com/@OneSignalDevs/web-push-notifications-are-a-versatile-channel-that-can-be-used-to-enhance-your-ux-re-engage-2d00c8bf1535)
+- [Documentación de OneSignal](https://documentation.onesignal.com/docs/web-push-sdk-setup)
+- [Dashboard de OneSignal](https://onesignal.com)

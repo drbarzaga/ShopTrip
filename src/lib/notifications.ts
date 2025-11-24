@@ -12,18 +12,6 @@ export type NotificationType =
   | "item_updated"
   | "item_purchased";
 
-export interface Notification {
-  id: string;
-  type: NotificationType;
-  title: string;
-  message: string;
-  userId: string;
-  tripId?: string;
-  itemId?: string;
-  createdAt: Date;
-  read: boolean;
-}
-
 /**
  * Obtiene los usuarios que deberían recibir notificaciones para un viaje
  */
@@ -45,11 +33,9 @@ export async function getUsersToNotifyForTrip(tripId: string): Promise<string[]>
     }
 
     const tripRecord = tripData[0];
-    console.log(`[Notifications] Trip ${tripId} - Organization: ${tripRecord.organizationId || "none"}, Creator: ${tripRecord.userId}`);
 
     // Si el viaje no tiene organización, solo notificar al creador
     if (!tripRecord.organizationId) {
-      console.log(`[Notifications] No organization, notifying only creator: ${tripRecord.userId}`);
       return [tripRecord.userId];
     }
 
@@ -59,9 +45,7 @@ export async function getUsersToNotifyForTrip(tripId: string): Promise<string[]>
       .from(member)
       .where(eq(member.organizationId, tripRecord.organizationId));
 
-    const userIds = members.map((m) => m.userId);
-    console.log(`[Notifications] Organization ${tripRecord.organizationId} has ${userIds.length} members: ${userIds.join(", ")}`);
-    return userIds;
+    return members.map((m) => m.userId);
   } catch (error) {
     console.error("[Notifications] Error getting users to notify:", error);
     return [];
@@ -69,7 +53,7 @@ export async function getUsersToNotifyForTrip(tripId: string): Promise<string[]>
 }
 
 /**
- * Crea una notificación para múltiples usuarios
+ * Envía notificación usando OneSignal
  */
 export async function createNotification(
   type: NotificationType,
@@ -80,45 +64,27 @@ export async function createNotification(
   itemId?: string
 ): Promise<void> {
   try {
-    // Emitir notificación SSE (tiempo real cuando la app está abierta)
-    const { notificationEmitter } = await import("@/lib/notifications-events");
+    const { sendOneSignalNotification } = await import("@/lib/onesignal-push");
+    const url = tripId ? `/trips/${tripId}` : undefined;
     
-    notificationEmitter.emit(userIds, {
-      type,
+    const result = await sendOneSignalNotification(userIds, {
       title,
-      message,
-      tripId,
-      itemId,
+      body: message,
+      data: {
+        type,
+        tripId: tripId || "",
+        itemId: itemId || "",
+      },
+      url,
     });
-
-    // Enviar notificación push usando OneSignal (funciona cuando la app está cerrada)
-    try {
-      const { sendOneSignalNotification } = await import("@/lib/onesignal-push");
-      const url = tripId ? `/trips/${tripId}` : undefined;
-      
-      const result = await sendOneSignalNotification(userIds, {
-        title,
-        body: message,
-        data: {
-          type,
-          tripId: tripId || "",
-          itemId: itemId || "",
-        },
-        url,
-      });
-      
-      if (result.success) {
-        console.log(`[Notifications] OneSignal notification sent successfully: ${result.messageId}`);
-      } else {
-        console.warn(`[Notifications] OneSignal notification failed: ${result.error}`);
-        console.warn(`[Notifications] Using SSE only for real-time notifications when app is open`);
-      }
-    } catch (pushError) {
-      console.error("[Notifications] Error sending OneSignal notification:", pushError);
-      // No fallar si falla el push, SSE ya funcionó
+    
+    if (result.success) {
+      console.log(`[Notifications] OneSignal notification sent: ${result.messageId}`);
+    } else {
+      console.warn(`[Notifications] OneSignal notification failed: ${result.error}`);
     }
   } catch (error) {
-    console.error("Error creating notification:", error);
+    console.error("[Notifications] Error sending notification:", error);
   }
 }
 
@@ -176,9 +142,7 @@ export async function notifyItemCreated(
   itemName: string,
   creatorName: string
 ): Promise<void> {
-  console.log(`[Notifications] notifyItemCreated called for trip ${tripId}, item: ${itemName}`);
   const userIds = await getUsersToNotifyForTrip(tripId);
-  console.log(`[Notifications] Will notify ${userIds.length} users: ${userIds.join(", ")}`);
   
   await createNotification(
     "item_created",
@@ -226,4 +190,3 @@ export async function notifyItemPurchased(
     tripId
   );
 }
-

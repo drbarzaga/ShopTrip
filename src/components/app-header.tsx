@@ -11,7 +11,6 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { getAppName } from "@/lib/utils";
 import { LogoIcon } from "@/components/shared/logo";
-import { NotificationPermissionButton } from "@/components/notification-permission-button";
 
 export async function AppHeader() {
   const session = await getSession();
@@ -52,7 +51,6 @@ export async function AppHeader() {
               </h1>
             </Link>
             <div className="flex items-center gap-2 shrink-0">
-              <NotificationPermissionButton />
               <ThemeToggle />
               <UserMenu
                 userName={session.user.name}
@@ -97,7 +95,6 @@ export async function AppHeader() {
                   Mis Viajes
                 </Button>
               </Link>
-              <NotificationPermissionButton />
               <ThemeToggle />
               <UserMenu
                 userName={session.user.name}

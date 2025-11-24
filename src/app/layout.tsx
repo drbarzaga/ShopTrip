@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
@@ -35,9 +36,7 @@ export const metadata: Metadata = {
       { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico", sizes: "any" },
     ],
-    apple: [
-      { url: "/apple-icon.svg", type: "image/svg+xml" },
-    ],
+    apple: [{ url: "/apple-icon.svg", type: "image/svg+xml" }],
   },
   other: {
     "mobile-web-app-capable": "yes",
@@ -57,6 +56,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* OneSignal SDK Script - desde CDN según documentación oficial */}
+        <Script
+          src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+          strategy="lazyOnload"
+          defer
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

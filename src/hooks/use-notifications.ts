@@ -139,6 +139,31 @@ export function useNotifications() {
     return () => clearInterval(interval);
   }, [fetchNotifications, fetchUnreadCount]);
 
+  const deleteNotification = useCallback(async (notificationId: string) => {
+    try {
+      const response = await fetch(`/api/notifications?id=${notificationId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        // Actualizar estado local inmediatamente
+        setNotifications((prev) => {
+          const notification = prev.find((n) => n.id === notificationId);
+          // Actualizar contador si la notificación no estaba leída
+          if (notification && !notification.read) {
+            setUnreadCount((count) => Math.max(0, count - 1));
+          }
+          return prev.filter((n) => n.id !== notificationId);
+        });
+        // Refrescar para asegurar sincronización
+        fetchNotifications();
+        fetchUnreadCount();
+      }
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+    }
+  }, [fetchNotifications, fetchUnreadCount]);
+
   return {
     notifications,
     unreadCount,
@@ -146,6 +171,7 @@ export function useNotifications() {
     markAsRead,
     markAllAsRead,
     handleNotificationClick,
+    deleteNotification,
     refresh: () => {
       fetchNotifications();
       fetchUnreadCount();

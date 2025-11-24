@@ -76,11 +76,14 @@ export function NotificationsList({
   const handleDelete = async (notificationId: string) => {
     startTransition(async () => {
       try {
+        const notification = notifications.find((n) => n.id === notificationId);
         const response = await fetch(`/api/notifications?id=${notificationId}`, {
           method: "DELETE",
         });
         if (response.ok) {
+          // Actualizar estado local inmediatamente
           setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+          // Refrescar para sincronizar con el servidor
           refresh();
         }
       } catch (error) {

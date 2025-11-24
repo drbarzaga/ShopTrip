@@ -112,7 +112,7 @@ export function NotificationsDropdown() {
     loading,
     markAllAsRead,
     handleNotificationClick,
-    refresh,
+    deleteNotification,
   } = useNotifications();
 
   const handleClick = (notification: Notification) => {
@@ -121,16 +121,7 @@ export function NotificationsDropdown() {
   };
 
   const handleDelete = async (notificationId: string) => {
-    try {
-      const response = await fetch(`/api/notifications?id=${notificationId}`, {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        refresh();
-      }
-    } catch (error) {
-      console.error("Error deleting notification:", error);
-    }
+    await deleteNotification(notificationId);
   };
 
 

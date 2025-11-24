@@ -10,13 +10,30 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+const PROMPT_DISMISSED_KEY = "pwa-install-prompt-dismissed";
+
 export function PWAInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Verificar que estamos en el cliente
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    setMounted(true);
+
+    // Verificar si el usuario ya descartó el prompt
+    const wasDismissed = localStorage.getItem(PROMPT_DISMISSED_KEY);
+    if (wasDismissed) {
+      console.log("[PWA Install] Prompt was previously dismissed");
+      return;
+    }
+
     // Detectar si es iOS
     const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     setIsIOS(iOS);
@@ -27,13 +44,19 @@ export function PWAInstallPrompt() {
       ((window.navigator as any).standalone === true);
     setIsStandalone(standalone);
 
+    console.log("[PWA Install] Standalone mode:", standalone);
+    console.log("[PWA Install] iOS:", iOS);
+    console.log("[PWA Install] User agent:", navigator.userAgent);
+
     // Si ya está instalado, no mostrar el prompt
     if (standalone) {
+      console.log("[PWA Install] Already installed, skipping prompt");
       return;
     }
 
     // Escuchar el evento beforeinstallprompt (Chrome, Edge, etc.)
     const handleBeforeInstallPrompt = (e: Event) => {
+      console.log("[PWA Install] beforeinstallprompt event received");
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setShowPrompt(true);
@@ -41,12 +64,25 @@ export function PWAInstallPrompt() {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
-    // Para iOS, mostrar el prompt después de un delay
+    // Para iOS y otros navegadores que no soportan beforeinstallprompt,
+    // mostrar el prompt después de un delay
     let timer: NodeJS.Timeout | null = null;
+    
+    // Mostrar para iOS después de 3 segundos
     if (iOS && !standalone) {
       timer = setTimeout(() => {
+        console.log("[PWA Install] Showing iOS prompt after delay");
         setShowPrompt(true);
-      }, 3000); // Mostrar después de 3 segundos
+      }, 3000);
+    } 
+    // Para otros navegadores (Chrome en desktop, etc.), mostrar después de 5 segundos
+    // si no se recibió el evento beforeinstallprompt
+    else if (!standalone) {
+      timer = setTimeout(() => {
+        // Solo mostrar si no se recibió el evento beforeinstallprompt
+        console.log("[PWA Install] Checking if should show prompt...");
+        setShowPrompt(true);
+      }, 5000);
     }
 
     return () => {
@@ -61,16 +97,27 @@ export function PWAInstallPrompt() {
   const handleInstallClick = async () => {
     if (deferredPrompt) {
       // Chrome/Edge - usar el prompt nativo
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") {
-        setShowPrompt(false);
-        setDeferredPrompt(null);
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log("[PWA Install] User choice:", outcome);
+        if (outcome === "accepted") {
+          setShowPrompt(false);
+          setDeferredPrompt(null);
+        }
+      } catch (error) {
+        console.error("[PWA Install] Error showing install prompt:", error);
+        // Si falla, mostrar instrucciones manuales
+        setShowPrompt(true);
       }
+    } else {
+      // Si no hay deferredPrompt, mostrar instrucciones manuales
+      console.log("[PWA Install] No deferred prompt, showing manual instructions");
     }
   };
 
-  if (!showPrompt || isStandalone) {
+  // No renderizar hasta que esté montado en el cliente
+  if (!mounted || !showPrompt || isStandalone) {
     return null;
   }
 
@@ -93,7 +140,10 @@ export function PWAInstallPrompt() {
             variant="ghost"
             size="icon"
             className="h-6 w-6"
-            onClick={() => setShowPrompt(false)}
+            onClick={() => {
+              setShowPrompt(false);
+              localStorage.setItem(PROMPT_DISMISSED_KEY, "true");
+            }}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -111,7 +161,10 @@ export function PWAInstallPrompt() {
               </ol>
             </div>
             <Button
-              onClick={() => setShowPrompt(false)}
+              onClick={() => {
+                setShowPrompt(false);
+                localStorage.setItem(PROMPT_DISMISSED_KEY, "true");
+              }}
               className="w-full"
               variant="outline"
             >
@@ -119,10 +172,35 @@ export function PWAInstallPrompt() {
             </Button>
           </div>
         ) : (
-          <Button onClick={handleInstallClick} className="w-full">
-            <Download className="mr-2 h-4 w-4" />
-            Instalar Ahora
-          </Button>
+          <div className="space-y-3">
+            {deferredPrompt ? (
+              <Button onClick={handleInstallClick} className="w-full">
+                <Download className="mr-2 h-4 w-4" />
+                Instalar Ahora
+              </Button>
+            ) : (
+              <>
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium mb-2">Instalación manual:</p>
+                  <ul className="list-disc list-inside space-y-1.5 text-xs">
+                    <li>Chrome/Edge: Menú (⋮) → &quot;Instalar Shop Trip&quot;</li>
+                    <li>Safari: Menú → &quot;Agregar a pantalla de inicio&quot;</li>
+                    <li>Firefox: Menú → &quot;Instalar&quot;</li>
+                  </ul>
+                </div>
+                <Button
+                  onClick={() => {
+                    setShowPrompt(false);
+                    localStorage.setItem(PROMPT_DISMISSED_KEY, "true");
+                  }}
+                  className="w-full"
+                  variant="outline"
+                >
+                  Entendido
+                </Button>
+              </>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>

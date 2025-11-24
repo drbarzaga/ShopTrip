@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-server";
 
 export const dynamic = 'force-dynamic';
-import { getTripBySlug } from "@/actions/trips";
+import { getTripBySlug, canUserDeleteTrip } from "@/actions/trips";
 import { getTripItems } from "@/lib/trip-items";
 import { getUserRoleInTripOrganization } from "@/actions/trip-items";
 import { formatCurrency } from "@/lib/format-currency";
@@ -21,6 +21,7 @@ import { ItemsList } from "@/components/items-list";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { CreateTripItemDialog } from "@/components/create-trip-item-dialog";
 import { EditTripDialog } from "@/components/edit-trip-dialog";
+import { DeleteTripDialog } from "@/components/delete-trip-dialog";
 import { RefreshButton } from "@/components/refresh-button";
 
 function formatDate(date: Date | null): string {
@@ -55,6 +56,7 @@ export default async function TripDetailPage({
   // Obtener el rol del usuario en la organización del viaje
   const userRole = await getUserRoleInTripOrganization(session.user.id, tripData.id);
   const canEdit = userRole === "owner" || userRole === "admin";
+  const canDelete = await canUserDeleteTrip(session.user.id, tripData.id);
 
   const purchasedItems = items.filter((item) => item.purchased).length;
   const totalSpent = items
@@ -118,6 +120,12 @@ export default async function TripDetailPage({
                     startDate: tripData.startDate,
                     endDate: tripData.endDate,
                   }}
+                />
+              )}
+              {canDelete && (
+                <DeleteTripDialog
+                  tripId={tripData.id}
+                  tripName={tripData.name}
                 />
               )}
             </div>

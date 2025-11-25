@@ -151,4 +151,42 @@ a {
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Prevenir flash de contenido sin estilo en PWA */
+  html {
+    background-color: #ffffff;
+  }
+  
+  html.dark {
+    background-color: #0a0a0a;
+  }
+
+  /* Animaciones para el splash screen */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-in {
+    animation: fade-in 0.5s ease-out;
+  }
+
+  .fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
 }

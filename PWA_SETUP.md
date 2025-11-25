@@ -111,3 +111,4 @@ La app ahora está configurada como PWA (Progressive Web App) y puede instalarse
 - El Service Worker se actualiza automáticamente
 - Los usuarios siempre tienen la última versión
 
+

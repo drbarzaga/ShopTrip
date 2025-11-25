@@ -149,3 +149,4 @@ Notification.permission
 3. Probar el funcionamiento offline
 4. Verificar que el cache funcione correctamente
 
+

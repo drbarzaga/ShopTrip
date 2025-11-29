@@ -1,29 +1,97 @@
+'use client'
+
 import { cn } from '@/lib/utils'
-import { ShoppingBag } from 'lucide-react'
+import { useId } from 'react'
 
 export const Logo = ({ className, uniColor }: { className?: string; uniColor?: boolean }) => {
+    const id = useId()
+    const gradientId = `gradient-${id.replace(/:/g, '')}`
+    const innerGradientId = `innerGradient-${id.replace(/:/g, '')}`
+    
     return (
-        <div className={cn('relative flex items-center justify-center', className)}>
-            <div className="relative">
-                <div className="absolute inset-0 bg-primary/10 rounded-full blur-md"></div>
-                <div className="relative bg-gradient-to-br from-primary/5 to-primary/10 p-2.5 rounded-full">
-                    <ShoppingBag className="h-7 w-7 text-primary stroke-[1.5]" />
-                </div>
-            </div>
-        </div>
+        <svg 
+            className={cn('h-7 w-7', className)} 
+            viewBox="0 0 32 32" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            {/* Fondo con gradiente azul-púrpura */}
+            <rect width="32" height="32" rx="8" fill={`url(#${gradientId})`}/>
+            
+            {/* Maleta/Valija estilizada con checkmark */}
+            <g transform="translate(4, 5)">
+                {/* Sombra sutil */}
+                <rect x="6" y="8" width="18" height="18" rx="2.5" fill="black" opacity="0.1"/>
+                {/* Cuerpo principal de la maleta */}
+                <rect x="5" y="7" width="18" height="18" rx="2.5" fill="white" opacity="0.98"/>
+                {/* Tapa superior */}
+                <rect x="5" y="7" width="18" height="5" rx="2.5" fill="white" opacity="0.9"/>
+                {/* Detalle de la tapa */}
+                <line x1="7" y1="9" x2="21" y2="9" stroke={`url(#${innerGradientId})`} strokeWidth="1" opacity="0.3"/>
+                {/* Interior con gradiente suave */}
+                <rect x="7" y="9" width="14" height="14" rx="1.5" fill={`url(#${innerGradientId})`}/>
+                {/* Checkmark elegante y visible */}
+                <path d="M10 17l4 4 8-8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.95"/>
+            </g>
+            
+            <defs>
+                <linearGradient id={gradientId} x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#3b82f6"/>
+                    <stop offset="50%" stopColor="#6366f1"/>
+                    <stop offset="100%" stopColor="#8b5cf6"/>
+                </linearGradient>
+                <linearGradient id={innerGradientId} x1="7" y1="9" x2="21" y2="23" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#60a5fa" opacity="0.7"/>
+                    <stop offset="100%" stopColor="#a78bfa" opacity="0.7"/>
+                </linearGradient>
+            </defs>
+        </svg>
     )
 }
 
 export const LogoIcon = ({ className, uniColor }: { className?: string; uniColor?: boolean }) => {
+    const id = useId()
+    const gradientId = `gradientIcon-${id.replace(/:/g, '')}`
+    const innerGradientId = `innerGradientIcon-${id.replace(/:/g, '')}`
+    
     return (
-        <div className={cn('relative flex items-center justify-center', className)}>
-            <div className="relative">
-                <div className="absolute inset-0 bg-primary/10 rounded-full blur-md"></div>
-                <div className="relative bg-gradient-to-br from-primary/5 to-primary/10 p-2 sm:p-2.5 rounded-full">
-                    <ShoppingBag className="h-6 w-6 sm:h-7 sm:w-7 text-primary stroke-[1.5]" />
-                </div>
-            </div>
-        </div>
+        <svg 
+            className={cn('h-6 w-6 sm:h-7 sm:w-7', className)} 
+            viewBox="0 0 32 32" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            {/* Fondo con gradiente azul-púrpura */}
+            <rect width="32" height="32" rx="8" fill={`url(#${gradientId})`}/>
+            
+            {/* Maleta/Valija estilizada con checkmark */}
+            <g transform="translate(4, 5)">
+                {/* Sombra sutil */}
+                <rect x="6" y="8" width="18" height="18" rx="2.5" fill="black" opacity="0.1"/>
+                {/* Cuerpo principal de la maleta */}
+                <rect x="5" y="7" width="18" height="18" rx="2.5" fill="white" opacity="0.98"/>
+                {/* Tapa superior */}
+                <rect x="5" y="7" width="18" height="5" rx="2.5" fill="white" opacity="0.9"/>
+                {/* Detalle de la tapa */}
+                <line x1="7" y1="9" x2="21" y2="9" stroke={`url(#${innerGradientId})`} strokeWidth="1" opacity="0.3"/>
+                {/* Interior con gradiente suave */}
+                <rect x="7" y="9" width="14" height="14" rx="1.5" fill={`url(#${innerGradientId})`}/>
+                {/* Checkmark elegante y visible */}
+                <path d="M10 17l4 4 8-8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.95"/>
+            </g>
+            
+            <defs>
+                <linearGradient id={gradientId} x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#3b82f6"/>
+                    <stop offset="50%" stopColor="#6366f1"/>
+                    <stop offset="100%" stopColor="#8b5cf6"/>
+                </linearGradient>
+                <linearGradient id={innerGradientId} x1="7" y1="9" x2="21" y2="23" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#60a5fa" opacity="0.7"/>
+                    <stop offset="100%" stopColor="#a78bfa" opacity="0.7"/>
+                </linearGradient>
+            </defs>
+        </svg>
     )
 }
 

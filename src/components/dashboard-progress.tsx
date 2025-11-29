@@ -2,8 +2,7 @@
 
 import { Progress } from "@/components/ui/progress";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { AnimatedNumber, NumberFlowGroup } from "./animated-number";
-import NumberFlow from "@number-flow/react";
+import { AnimatedNumber } from "./animated-number";
 
 interface DashboardProgressProps {
   purchasedItems: number;
@@ -24,9 +23,8 @@ export function DashboardProgress({
           Progreso General
         </CardTitle>
         <span className="text-xs sm:text-sm font-medium">
-          <NumberFlowGroup>
-            <AnimatedNumber value={purchasedItems} /> / <AnimatedNumber value={totalItems} />
-          </NumberFlowGroup>
+          <AnimatedNumber value={purchasedItems} /> /{" "}
+          <AnimatedNumber value={totalItems} />
         </span>
       </CardHeader>
       <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
@@ -36,11 +34,7 @@ export function DashboardProgress({
             <span>
               {totalItems > 0 ? (
                 <>
-                  <NumberFlow
-                    value={Math.round(percentage)}
-                    format={{ maximumFractionDigits: 0 }}
-                  />
-                  % completado
+                  <AnimatedNumber value={Math.round(percentage)} />% completado
                 </>
               ) : (
                 "Aún no hay productos"

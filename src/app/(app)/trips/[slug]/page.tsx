@@ -6,14 +6,15 @@ import { getTripBySlug, canUserDeleteTrip } from "@/actions/trips";
 import { getTripItems } from "@/lib/trip-items";
 import { getUserRoleInTripOrganization } from "@/actions/trip-items";
 import { formatCurrency } from "@/lib/format-currency";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getUserPreferredCurrency } from "@/actions/settings";
+import { convertCurrency } from "@/lib/currency";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
   MapPin,
   Calendar,
   ShoppingCart,
-  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import { ItemsList } from "@/components/items-list";
@@ -21,6 +22,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { EditTripDialog } from "@/components/edit-trip-dialog";
 import { DeleteTripDialog } from "@/components/delete-trip-dialog";
 import { RefreshButton } from "@/components/refresh-button";
+import { TripStatsCards } from "@/components/trip-stats-cards";
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
@@ -68,6 +70,17 @@ export default async function TripDetailPage({
     .filter((item) => item.purchased)
     .reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
   
+  // Obtener moneda preferida y convertir si es necesario
+  const preferredCurrency = await getUserPreferredCurrency();
+  let convertedTotalSpent = totalSpent;
+  if (preferredCurrency === "USD") {
+    try {
+      convertedTotalSpent = await convertCurrency(totalSpent, "UYU", "USD");
+    } catch (error) {
+      console.error("Error converting currency:", error);
+    }
+  }
+  
   // Formatear todos los precios de una vez en el servidor
   const { formatMultipleCurrencies } = await import("@/lib/format-currency");
   const itemPrices = items.map((item) => {
@@ -78,10 +91,9 @@ export default async function TripDetailPage({
   });
   const itemUnitPrices = items.map((item) => item.price ?? 0);
   
-  const [formattedPrices, formattedUnitPrices, formattedTotalSpent] = await Promise.all([
+  const [formattedPrices, formattedUnitPrices] = await Promise.all([
     formatMultipleCurrencies(itemPrices),
     formatMultipleCurrencies(itemUnitPrices),
-    formatCurrency(totalSpent),
   ]);
 
   // Agregar los precios formateados a los items
@@ -161,25 +173,12 @@ export default async function TripDetailPage({
         </div>
 
         {/* Stats */}
-        <div className="grid gap-3 grid-cols-2 sm:gap-4 mb-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-              <CardTitle className="text-xs sm:text-sm font-medium">Comprados</CardTitle>
-              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold">{purchasedItems} / {items.length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-              <CardTitle className="text-xs sm:text-sm font-medium">Total Gastado</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold">{formattedTotalSpent}</div>
-            </CardContent>
-          </Card>
-        </div>
+        <TripStatsCards
+          purchasedItems={purchasedItems}
+          totalItems={items.length}
+          totalSpent={convertedTotalSpent}
+          currency={preferredCurrency}
+        />
 
         {/* Items List */}
         <div className="space-y-4">

@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Shop Trip | Organiza tus compras de viaje",
+  title: "Shop Trip | Organiza las compras de tu viaje",
   description:
     "A simple tool to manage and organize the items you need to buy for your trip",
   manifest: "/manifest.json",

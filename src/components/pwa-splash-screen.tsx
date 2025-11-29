@@ -67,7 +67,7 @@ export function PWASplashScreen() {
                 color: ${theme === 'dark' ? '#9ca3af' : '#4b5563'};
                 margin: 0;
                 animation: fadeIn 0.7s ease-out 0.1s both;
-              ">Organiza tus compras de viaje</p>
+              ">Organiza las compras de tu viaje</p>
             </div>
             <div style="
               display: flex;

@@ -35,103 +35,79 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-4xl">
+      <div className="container mx-auto py-4 px-4 max-w-4xl sm:py-6 sm:px-6">
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Dashboard</h1>
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2">Dashboard</h1>
           <p className="text-sm sm:text-base text-muted-foreground">
             Resumen de tus viajes y compras
           </p>
         </div>
 
-        {/* Key Stats - Elegant Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-5 mb-4 sm:mb-8">
+        {/* Key Stats */}
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4 mb-8">
           {/* Total Gastado */}
-          <Card className="border border-green-200/50 dark:border-green-800/30 bg-gradient-to-br from-green-50/50 to-emerald-50/30 dark:from-green-950/20 dark:to-emerald-950/10 hover:shadow-lg transition-all duration-300">
-            <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-5">
-              <div className="flex items-center justify-between mb-1 sm:mb-2">
-                <CardTitle className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Total Gastado
-                </CardTitle>
-                <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <DollarSign className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
-                </div>
-              </div>
-              <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-green-600 dark:text-green-400">
-                {formattedTotalSpent}
-              </p>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Gastado</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formattedTotalSpent}</div>
               {stats.totalItems > 0 && (
-                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {stats.purchasedItems} artículos comprados
                 </p>
               )}
-            </CardHeader>
+            </CardContent>
           </Card>
 
           {/* Comprados */}
-          <Card className="border border-primary/20 dark:border-primary/30 bg-gradient-to-br from-primary/5 to-purple-50/30 dark:from-primary/10 dark:to-purple-950/10 hover:shadow-lg transition-all duration-300">
-            <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-5">
-              <div className="flex items-center justify-between mb-1 sm:mb-2">
-                <CardTitle className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Comprados
-                </CardTitle>
-                <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-lg bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
-                  <CheckCircle2 className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-primary" />
-                </div>
-              </div>
-              <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-primary">
-                {stats.purchasedItems}
-              </p>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium">Comprados</CardTitle>
+              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{stats.purchasedItems}</div>
               {stats.totalItems > 0 && (
-                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   de {stats.totalItems} totales
                 </p>
               )}
-            </CardHeader>
+            </CardContent>
           </Card>
 
           {/* Total Viajes */}
-          <Card className="border border-blue-200/50 dark:border-blue-800/30 bg-gradient-to-br from-blue-50/50 to-cyan-50/30 dark:from-blue-950/20 dark:to-cyan-950/10 hover:shadow-lg transition-all duration-300">
-            <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-5">
-              <div className="flex items-center justify-between mb-1 sm:mb-2">
-                <CardTitle className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Total Viajes
-                </CardTitle>
-                <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <Calendar className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-              </div>
-              <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-blue-600 dark:text-blue-400">
-                {stats.totalTrips}
-              </p>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium">Total Viajes</CardTitle>
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{stats.totalTrips}</div>
               {stats.totalTrips > 0 && (
-                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {stats.completedTrips} completados
                 </p>
               )}
-            </CardHeader>
+            </CardContent>
           </Card>
 
           {/* Viajes Activos */}
-          <Card className="border border-orange-200/50 dark:border-orange-800/30 bg-gradient-to-br from-orange-50/50 to-amber-50/30 dark:from-orange-950/20 dark:to-amber-950/10 hover:shadow-lg transition-all duration-300">
-            <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-5">
-              <div className="flex items-center justify-between mb-1 sm:mb-2">
-                <CardTitle className="text-[10px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Viajes Activos
-                </CardTitle>
-                <div className="h-7 w-7 sm:h-10 sm:w-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                  <TrendingUp className="h-3.5 w-3.5 sm:h-5 sm:w-5 text-orange-600 dark:text-orange-400" />
-                </div>
-              </div>
-              <p className="text-lg sm:text-2xl lg:text-3xl font-bold text-orange-600 dark:text-orange-400">
-                {stats.activeTrips}
-              </p>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium">Viajes Activos</CardTitle>
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{stats.activeTrips}</div>
               {stats.activeTrips > 0 && (
-                <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   En progreso
                 </p>
               )}
-            </CardHeader>
+            </CardContent>
           </Card>
         </div>
 
@@ -141,11 +117,11 @@ export default async function DashboardPage() {
           totalItems={stats.totalItems}
         />
 
-        {/* Recent Trips - Main Focus */}
+        {/* Recent Trips */}
         <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold mb-1">Viajes Recientes</h2>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-1">Viajes Recientes</h2>
               <p className="text-sm text-muted-foreground">
                 Tus viajes más recientes y actualizados
               </p>
@@ -163,20 +139,11 @@ export default async function DashboardPage() {
           </div>
 
           {recentTrips.length === 0 ? (
-            <Card className="border-2 border-dashed">
-              <CardContent className="p-6 sm:p-12 text-center">
-                <div className="flex justify-center mb-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl"></div>
-                    <div className="relative bg-primary/5 rounded-full p-4 sm:p-6">
-                      <Plane className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
-                    </div>
-                  </div>
-                </div>
-                <h3 className="text-lg sm:text-xl font-semibold mb-2">
-                  Aún no hay viajes
-                </h3>
-                <p className="text-muted-foreground text-sm mb-4 sm:mb-6 max-w-sm mx-auto px-2">
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center p-12 text-center">
+                <Plane className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Aún no hay viajes</h3>
+                <p className="text-sm text-muted-foreground mb-6 max-w-md">
                   Comienza a organizar tus listas de compras creando tu primer
                   viaje. Agrega artículos, rastrea compras y mantente organizado!
                 </p>
@@ -184,7 +151,7 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {recentTrips.map((trip) => (
                 <TripCard
                   key={trip.id}

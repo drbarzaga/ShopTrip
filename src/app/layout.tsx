@@ -66,11 +66,42 @@ export default function RootLayout({
         dangerouslySetInnerHTML={{
           __html: `
             (function() {
-              // Detectar tema preferido
+              // Detectar tema preferido (dark/light)
               const theme = localStorage.getItem('theme') || 
                 (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
               if (theme === 'dark') {
                 document.documentElement.classList.add('dark');
+              }
+              
+              // Detectar tema de color
+              const colorTheme = localStorage.getItem('color-theme') || 'slate';
+              document.documentElement.setAttribute('data-theme', colorTheme);
+              
+              // Detectar fuente
+              const fontFamily = localStorage.getItem('font-family') || 'geist';
+              document.documentElement.setAttribute('data-font', fontFamily);
+              
+              // Cargar fuente si no es geist
+              if (fontFamily !== 'geist') {
+                const fontMap = {
+                  inter: 'Inter:wght@300;400;500;600;700',
+                  roboto: 'Roboto:wght@300;400;500;700',
+                  'open-sans': 'Open+Sans:wght@300;400;500;600;700',
+                  lato: 'Lato:wght@300;400;700',
+                  montserrat: 'Montserrat:wght@300;400;500;600;700',
+                  poppins: 'Poppins:wght@300;400;500;600;700',
+                  raleway: 'Raleway:wght@300;400;500;600;700',
+                  nunito: 'Nunito:wght@300;400;500;600;700',
+                  'source-sans': 'Source+Sans+Pro:wght@300;400;600;700',
+                };
+                const fontUrl = fontMap[fontFamily];
+                if (fontUrl && !document.getElementById('font-' + fontFamily)) {
+                  const link = document.createElement('link');
+                  link.id = 'font-' + fontFamily;
+                  link.rel = 'stylesheet';
+                  link.href = 'https://fonts.googleapis.com/css2?family=' + fontUrl + '&display=swap';
+                  document.head.appendChild(link);
+                }
               }
               
               // Prevenir flash estableciendo background inmediatamente

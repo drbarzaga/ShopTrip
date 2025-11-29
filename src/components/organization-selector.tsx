@@ -136,7 +136,7 @@ export function OrganizationSelector({
         </Select>
         <CreateOrganizationDialog
           trigger={
-            <Button variant="outline" size="sm" className="h-8 shrink-0 px-3">
+            <Button variant="outline" className="h-10 shrink-0 px-3">
               <Plus className="h-4 w-4" />
             </Button>
           }

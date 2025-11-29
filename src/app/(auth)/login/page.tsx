@@ -32,23 +32,32 @@ function LoginForm() {
   }, [state, redirectTo, router]);
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-4 sm:p-6">
+    <div className="flex min-h-screen w-full items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-background via-muted/10 to-background relative overflow-hidden">
+      {/* Efectos de fondo decorativos */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
       <form
         action={formAction}
-        className="w-full max-w-sm bg-muted overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]"
+        className="relative w-full max-w-sm bg-card/70 backdrop-blur-2xl overflow-hidden rounded-3xl border-2 border-border/40 shadow-2xl shadow-black/10 dark:shadow-black/30 animate-in slide-up"
       >
+        <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-white/20 dark:from-white/5 dark:via-transparent dark:to-white/5"></div>
         {redirectTo && (
           <input type="hidden" name="redirect" value={redirectTo} />
         )}
-        <div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-6 sm:p-8 pb-6">
-          <div className="text-center">
-            <Link href="/" aria-label="go home" className="mx-auto block w-fit">
-              <LogoIcon />
+        <div className="relative bg-card/90 backdrop-blur-sm -m-px rounded-3xl border-2 border-border/30 p-8 sm:p-10 pb-8">
+          <div className="text-center animate-in slide-down">
+            <Link href="/" aria-label="go home" className="mx-auto block w-fit transition-all duration-300 hover:scale-110 hover:rotate-3">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl"></div>
+                <LogoIcon className="relative" />
+              </div>
             </Link>
-            <h1 className="mb-1 mt-4 text-xl font-semibold">
+            <h1 className="mb-3 mt-6 text-3xl font-bold bg-gradient-to-r from-foreground via-foreground/80 to-foreground/60 bg-clip-text text-transparent">
               Iniciar Sesión en {getAppName()}
             </h1>
-            <p className="text-sm">
+            <p className="text-sm text-muted-foreground/80">
               ¡Bienvenido de nuevo! Inicia sesión para continuar
             </p>
           </div>
@@ -98,7 +107,7 @@ function LoginForm() {
               <p className="text-sm text-destructive">{state.message}</p>
             )}
 
-            <Button className="w-full" type="submit" disabled={isPending}>
+            <Button className="w-full shadow-md hover:shadow-lg transition-all duration-200" type="submit" disabled={isPending}>
               {isPending ? "Iniciando sesión..." : "Iniciar Sesión"}
             </Button>
           </div>

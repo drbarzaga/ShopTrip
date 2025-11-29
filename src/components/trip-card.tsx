@@ -17,52 +17,55 @@ interface TripCardProps {
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
+  // Usar los componentes de fecha directamente para evitar problemas de zona horaria
+  const dateObj = new Date(date);
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth();
+  const day = dateObj.getDate();
+  // Crear una nueva fecha con los componentes locales para formatear
   return new Intl.DateTimeFormat("es-ES", {
     month: "short",
     day: "numeric",
     year: "numeric",
-  }).format(new Date(date));
+  }).format(new Date(year, month, day));
 }
 
 export function TripCard({ trip }: TripCardProps) {
   return (
-    <Card className="group relative overflow-hidden border border-border/50 bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-md">
-      <CardContent className="p-5">
-        <div className="flex items-start gap-4">
-          {/* Icono minimalista */}
-          <div className="relative shrink-0">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all duration-300 group-hover:bg-primary/15 group-hover:scale-105">
-              <Plane className="h-5 w-5" />
+    <Card className="group transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex items-start gap-3 sm:gap-4">
+          {/* Icono */}
+          <div className="shrink-0">
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg bg-muted transition-all duration-300 group-hover:bg-primary/10 group-hover:scale-110 group-hover:rotate-3">
+              <Plane className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground transition-all duration-300 group-hover:text-primary group-hover:-rotate-6" />
             </div>
           </div>
 
           {/* Contenido principal */}
-          <div className="flex-1 min-w-0 space-y-3">
-            {/* Header con título y acciones */}
-            <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2 sm:gap-3">
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold leading-tight text-foreground transition-colors group-hover:text-primary">
+                <h3 className="text-base sm:text-lg font-semibold leading-tight mb-2">
                   {trip.name}
                 </h3>
               </div>
-              <div className="flex items-center gap-1 shrink-0">
-                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:text-primary group-hover:translate-x-1" />
-              </div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:text-primary" />
             </div>
 
             {/* Información secundaria */}
             <div className="flex flex-col gap-2">
               {trip.destination && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5 shrink-0" />
+                  <MapPin className="h-4 w-4 shrink-0" />
                   <span className="truncate">{trip.destination}</span>
                 </div>
               )}
               {(trip.startDate || trip.endDate) && (
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                   {trip.startDate && (
                     <div className="flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5 shrink-0" />
+                      <Calendar className="h-4 w-4 shrink-0" />
                       <span>{formatDate(trip.startDate)}</span>
                     </div>
                   )}
@@ -71,7 +74,7 @@ export function TripCard({ trip }: TripCardProps) {
                   )}
                   {trip.endDate && (
                     <div className="flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5 shrink-0" />
+                      <Calendar className="h-4 w-4 shrink-0" />
                       <span>{formatDate(trip.endDate)}</span>
                     </div>
                   )}

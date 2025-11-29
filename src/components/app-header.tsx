@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-server";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeSelector } from "@/components/theme-selector";
 import { Plane } from "lucide-react";
 import Link from "next/link";
 import { OrganizationSelector } from "@/components/organization-selector";
@@ -37,22 +38,23 @@ export async function AppHeader() {
 
   return (
     <>
-      {/* Header móvil - diseño optimizado */}
-      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:hidden">
-        <div className="px-3 py-4">
+      {/* Header móvil */}
+      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden">
+        <div className="px-4 py-3">
           {/* Primera fila: Logo y menú de usuario */}
           <div className="flex items-center justify-between mb-3 gap-2">
             <Link 
               href="/dashboard" 
-              className="flex items-center gap-2.5 hover:opacity-80 transition-opacity min-w-0 flex-shrink"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1"
             >
-              <LogoIcon className="shrink-0" />
+              <LogoIcon />
               <h1 className="text-base font-semibold truncate">
                 {getAppName()}
               </h1>
             </Link>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               <NotificationsDropdown />
+              <ThemeSelector />
               <ThemeToggle />
               <UserMenu
                 userName={session.user.name}
@@ -72,16 +74,18 @@ export async function AppHeader() {
       </header>
       
       {/* Header desktop */}
-      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 hidden md:block">
-        <div className="container mx-auto px-4 py-4 max-w-7xl">
+      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 hidden md:block">
+        <div className="container mx-auto px-6 py-3.5 max-w-7xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Link 
                 href="/dashboard" 
-                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                className="flex items-center gap-2.5 hover:opacity-80 transition-all duration-200 group"
               >
-                <LogoIcon />
-                <h1 className="text-lg font-semibold truncate">
+                <div className="transition-transform duration-200 group-hover:scale-105">
+                  <LogoIcon />
+                </div>
+                <h1 className="text-lg font-semibold truncate bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
                   {getAppName()}
                 </h1>
               </Link>
@@ -92,12 +96,13 @@ export async function AppHeader() {
                 activeOrganizationId={activeOrganizationId}
               />
               <Link href="/trips">
-                <Button variant="ghost" size="sm">
-                  <Plane className="mr-2 h-4 w-4" />
-                  Mis Viajes
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Plane className="h-4 w-4" />
+                  <span>Mis Viajes</span>
                 </Button>
               </Link>
               <NotificationsDropdown />
+              <ThemeSelector />
               <ThemeToggle />
               <UserMenu
                 userName={session.user.name}

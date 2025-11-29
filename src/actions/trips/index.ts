@@ -75,8 +75,10 @@ export const createTripAction = async (
         return existing.length > 0;
       });
 
-      const startDate = data.startDate ? new Date(data.startDate) : null;
-      const endDate = data.endDate ? new Date(data.endDate) : null;
+      // Crear fechas como fechas locales para evitar problemas de zona horaria
+      // Cuando viene "YYYY-MM-DD" del input, agregamos "T00:00:00" para que se interprete como hora local
+      const startDate = data.startDate ? new Date(data.startDate + 'T00:00:00') : null;
+      const endDate = data.endDate ? new Date(data.endDate + 'T00:00:00') : null;
 
       // Obtener organización activa para asociar el viaje
       const activeOrganizationId = await getActiveOrganizationId();
@@ -265,8 +267,10 @@ export const updateTripAction = async (
         }
       }
 
-      const startDate = data.startDate ? new Date(data.startDate) : null;
-      const endDate = data.endDate ? new Date(data.endDate) : null;
+      // Crear fechas como fechas locales para evitar problemas de zona horaria
+      // Cuando viene "YYYY-MM-DD" del input, agregamos "T00:00:00" para que se interprete como hora local
+      const startDate = data.startDate ? new Date(data.startDate + 'T00:00:00') : null;
+      const endDate = data.endDate ? new Date(data.endDate + 'T00:00:00') : null;
 
       // Actualizar el viaje
       await db

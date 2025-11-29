@@ -20,36 +20,32 @@ export default async function TripsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl">
+      <div className="container mx-auto py-4 px-4 max-w-2xl sm:py-6 sm:px-6">
         {/* Breadcrumbs */}
         <Breadcrumbs items={[{ label: "Mis Viajes" }]} />
         
         {/* Header */}
         <div className="mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <h1 className="text-2xl sm:text-3xl font-bold">Mis Viajes</h1>
-            <div className="w-full sm:w-auto">
-              <CreateTripDialog />
-            </div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Mis Viajes</h1>
+            <CreateTripDialog />
           </div>
         </div>
 
         {/* Trips List */}
         {trips.length === 0 ? (
-          <Card className="border-2 border-dashed">
-            <CardContent className="p-6 sm:p-8 text-center">
-              <div className="bg-primary/10 text-primary p-3 rounded-full w-fit mx-auto mb-4">
-                <MapPin className="h-6 w-6" />
-              </div>
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center p-8 sm:p-12 text-center">
+              <MapPin className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">Aún no hay viajes</h3>
-              <p className="text-muted-foreground text-sm mb-4">
+              <p className="text-sm text-muted-foreground mb-6 max-w-sm">
                 Crea tu primer viaje para comenzar a planificar tu aventura
               </p>
               <CreateTripDialog />
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {trips.map((trip) => (
               <TripCard
                 key={trip.id}

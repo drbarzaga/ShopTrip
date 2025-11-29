@@ -108,10 +108,10 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
     const IconComponent = getItemIcon(item.name);
     return (
       <IconComponent
-        className={`h-4 w-4 transition-colors ${
+        className={`h-4 w-4 transition-all duration-300 ${
           purchased
             ? "text-green-600 dark:text-green-400"
-            : "text-muted-foreground"
+            : "text-muted-foreground group-hover:text-primary"
         }`}
       />
     );
@@ -156,37 +156,37 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
 
   return (
     <Card
-      className={`group relative overflow-hidden border transition-all duration-300 ${
+      className={`group transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${
         purchased
-          ? "border-green-200/50 bg-green-50/30 dark:border-green-800/30 dark:bg-green-950/20"
+          ? "border-green-200 dark:border-green-800"
           : isRecent
-            ? "border-blue-300/50 bg-blue-50/30 dark:border-blue-700/50 dark:bg-blue-950/20 shadow-sm"
-            : "border-border/50 bg-card hover:border-primary/30 hover:shadow-sm"
-      } ${isRecent ? "ring-2 ring-blue-400/20 dark:ring-blue-500/20" : ""}`}
+            ? "border-blue-300 dark:border-blue-700"
+            : ""
+      }`}
     >
-      <CardContent className="p-5">
-        <div className="flex items-start gap-4">
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex items-start gap-3 sm:gap-4">
           {/* Icono */}
           <div className="shrink-0">
-            <div
-              className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all ${
-                purchased
-                  ? "bg-green-100 dark:bg-green-900/30"
-                  : "bg-muted/50 group-hover:bg-primary/10"
-              }`}
-            >
-              {renderIcon()}
+            <div className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${
+              purchased
+                ? "bg-green-100 dark:bg-green-900/40 group-hover:bg-green-200 dark:group-hover:bg-green-900/60"
+                : "bg-muted group-hover:bg-primary/10"
+            }`}>
+              <div className="transition-transform duration-300 group-hover:-rotate-6">
+                {renderIcon()}
+              </div>
             </div>
           </div>
 
           {/* Contenido principal */}
-          <div className="flex-1 min-w-0 space-y-2.5">
+          <div className="flex-1 min-w-0 space-y-2">
             {/* Header con título y acciones */}
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start justify-between gap-2 sm:gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3
-                    className={`text-base font-medium leading-snug transition-all ${
+                    className={`text-sm sm:text-base font-medium leading-snug ${
                       purchased
                         ? "line-through text-muted-foreground/60"
                         : "text-foreground"

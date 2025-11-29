@@ -4,6 +4,7 @@ import { getUserPreferredCurrency } from "@/actions/settings";
 import { CurrencySelector } from "@/components/currency-selector";
 import { ProfileSection } from "@/components/profile-section";
 import { DeleteAccountSection } from "@/components/delete-account-section";
+import { AppearanceSettings } from "@/components/appearance-settings";
 import {
   Card,
   CardContent,
@@ -47,6 +48,9 @@ export default async function SettingsPage() {
             userEmail={session.user.email || null}
             userImage={session.user.image || null}
           />
+
+          {/* Appearance Settings */}
+          <AppearanceSettings />
 
           {/* Currency Preferences */}
           <Card className="border">

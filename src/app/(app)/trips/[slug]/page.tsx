@@ -12,25 +12,30 @@ import {
   ArrowLeft,
   MapPin,
   Calendar,
-  Plus,
   ShoppingCart,
   CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import { ItemsList } from "@/components/items-list";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { CreateTripItemDialog } from "@/components/create-trip-item-dialog";
 import { EditTripDialog } from "@/components/edit-trip-dialog";
 import { DeleteTripDialog } from "@/components/delete-trip-dialog";
 import { RefreshButton } from "@/components/refresh-button";
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
+  // Usar los componentes de fecha directamente para evitar problemas de zona horaria
+  const dateObj = new Date(date);
+  // Extraer año, mes y día usando métodos locales para mantener la fecha original
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth();
+  const day = dateObj.getDate();
+  // Crear una nueva fecha con los componentes locales para formatear
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-  }).format(new Date(date));
+  }).format(new Date(year, month, day));
 }
 
 export default async function TripDetailPage({
@@ -88,7 +93,7 @@ export default async function TripDetailPage({
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl">
+      <div className="container mx-auto py-4 px-4 max-w-2xl sm:py-6 sm:px-6">
         {/* Breadcrumbs */}
         <Breadcrumbs 
           items={[
@@ -98,15 +103,15 @@ export default async function TripDetailPage({
         />
         
         {/* Header */}
-        <div className="mb-4 sm:mb-6">
+        <div className="mb-6">
           <Link href="/trips">
-            <Button variant="ghost" size="sm" className="mb-3 sm:mb-4">
+            <Button variant="ghost" size="sm" className="mb-3">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver a Viajes
             </Button>
           </Link>
-          <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2">
-            <h1 className="text-xl sm:text-2xl font-bold flex-1 min-w-0 pr-2">
+          <div className="flex items-start justify-between gap-3 sm:gap-4 mb-3">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex-1 min-w-0">
               {tripData.name}
             </h1>
             <div className="flex items-center gap-2 shrink-0">
@@ -131,15 +136,15 @@ export default async function TripDetailPage({
             </div>
           </div>
           {tripData.destination && (
-            <div className="flex items-center gap-1.5 text-sm sm:text-base text-muted-foreground mb-2">
-              <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2">
+              <MapPin className="h-4 w-4 shrink-0" />
               <span className="truncate">{tripData.destination}</span>
             </div>
           )}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm text-muted-foreground">
             {tripData.startDate && (
               <div className="flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <Calendar className="h-4 w-4 shrink-0" />
                 <span>{formatDate(tripData.startDate)}</span>
               </div>
             )}
@@ -148,7 +153,7 @@ export default async function TripDetailPage({
             )}
             {tripData.endDate && (
               <div className="flex items-center gap-1.5">
-                <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <Calendar className="h-4 w-4 shrink-0" />
                 <span>{formatDate(tripData.endDate)}</span>
               </div>
             )}
@@ -156,55 +161,37 @@ export default async function TripDetailPage({
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4 sm:mb-6">
-          <Card className="border">
-            <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
-              <CardTitle className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                <CheckCircle2 className="h-3 w-3" />
-                Comprados
-              </CardTitle>
-              <p className="text-xl sm:text-2xl font-bold text-primary">
-                {purchasedItems} / {items.length}
-              </p>
+        <div className="grid gap-3 grid-cols-2 sm:gap-4 mb-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium">Comprados</CardTitle>
+              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
             </CardHeader>
+            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{purchasedItems} / {items.length}</div>
+            </CardContent>
           </Card>
-          <Card className="border">
-            <CardHeader className="pb-2 sm:pb-3 p-3 sm:p-4">
-              <CardTitle className="text-xs font-medium text-muted-foreground">
-                Total Gastado
-              </CardTitle>
-              <p className="text-xl sm:text-2xl font-bold text-green-600">
-                {formattedTotalSpent}
-              </p>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium">Total Gastado</CardTitle>
             </CardHeader>
+            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{formattedTotalSpent}</div>
+            </CardContent>
           </Card>
         </div>
 
         {/* Items List */}
-        <div className="space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 className="text-lg sm:text-xl font-bold">Artículos</h2>
-            {canEdit && items.length > 0 && <CreateTripItemDialog tripId={tripData.id} />}
-          </div>
+        <div className="space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Artículos</h2>
 
           {items.length === 0 ? (
-            <Card className="border">
-              <CardContent className="p-6 sm:p-8 text-center">
-                <ShoppingCart className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground text-sm mb-4">
-                  Aún no hay artículos
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center p-8 sm:p-12 text-center">
+                <ShoppingCart className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-4" />
+                <p className="text-sm text-muted-foreground">
+                  Aún no hay artículos. Usa el botón de abajo para agregar tu primer artículo.
                 </p>
-                {canEdit && (
-                  <CreateTripItemDialog 
-                    tripId={tripData.id}
-                    trigger={
-                      <Button size="sm">
-                        <Plus className="mr-2 h-4 w-4" />
-                        Agregar Primer Artículo
-                      </Button>
-                    }
-                  />
-                )}
               </CardContent>
             </Card>
           ) : (

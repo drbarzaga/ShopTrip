@@ -114,42 +114,23 @@ export const createTripAction = async (
             .where(eq(notificationPreferences.userId, session.user.id))
             .limit(1);
           
-          console.log("[Reminders] Checking preferences for user:", session.user.id);
-          console.log("[Reminders] Preferences found:", prefs.length > 0);
-          if (prefs.length > 0) {
-            console.log("[Reminders] reminderEnabled:", prefs[0].reminderEnabled);
-            console.log("[Reminders] reminderDaysBefore:", prefs[0].reminderDaysBefore);
-          }
-          
           if (prefs.length > 0 && prefs[0].reminderEnabled) {
             const reminderDate = new Date(startDate);
             reminderDate.setDate(reminderDate.getDate() - prefs[0].reminderDaysBefore);
             
-            console.log("[Reminders] Trip startDate:", startDate);
-            console.log("[Reminders] Calculated reminderDate:", reminderDate);
-            console.log("[Reminders] Current date:", new Date());
-            console.log("[Reminders] Is reminderDate in future?", reminderDate > new Date());
-            
             // Solo crear recordatorio si la fecha es futura
             if (reminderDate > new Date()) {
-              const result = await createReminderAction(
+              await createReminderAction(
                 tripId,
                 reminderDate,
                 `Recordatorio: Tu viaje "${data.name}" comienza en ${prefs[0].reminderDaysBefore} día(s)`
               );
-              console.log("[Reminders] Reminder creation result:", result);
-            } else {
-              console.log("[Reminders] Skipping reminder creation - date is in the past");
             }
-          } else {
-            console.log("[Reminders] Skipping reminder creation - reminders not enabled or no preferences");
           }
         } catch (error) {
           console.error("[Reminders] Error creating reminder:", error);
           // No fallar la creación del viaje si falla el recordatorio
         }
-      } else {
-        console.log("[Reminders] No startDate provided, skipping reminder creation");
       }
 
       return await success(

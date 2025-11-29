@@ -25,10 +25,6 @@ export async function createReminderAction(
       };
     }
 
-    console.log("[Reminders] Creating reminder for trip:", tripId);
-    console.log("[Reminders] Reminder date:", reminderDate);
-    console.log("[Reminders] Message:", message);
-
     // Verificar que el viaje existe y pertenece al usuario
     const tripData = await db
       .select()
@@ -37,7 +33,6 @@ export async function createReminderAction(
       .limit(1);
 
     if (tripData.length === 0) {
-      console.error("[Reminders] Trip not found:", tripId);
       return {
         success: false,
         message: "Viaje no encontrado",
@@ -45,8 +40,6 @@ export async function createReminderAction(
     }
 
     const id = crypto.randomUUID();
-    console.log("[Reminders] Inserting reminder with id:", id);
-    
     await db.insert(reminder).values({
       id,
       userId: session.user.id,
@@ -55,8 +48,6 @@ export async function createReminderAction(
       message: message || null,
       sent: false,
     });
-
-    console.log("[Reminders] Reminder created successfully:", id);
     revalidatePath("/settings");
     return {
       success: true,
@@ -88,9 +79,6 @@ export async function getPendingReminders(userId: string): Promise<
   }>
 > {
   try {
-    const now = new Date();
-    console.log(`[Reminders] Getting pending reminders for user ${userId}, current time: ${now}`);
-    
     const reminders = await db
       .select({
         id: reminder.id,
@@ -105,21 +93,13 @@ export async function getPendingReminders(userId: string): Promise<
         and(
           eq(reminder.userId, userId),
           eq(reminder.sent, false),
-          lte(reminder.reminderDate, now)
+          lte(reminder.reminderDate, new Date())
         )
       );
-
-    console.log(`[Reminders] Found ${reminders.length} pending reminders for user ${userId}`);
-    reminders.forEach(r => {
-      console.log(`[Reminders] - Reminder ${r.id}: date=${r.reminderDate}, trip="${r.tripName}"`);
-    });
 
     return reminders;
   } catch (error) {
     console.error("[Reminders] Error getting pending reminders:", error);
-    if (error instanceof Error) {
-      console.error("[Reminders] Error details:", error.message, error.stack);
-    }
     return [];
   }
 }
@@ -237,12 +217,8 @@ export async function syncTripReminders(
   tripName: string
 ): Promise<void> {
   try {
-    console.log("[Reminders] Syncing reminders for trip:", tripId);
-    console.log("[Reminders] User ID:", userId);
-    console.log("[Reminders] Start date:", startDate);
-    
     // Eliminar recordatorios no enviados existentes del viaje
-    const deleteResult = await db
+    await db
       .delete(reminder)
       .where(
         and(
@@ -251,7 +227,6 @@ export async function syncTripReminders(
           eq(reminder.sent, false)
         )
       );
-    console.log("[Reminders] Deleted existing unsent reminders");
 
     // Si hay fecha de inicio, crear nuevo recordatorio si el usuario tiene recordatorios habilitados
     if (startDate) {
@@ -262,20 +237,9 @@ export async function syncTripReminders(
         .where(eq(notificationPreferences.userId, userId))
         .limit(1);
 
-      console.log("[Reminders] Preferences found:", prefs.length > 0);
-      if (prefs.length > 0) {
-        console.log("[Reminders] reminderEnabled:", prefs[0].reminderEnabled);
-        console.log("[Reminders] reminderDaysBefore:", prefs[0].reminderDaysBefore);
-      }
-
       if (prefs.length > 0 && prefs[0].reminderEnabled) {
         const reminderDate = new Date(startDate);
         reminderDate.setDate(reminderDate.getDate() - prefs[0].reminderDaysBefore);
-
-        console.log("[Reminders] Trip startDate:", startDate);
-        console.log("[Reminders] Calculated reminderDate:", reminderDate);
-        console.log("[Reminders] Current date:", new Date());
-        console.log("[Reminders] Is reminderDate in future?", reminderDate > new Date());
 
         // Solo crear recordatorio si la fecha es futura
         if (reminderDate > new Date()) {
@@ -288,21 +252,11 @@ export async function syncTripReminders(
             message: `Recordatorio: Tu viaje "${tripName}" comienza en ${prefs[0].reminderDaysBefore} día(s)`,
             sent: false,
           });
-          console.log("[Reminders] Reminder created successfully:", id);
-        } else {
-          console.log("[Reminders] Skipping reminder creation - date is in the past");
         }
-      } else {
-        console.log("[Reminders] Skipping reminder creation - reminders not enabled or no preferences");
       }
-    } else {
-      console.log("[Reminders] No startDate provided, skipping reminder creation");
     }
   } catch (error) {
     console.error("[Reminders] Error syncing trip reminders:", error);
-    if (error instanceof Error) {
-      console.error("[Reminders] Error details:", error.message, error.stack);
-    }
     // No lanzar error para no interrumpir la actualización del viaje
   }
 }

@@ -103,6 +103,11 @@ export const createTripAction = async (
         // No fallar la creación del viaje si falla la notificación
       }
 
+      // Recordatorios temporalmente desactivados
+      // Vercel en su plan gratuito solo permite 1 cron job por día, lo cual no es suficiente
+      // para procesar recordatorios de manera efectiva (necesitarían ejecutarse cada hora o más frecuentemente)
+      // TODO: Reactivar cuando se migre a un plan que permita múltiples cron jobs o se use un servicio externo
+      /*
       // Crear recordatorio automático si el usuario tiene recordatorios habilitados y hay fecha de inicio
       if (startDate) {
         try {
@@ -132,6 +137,7 @@ export const createTripAction = async (
           // No fallar la creación del viaje si falla el recordatorio
         }
       }
+      */
 
       return await success(
         { id: tripId, slug: uniqueSlug },

@@ -8,6 +8,10 @@ import { createNotification } from "@/lib/notifications";
 /**
  * Procesa los recordatorios pendientes y envía notificaciones
  * Este endpoint debe ser llamado periódicamente (ej: cada hora) por un cron job
+ *
+ * NOTA: Temporalmente desactivado - Vercel en su plan gratuito solo permite 1 cron job por día,
+ * lo cual no es suficiente para procesar recordatorios de manera efectiva.
+ * TODO: Reactivar cuando se migre a un plan que permita múltiples cron jobs o se use un servicio externo
  */
 export async function POST(request: Request) {
   try {

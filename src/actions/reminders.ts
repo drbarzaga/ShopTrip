@@ -202,3 +202,58 @@ export async function getUserReminders(): Promise<
     return [];
   }
 }
+
+/**
+ * Sincroniza los recordatorios de un viaje
+ * Elimina recordatorios no enviados existentes y crea uno nuevo si es necesario
+ */
+export async function syncTripReminders(
+  tripId: string,
+  userId: string,
+  startDate: Date | null,
+  tripName: string
+): Promise<void> {
+  try {
+    // Eliminar recordatorios no enviados existentes del viaje
+    await db
+      .delete(reminder)
+      .where(
+        and(
+          eq(reminder.tripId, tripId),
+          eq(reminder.userId, userId),
+          eq(reminder.sent, false)
+        )
+      );
+
+    // Si hay fecha de inicio, crear nuevo recordatorio si el usuario tiene recordatorios habilitados
+    if (startDate) {
+      const { notificationPreferences } = await import("@/db/schema");
+      const prefs = await db
+        .select()
+        .from(notificationPreferences)
+        .where(eq(notificationPreferences.userId, userId))
+        .limit(1);
+
+      if (prefs.length > 0 && prefs[0].reminderEnabled) {
+        const reminderDate = new Date(startDate);
+        reminderDate.setDate(reminderDate.getDate() - prefs[0].reminderDaysBefore);
+
+        // Solo crear recordatorio si la fecha es futura
+        if (reminderDate > new Date()) {
+          const id = crypto.randomUUID();
+          await db.insert(reminder).values({
+            id,
+            userId,
+            tripId,
+            reminderDate,
+            message: `Recordatorio: Tu viaje "${tripName}" comienza en ${prefs[0].reminderDaysBefore} día(s)`,
+            sent: false,
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error("[Reminders] Error syncing trip reminders:", error);
+    // No lanzar error para no interrumpir la actualización del viaje
+  }
+}

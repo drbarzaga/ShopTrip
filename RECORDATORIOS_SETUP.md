@@ -69,16 +69,22 @@ Esto ejecutará el endpoint cada hora. Para ejecutarlo más frecuentemente (cada
 - Settings → Cron Jobs
 - Edita el cron job y agrega el header: `Authorization: Bearer ${CRON_SECRET}`
 
-#### Opción B: Usando un Servicio Externo (Cron-job.org, EasyCron, etc.)
+#### Opción B: Usando cron-job.org (Recomendado) ⭐
 
-Si no usas Vercel, puedes usar un servicio externo de cron jobs:
+**Esta es la opción recomendada** ya que es gratuita, confiable y permite múltiples ejecuciones por día.
 
-1. Crea una cuenta en [cron-job.org](https://cron-job.org) o similar
+📚 **Ver la guía completa:** [CRON_JOB_ORG_SETUP.md](./CRON_JOB_ORG_SETUP.md)
+
+Resumen rápido:
+1. Crea una cuenta gratuita en [cron-job.org](https://console.cron-job.org/jobs)
 2. Crea un nuevo cron job con:
    - **URL:** `https://tu-dominio.com/api/reminders/process`
    - **Método:** POST
    - **Headers:** `Authorization: Bearer tu-CRON_SECRET-aqui`
-   - **Frecuencia:** Cada hora (o cada 15 minutos)
+   - **Frecuencia:** Cada hora (`0 * * * *`) o cada 15 minutos (`*/15 * * * *`)
+3. Activa el cron job
+
+Para más detalles, consulta [CRON_JOB_ORG_SETUP.md](./CRON_JOB_ORG_SETUP.md)
 
 #### Opción C: Usando GitHub Actions (Para proyectos en GitHub)
 

@@ -8,35 +8,53 @@ import { createNotification } from "@/lib/notifications";
 /**
  * Procesa los recordatorios pendientes y envía notificaciones
  * Este endpoint debe ser llamado periódicamente (ej: cada hora) por un cron job
- *
- * NOTA: Temporalmente desactivado - Vercel en su plan gratuito solo permite 1 cron job por día,
- * lo cual no es suficiente para procesar recordatorios de manera efectiva.
- * TODO: Reactivar cuando se migre a un plan que permita múltiples cron jobs o se use un servicio externo
+ * 
+ * Compatible con:
+ * - cron-job.org (recomendado)
+ * - Vercel Cron Jobs
+ * - Cualquier servicio de cron que pueda enviar headers HTTP
  */
 export async function POST(request: Request) {
   try {
     // Verificar que la solicitud viene de un origen autorizado
-    // Vercel Cron Jobs puede enviar el header 'x-vercel-signature' o podemos usar Authorization
     const authHeader = request.headers.get("authorization");
     const vercelSignature = request.headers.get("x-vercel-signature");
+    const cronJobToken = request.headers.get("x-cron-job-token"); // Para cron-job.org
     const expectedToken = process.env.CRON_SECRET;
 
-    // Permitir si viene de Vercel Cron (tiene x-vercel-signature) o si tiene el token correcto
-    // Si no hay CRON_SECRET configurado, permitir solo desde Vercel Cron
+    // Permitir si viene de Vercel Cron (tiene x-vercel-signature)
     const isVercelCron = !!vercelSignature;
-    const hasValidToken =
+    
+    // Permitir si tiene el token correcto en Authorization header
+    const hasValidAuthToken =
       expectedToken && authHeader === `Bearer ${expectedToken}`;
+    
+    // Permitir si tiene el token correcto en header personalizado (cron-job.org)
+    const hasValidCronJobToken =
+      expectedToken && cronJobToken === expectedToken;
 
-    if (expectedToken && !isVercelCron && !hasValidToken) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Si no hay token configurado y no es Vercel Cron, rechazar
-    if (!expectedToken && !isVercelCron) {
-      return NextResponse.json(
-        { error: "CRON_SECRET not configured" },
-        { status: 401 }
-      );
+    // Si hay CRON_SECRET configurado, requerir autenticación
+    if (expectedToken) {
+      if (!isVercelCron && !hasValidAuthToken && !hasValidCronJobToken) {
+        return NextResponse.json(
+          { 
+            error: "Unauthorized",
+            message: "Missing or invalid CRON_SECRET token"
+          }, 
+          { status: 401 }
+        );
+      }
+    } else {
+      // Si no hay token configurado, solo permitir Vercel Cron
+      if (!isVercelCron) {
+        return NextResponse.json(
+          { 
+            error: "CRON_SECRET not configured",
+            message: "Please set CRON_SECRET environment variable"
+          },
+          { status: 401 }
+        );
+      }
     }
 
     // Obtener todos los usuarios

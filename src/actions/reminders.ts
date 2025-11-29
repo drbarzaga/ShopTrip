@@ -135,10 +135,7 @@ export async function deleteReminderAction(
       .select()
       .from(reminder)
       .where(
-        and(
-          eq(reminder.id, reminderId),
-          eq(reminder.userId, session.user.id)
-        )
+        and(eq(reminder.id, reminderId), eq(reminder.userId, session.user.id))
       )
       .limit(1);
 
@@ -154,6 +151,7 @@ export async function deleteReminderAction(
     revalidatePath("/settings");
     return {
       success: true,
+      data: undefined as never,
       message: "Recordatorio eliminado correctamente",
     };
   } catch (error) {
@@ -204,4 +202,3 @@ export async function getUserReminders(): Promise<
     return [];
   }
 }
-

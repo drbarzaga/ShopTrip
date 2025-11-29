@@ -74,28 +74,11 @@ export const Logo = ({ className, uniColor }: { className?: string; uniColor?: b
 
 export const LogoIcon = ({ className, uniColor }: { className?: string; uniColor?: boolean }) => {
     return (
-        <svg 
-            className={cn('h-6 w-6 sm:h-7 sm:w-7', className)} 
-            viewBox="0 -3 40 37" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-        >
-            {/* Fondo con color del tema */}
-            <rect x="0" y="0" width="32" height="32" rx="8" className="fill-primary"/>
-            
-            {/* Avión centrado */}
-            <g transform="translate(4, 4)">
-                <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="white" opacity="0.98"/>
-            </g>
-            
-            {/* Checkmark verde que sobresale del borde superior derecho */}
-            {/* Centro del círculo en la esquina (32, 0) */}
-            <g transform="translate(32, 0)">
-                <circle cx="0" cy="0" r="6" fill="white" opacity="0.98"/>
-                <circle cx="0" cy="0" r="5.5" fill="#22c55e" opacity="0.95"/>
-                <path d="M-2.5 0 L-0.5 2 L2.5 -2" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            </g>
-        </svg>
+        <img 
+            src="/icon.png"
+            alt="Shop Trip"
+            className={cn('h-6 w-6 sm:h-7 sm:w-7', className)}
+        />
     )
 }
 

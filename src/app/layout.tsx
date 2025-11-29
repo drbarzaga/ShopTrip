@@ -35,10 +35,12 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
       { url: "/favicon.ico", sizes: "any" },
     ],
     apple: [
       { url: "/apple-icon.svg", type: "image/svg+xml", sizes: "180x180" },
+      { url: "/apple-icon.png", type: "image/png", sizes: "180x180" },
     ],
   },
   other: {
@@ -129,59 +131,23 @@ export default function RootLayout({
                   opacity: 1;
                   transition: opacity 0.5s ease-out;
                 ">
-                  <div style="
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 1.5rem;
-                    animation: fadeIn 0.5s ease-out;
-                  ">
-                    <div style="position: relative;">
-                      <div style="
-                        position: absolute;
-                        inset: 0;
-                        background: rgba(59, 130, 246, 0.2);
-                        border-radius: 1.5rem;
-                        filter: blur(2rem);
-                        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-                      "></div>
-                      <div style="
-                        position: relative;
-                        background: linear-gradient(to bottom right, \${theme === 'dark' ? '#2563eb, #1d4ed8' : '#3b82f6, #2563eb'});
-                        border-radius: 1.5rem;
-                        padding: 1.5rem;
-                        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-                      ">
-                        <svg width="64" height="64" viewBox="0 -3 40 37" fill="none" xmlns="http://www.w3.org/2000/svg" style="
+                    <div style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 1.5rem;
+                      animation: fadeIn 0.5s ease-out;
+                    ">
+                      <img 
+                        src="/icon.png" 
+                        alt="Shop Trip" 
+                        style="
+                          width: 64px;
+                          height: 64px;
                           animation: bounce 1s infinite;
-                        ">
-                          <!-- Fondo con gradiente azul -->
-                          <rect x="0" y="0" width="32" height="32" rx="8" fill="url(#splashGradient)"/>
-                          
-                          <!-- Avión centrado -->
-                          <g transform="translate(4, 4)">
-                            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="white" opacity="0.98"/>
-                          </g>
-                          
-                          <!-- Checkmark verde que sobresale del borde superior derecho -->
-                          <!-- Centro del círculo en la esquina (32, 0) -->
-                          <g transform="translate(32, 0)">
-                            <circle cx="0" cy="0" r="6" fill="white" opacity="0.98"/>
-                            <circle cx="0" cy="0" r="5.5" fill="#22c55e" opacity="0.95"/>
-                            <path d="M-2.5 0 L-0.5 2 L2.5 -2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                          </g>
-                          
-                          <defs>
-                            <linearGradient id="splashGradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                              <stop offset="0%" stop-color="#3b82f6"/>
-                              <stop offset="50%" stop-color="#2563eb"/>
-                              <stop offset="100%" stop-color="#1d4ed8"/>
-                            </linearGradient>
-                          </defs>
-                        </svg>
-                      </div>
-                    </div>
+                        "
+                      />
                     <div style="text-align: center; display: flex; flex-direction: column; gap: 0.5rem;">
                       <h1 style="
                         font-size: 1.875rem;

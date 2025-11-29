@@ -88,6 +88,9 @@ export async function getPendingReminders(userId: string): Promise<
   }>
 > {
   try {
+    const now = new Date();
+    console.log(`[Reminders] Getting pending reminders for user ${userId}, current time: ${now}`);
+    
     const reminders = await db
       .select({
         id: reminder.id,
@@ -102,13 +105,21 @@ export async function getPendingReminders(userId: string): Promise<
         and(
           eq(reminder.userId, userId),
           eq(reminder.sent, false),
-          lte(reminder.reminderDate, new Date())
+          lte(reminder.reminderDate, now)
         )
       );
+
+    console.log(`[Reminders] Found ${reminders.length} pending reminders for user ${userId}`);
+    reminders.forEach(r => {
+      console.log(`[Reminders] - Reminder ${r.id}: date=${r.reminderDate}, trip="${r.tripName}"`);
+    });
 
     return reminders;
   } catch (error) {
     console.error("[Reminders] Error getting pending reminders:", error);
+    if (error instanceof Error) {
+      console.error("[Reminders] Error details:", error.message, error.stack);
+    }
     return [];
   }
 }

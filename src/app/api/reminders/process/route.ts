@@ -59,9 +59,12 @@ export async function POST(request: Request) {
 
     // Obtener todos los usuarios
     const users = await db.select({ id: user.id }).from(user);
+    console.log("[Reminders API] Processing reminders for", users.length, "users");
 
     let processedCount = 0;
     let sentCount = 0;
+    const now = new Date();
+    console.log("[Reminders API] Current time:", now);
 
     for (const userRecord of users) {
       // Verificar si el usuario tiene recordatorios habilitados
@@ -72,13 +75,20 @@ export async function POST(request: Request) {
         .limit(1);
 
       if (prefsData.length === 0 || !prefsData[0].reminderEnabled) {
+        console.log(`[Reminders API] User ${userRecord.id}: reminders disabled or no preferences`);
         continue;
       }
 
+      console.log(`[Reminders API] User ${userRecord.id}: reminders enabled, checking pending reminders`);
+
       // Obtener recordatorios pendientes del usuario
       const pendingReminders = await getPendingReminders(userRecord.id);
+      console.log(`[Reminders API] User ${userRecord.id}: found ${pendingReminders.length} pending reminders`);
 
       for (const reminderRecord of pendingReminders) {
+        console.log(`[Reminders API] Processing reminder ${reminderRecord.id} for trip "${reminderRecord.tripName}"`);
+        console.log(`[Reminders API] Reminder date: ${reminderRecord.reminderDate}, Current date: ${now}`);
+        
         // Enviar notificación
         await createNotification(
           "trip_created", // Usar tipo genérico para recordatorios
@@ -91,16 +101,20 @@ export async function POST(request: Request) {
 
         // Marcar como enviado
         await markReminderAsSent(reminderRecord.id);
+        console.log(`[Reminders API] Reminder ${reminderRecord.id} marked as sent`);
         sentCount++;
       }
 
       processedCount += pendingReminders.length;
     }
 
+    console.log("[Reminders API] Processing complete:", { processed: processedCount, sent: sentCount });
+
     return NextResponse.json({
       success: true,
       processed: processedCount,
       sent: sentCount,
+      timestamp: now.toISOString(),
     });
   } catch (error) {
     console.error("[Reminders API] Error:", error);

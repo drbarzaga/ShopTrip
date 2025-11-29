@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { reminder, user, notificationPreferences } from "@/db/schema";
+import { user, notificationPreferences } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getPendingReminders, markReminderAsSent } from "@/actions/reminders";
 import { createNotification } from "@/lib/notifications";
@@ -14,12 +14,9 @@ export async function POST(request: Request) {
     // Verificar que la solicitud viene de un origen autorizado
     const authHeader = request.headers.get("authorization");
     const expectedToken = process.env.CRON_SECRET;
-    
+
     if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Obtener todos los usuarios
@@ -35,7 +32,7 @@ export async function POST(request: Request) {
         .from(notificationPreferences)
         .where(eq(notificationPreferences.userId, userRecord.id))
         .limit(1);
-      
+
       if (prefsData.length === 0 || !prefsData[0].reminderEnabled) {
         continue;
       }
@@ -75,4 +72,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

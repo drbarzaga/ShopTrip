@@ -12,11 +12,27 @@ import { createNotification } from "@/lib/notifications";
 export async function POST(request: Request) {
   try {
     // Verificar que la solicitud viene de un origen autorizado
+    // Vercel Cron Jobs puede enviar el header 'x-vercel-signature' o podemos usar Authorization
     const authHeader = request.headers.get("authorization");
+    const vercelSignature = request.headers.get("x-vercel-signature");
     const expectedToken = process.env.CRON_SECRET;
 
-    if (expectedToken && authHeader !== `Bearer ${expectedToken}`) {
+    // Permitir si viene de Vercel Cron (tiene x-vercel-signature) o si tiene el token correcto
+    // Si no hay CRON_SECRET configurado, permitir solo desde Vercel Cron
+    const isVercelCron = !!vercelSignature;
+    const hasValidToken =
+      expectedToken && authHeader === `Bearer ${expectedToken}`;
+
+    if (expectedToken && !isVercelCron && !hasValidToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Si no hay token configurado y no es Vercel Cron, rechazar
+    if (!expectedToken && !isVercelCron) {
+      return NextResponse.json(
+        { error: "CRON_SECRET not configured" },
+        { status: 401 }
+      );
     }
 
     // Obtener todos los usuarios

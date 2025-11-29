@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   motion,
   useMotionValue,
@@ -51,20 +51,41 @@ export function AnimatedNumber({
   className,
   duration = 1.5,
 }: AnimatedNumberProps) {
+  const isFirstMount = useRef(true);
+  const previousValue = useRef(value);
+  const canAnimate = useRef(false);
   const motionValue = useMotionValue(0);
   const spring = useSpring(motionValue, {
     damping: 30,
     stiffness: 100,
     duration: duration * 1000,
   });
-  const [display, setDisplay] = useState("0");
+  // Inicializar display con el valor real para evitar blinking
+  const [display, setDisplay] = useState(() => 
+    Math.round(value).toLocaleString("es-ES")
+  );
 
   useEffect(() => {
-    motionValue.set(value);
+    if (isFirstMount.current) {
+      // En el primer mount, usar requestAnimationFrame para animar después del render
+      requestAnimationFrame(() => {
+        canAnimate.current = true;
+        motionValue.set(value);
+      });
+      isFirstMount.current = false;
+      previousValue.current = value;
+    } else if (previousValue.current !== value) {
+      // En actualizaciones posteriores, animar normalmente
+      motionValue.set(value);
+      previousValue.current = value;
+    }
   }, [motionValue, value]);
 
   useMotionValueEvent(spring, "change", (latest) => {
-    setDisplay(Math.round(latest).toLocaleString("es-ES"));
+    // Solo actualizar display si podemos animar (evita el parpadeo inicial)
+    if (canAnimate.current) {
+      setDisplay(Math.round(latest).toLocaleString("es-ES"));
+    }
   });
 
   return (
@@ -87,20 +108,44 @@ export function AnimatedCurrency({
   className,
   duration = 1.5,
 }: AnimatedCurrencyProps) {
+  const isFirstMount = useRef(true);
+  const previousValue = useRef(value);
+  const previousCurrency = useRef(currency);
+  const canAnimate = useRef(false);
   const motionValue = useMotionValue(0);
   const spring = useSpring(motionValue, {
     damping: 30,
     stiffness: 100,
     duration: duration * 1000,
   });
-  const [display, setDisplay] = useState(formatCurrencyClient(0, currency));
+  // Inicializar display con el valor real para evitar blinking
+  const [display, setDisplay] = useState(() => 
+    formatCurrencyClient(value, currency)
+  );
 
   useEffect(() => {
-    motionValue.set(value);
-  }, [motionValue, value]);
+    if (isFirstMount.current) {
+      // En el primer mount, usar requestAnimationFrame para animar después del render
+      requestAnimationFrame(() => {
+        canAnimate.current = true;
+        motionValue.set(value);
+      });
+      isFirstMount.current = false;
+      previousValue.current = value;
+      previousCurrency.current = currency;
+    } else if (previousValue.current !== value || previousCurrency.current !== currency) {
+      // En actualizaciones posteriores, animar normalmente
+      motionValue.set(value);
+      previousValue.current = value;
+      previousCurrency.current = currency;
+    }
+  }, [motionValue, value, currency]);
 
   useMotionValueEvent(spring, "change", (latest) => {
-    setDisplay(formatCurrencyClient(latest, currency));
+    // Solo actualizar display si podemos animar (evita el parpadeo inicial)
+    if (canAnimate.current) {
+      setDisplay(formatCurrencyClient(latest, currency));
+    }
   });
 
   return (

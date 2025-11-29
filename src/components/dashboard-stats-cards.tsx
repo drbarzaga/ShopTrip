@@ -24,7 +24,7 @@ export function DashboardStatsCards({
   return (
     <div className="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4 mb-8">
       {/* Total Gastado */}
-      <Card>
+      <Card className="cursor-default [&_*]:cursor-default [&_*]:pointer-events-none select-none">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
           <CardTitle className="text-xs sm:text-sm font-medium">
             Total Gastado
@@ -45,7 +45,7 @@ export function DashboardStatsCards({
       </Card>
 
       {/* Comprados */}
-      <Card>
+      <Card className="cursor-default [&_*]:cursor-default [&_*]:pointer-events-none select-none">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
           <CardTitle className="text-xs sm:text-sm font-medium">
             Comprados
@@ -65,7 +65,7 @@ export function DashboardStatsCards({
       </Card>
 
       {/* Total Viajes */}
-      <Card>
+      <Card className="cursor-default [&_*]:cursor-default [&_*]:pointer-events-none select-none">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
           <CardTitle className="text-xs sm:text-sm font-medium">
             Total Viajes
@@ -85,7 +85,7 @@ export function DashboardStatsCards({
       </Card>
 
       {/* Viajes Activos */}
-      <Card>
+      <Card className="cursor-default [&_*]:cursor-default [&_*]:pointer-events-none select-none">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
           <CardTitle className="text-xs sm:text-sm font-medium">
             Viajes Activos

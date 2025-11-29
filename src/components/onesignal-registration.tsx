@@ -19,6 +19,23 @@ export function OneSignalRegistration() {
       return;
     }
 
+    // Verificar que estamos en el dominio correcto o en localhost para desarrollo
+    const hostname = window.location.hostname;
+    const isProduction = hostname === "shoptrip.app" || hostname === "www.shoptrip.app";
+    const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1" || hostname.startsWith("192.168.") || hostname.endsWith(".local");
+    
+    // Variable de entorno para habilitar OneSignal en desarrollo (opcional)
+    const enableInDev = process.env.NEXT_PUBLIC_ONESIGNAL_ENABLE_DEV === "true";
+
+    // Solo inicializar OneSignal en producción o en localhost si está habilitado explícitamente
+    if (!isProduction && (!isLocalhost || !enableInDev)) {
+      console.log(
+        `[OneSignal] Skipping initialization on ${hostname}. OneSignal only works on shoptrip.app. ` +
+        `To enable in development, set NEXT_PUBLIC_ONESIGNAL_ENABLE_DEV=true in .env`
+      );
+      return;
+    }
+
     const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
     const safariWebId = process.env.NEXT_PUBLIC_ONESIGNAL_SAFARI_WEB_ID;
 
@@ -40,7 +57,7 @@ export function OneSignalRegistration() {
           notifyButton: {
             enable: true,
           },
-          allowLocalhostAsSecureOrigin: true,
+          allowLocalhostAsSecureOrigin: isLocalhost,
           serviceWorkerParam: {
             scope: "/",
           },

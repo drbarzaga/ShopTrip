@@ -1,7 +1,7 @@
 "use client";
 
 import { Progress } from "@/components/ui/progress";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface DashboardProgressProps {
   purchasedItems: number;
@@ -17,15 +17,15 @@ export function DashboardProgress({
 
   return (
     <Card className="mb-6 sm:mb-8">
-      <CardHeader className="p-4 sm:p-6">
-        <div className="flex items-center justify-between mb-4">
-          <CardTitle className="text-sm font-medium">
-            Progreso General
-          </CardTitle>
-          <span className="text-sm font-medium">
-            {purchasedItems} / {totalItems}
-          </span>
-        </div>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+        <CardTitle className="text-xs sm:text-sm font-medium">
+          Progreso General
+        </CardTitle>
+        <span className="text-xs sm:text-sm font-medium">
+          {purchasedItems} / {totalItems}
+        </span>
+      </CardHeader>
+      <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
         <div className="space-y-2">
           <Progress value={percentage} />
           <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -39,7 +39,7 @@ export function DashboardProgress({
             )}
           </div>
         </div>
-      </CardHeader>
+      </CardContent>
     </Card>
   );
 }

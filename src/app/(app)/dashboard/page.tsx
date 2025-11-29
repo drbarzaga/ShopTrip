@@ -48,12 +48,12 @@ export default async function DashboardPage() {
         <div className="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4 mb-8">
           {/* Total Gastado */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Gastado</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium">Total Gastado</CardTitle>
+              <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formattedTotalSpent}</div>
+            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold">{formattedTotalSpent}</div>
               {stats.totalItems > 0 && (
                 <p className="text-xs text-muted-foreground mt-1">
                   {stats.purchasedItems} artículos comprados
@@ -66,7 +66,7 @@ export default async function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
               <CardTitle className="text-xs sm:text-sm font-medium">Comprados</CardTitle>
-              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="text-xl sm:text-2xl font-bold">{stats.purchasedItems}</div>
@@ -82,7 +82,7 @@ export default async function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
               <CardTitle className="text-xs sm:text-sm font-medium">Total Viajes</CardTitle>
-              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="text-xl sm:text-2xl font-bold">{stats.totalTrips}</div>
@@ -98,7 +98,7 @@ export default async function DashboardPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
               <CardTitle className="text-xs sm:text-sm font-medium">Viajes Activos</CardTitle>
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
             </CardHeader>
             <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
               <div className="text-xl sm:text-2xl font-bold">{stats.activeTrips}</div>
@@ -140,10 +140,10 @@ export default async function DashboardPage() {
 
           {recentTrips.length === 0 ? (
             <Card>
-              <CardContent className="flex flex-col items-center justify-center p-12 text-center">
-                <Plane className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Aún no hay viajes</h3>
-                <p className="text-sm text-muted-foreground mb-6 max-w-md">
+              <CardContent className="flex flex-col items-center justify-center p-8 sm:p-12 text-center">
+                <Plane className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold mb-2">Aún no hay viajes</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground mb-6 max-w-md">
                   Comienza a organizar tus listas de compras creando tu primer
                   viaje. Agrega artículos, rastrea compras y mantente organizado!
                 </p>

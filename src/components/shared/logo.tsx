@@ -2,10 +2,49 @@
 
 import { cn } from '@/lib/utils'
 import { useId } from 'react'
+import { useEffect, useState } from 'react'
 
 export const Logo = ({ className, uniColor }: { className?: string; uniColor?: boolean }) => {
     const id = useId()
     const gradientId = `gradient-${id.replace(/:/g, '')}`
+    const [primaryColor, setPrimaryColor] = useState('#3b82f6')
+    
+    useEffect(() => {
+        const updateColor = () => {
+            const root = document.documentElement
+            const computedStyle = getComputedStyle(root)
+            const primary = computedStyle.getPropertyValue('--primary').trim()
+            
+            // Convertir oklch a hex si es necesario, o usar directamente
+            // Por ahora, usaremos un enfoque más simple: leer el color primario
+            // y crear variaciones para el gradiente
+            if (primary) {
+                // Intentar convertir oklch a rgb/hex
+                try {
+                    // Si es oklch, necesitamos convertirlo
+                    if (primary.startsWith('oklch')) {
+                        // Usar el color directamente con CSS custom properties
+                        setPrimaryColor(`hsl(var(--primary))`)
+                    } else {
+                        setPrimaryColor(primary)
+                    }
+                } catch {
+                    setPrimaryColor(`hsl(var(--primary))`)
+                }
+            }
+        }
+        
+        updateColor()
+        
+        // Observar cambios en el tema
+        const observer = new MutationObserver(updateColor)
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme', 'class']
+        })
+        
+        return () => observer.disconnect()
+    }, [])
     
     return (
         <svg 
@@ -14,8 +53,8 @@ export const Logo = ({ className, uniColor }: { className?: string; uniColor?: b
             fill="none" 
             xmlns="http://www.w3.org/2000/svg"
         >
-            {/* Fondo con gradiente azul */}
-            <rect x="0" y="0" width="32" height="32" rx="8" fill={`url(#${gradientId})`}/>
+            {/* Fondo con gradiente del tema */}
+            <rect x="0" y="0" width="32" height="32" rx="8" className="fill-primary"/>
             
             {/* Avión centrado */}
             <g transform="translate(4, 4)">
@@ -29,22 +68,11 @@ export const Logo = ({ className, uniColor }: { className?: string; uniColor?: b
                 <circle cx="0" cy="0" r="5.5" fill="#22c55e" opacity="0.95"/>
                 <path d="M-2.5 0 L-0.5 2 L2.5 -2" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
             </g>
-            
-            <defs>
-                <linearGradient id={gradientId} x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#3b82f6"/>
-                    <stop offset="50%" stopColor="#2563eb"/>
-                    <stop offset="100%" stopColor="#1d4ed8"/>
-                </linearGradient>
-            </defs>
         </svg>
     )
 }
 
 export const LogoIcon = ({ className, uniColor }: { className?: string; uniColor?: boolean }) => {
-    const id = useId()
-    const gradientId = `gradientIcon-${id.replace(/:/g, '')}`
-    
     return (
         <svg 
             className={cn('h-6 w-6 sm:h-7 sm:w-7', className)} 
@@ -52,8 +80,8 @@ export const LogoIcon = ({ className, uniColor }: { className?: string; uniColor
             fill="none" 
             xmlns="http://www.w3.org/2000/svg"
         >
-            {/* Fondo con gradiente azul */}
-            <rect x="0" y="0" width="32" height="32" rx="8" fill={`url(#${gradientId})`}/>
+            {/* Fondo con color del tema */}
+            <rect x="0" y="0" width="32" height="32" rx="8" className="fill-primary"/>
             
             {/* Avión centrado */}
             <g transform="translate(4, 4)">
@@ -67,14 +95,6 @@ export const LogoIcon = ({ className, uniColor }: { className?: string; uniColor
                 <circle cx="0" cy="0" r="5.5" fill="#22c55e" opacity="0.95"/>
                 <path d="M-2.5 0 L-0.5 2 L2.5 -2" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
             </g>
-            
-            <defs>
-                <linearGradient id={gradientId} x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#3b82f6"/>
-                    <stop offset="50%" stopColor="#2563eb"/>
-                    <stop offset="100%" stopColor="#1d4ed8"/>
-                </linearGradient>
-            </defs>
         </svg>
     )
 }

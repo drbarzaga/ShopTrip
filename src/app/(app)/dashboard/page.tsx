@@ -2,19 +2,15 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-server";
 import { getDashboardStats } from "@/lib/dashboard-stats";
 import { getRecentTrips } from "@/lib/trips";
-import { formatCurrency } from "@/lib/format-currency";
+import { getUserPreferredCurrency } from "@/actions/settings";
+import { convertCurrency } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DashboardProgress } from "@/components/dashboard-progress";
+import { DashboardStatsCards } from "@/components/dashboard-stats-cards";
 import {
-  DollarSign,
-  CheckCircle2,
   ArrowRight,
-  Calendar,
-  MapPin,
-  TrendingUp,
   Plane,
-  Sparkles,
 } from "lucide-react";
 import { DashboardTripDialog } from "@/components/dashboard-trip-dialog";
 import { TripCard } from "@/components/trip-card";
@@ -31,7 +27,18 @@ export default async function DashboardPage() {
 
   const stats = await getDashboardStats(session.user.id);
   const recentTrips = await getRecentTrips(session.user.id, 5);
-  const formattedTotalSpent = await formatCurrency(stats.totalSpent);
+  const preferredCurrency = await getUserPreferredCurrency();
+  
+  // Convertir totalSpent si es necesario
+  let convertedTotalSpent = stats.totalSpent;
+  if (preferredCurrency === "USD") {
+    try {
+      convertedTotalSpent = await convertCurrency(stats.totalSpent, "UYU", "USD");
+    } catch (error) {
+      console.error("Error converting currency:", error);
+      // Si falla la conversión, usar el valor original
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -45,71 +52,13 @@ export default async function DashboardPage() {
         </div>
 
         {/* Key Stats */}
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          {/* Total Gastado */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-              <CardTitle className="text-xs sm:text-sm font-medium">Total Gastado</CardTitle>
-              <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-            </CardHeader>
-            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold">{formattedTotalSpent}</div>
-              {stats.totalItems > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.purchasedItems} artículos comprados
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Comprados */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-              <CardTitle className="text-xs sm:text-sm font-medium">Comprados</CardTitle>
-              <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-            </CardHeader>
-            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold">{stats.purchasedItems}</div>
-              {stats.totalItems > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  de {stats.totalItems} totales
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Total Viajes */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-              <CardTitle className="text-xs sm:text-sm font-medium">Total Viajes</CardTitle>
-              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-            </CardHeader>
-            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold">{stats.totalTrips}</div>
-              {stats.totalTrips > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.completedTrips} completados
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Viajes Activos */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-              <CardTitle className="text-xs sm:text-sm font-medium">Viajes Activos</CardTitle>
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
-            </CardHeader>
-            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold">{stats.activeTrips}</div>
-              {stats.activeTrips > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  En progreso
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        <DashboardStatsCards 
+          stats={{
+            ...stats,
+            totalSpent: convertedTotalSpent,
+          }}
+          currency={preferredCurrency}
+        />
 
         {/* Progress Bar */}
         <DashboardProgress

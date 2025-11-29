@@ -283,9 +283,9 @@ export function NotificationSettings({
           </div>
         </div>
 
-        {/* Recordatorios - Temporalmente oculto
         <Separator className="my-6" />
 
+        {/* Recordatorios */}
         <div className="space-y-3">
           <div className="flex items-center gap-2.5 mb-1">
             <div className="p-1.5 rounded-md bg-orange-500/10 dark:bg-orange-500/20">
@@ -293,40 +293,69 @@ export function NotificationSettings({
             </div>
             <h4 className="text-sm font-semibold text-foreground">Recordatorios</h4>
           </div>
-          <div className="ml-7">
-            <div className="p-4 rounded-lg border border-muted/50 bg-muted/30 dark:bg-muted/20">
-              <div className="flex items-start gap-4">
-                <div className="p-2 rounded-md bg-muted/50 text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="mb-2">
-                    <Label className="text-sm font-medium text-muted-foreground block">
-                      Recordatorios de viajes
-                    </Label>
-                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                      Temporalmente desactivado. Los recordatorios requieren procesamiento frecuente 
-                      que no está disponible en el plan actual de Vercel (solo permite 1 cron job por día).
-                    </p>
+          <div className="space-y-3 ml-7">
+            <NotificationItem
+              id="reminderEnabled"
+              label="Recordatorios de viajes"
+              description="Recibe notificaciones antes de que comience un viaje"
+              checked={preferences.reminderEnabled}
+              onCheckedChange={(checked) => handleToggle("reminderEnabled", checked)}
+              disabled={isPending}
+              icon={<Clock className="h-4 w-4" />}
+            />
+            
+            {preferences.reminderEnabled && (
+              <div className="ml-4 p-4 rounded-lg border border-border/50 bg-muted/30 dark:bg-muted/20">
+                <Label className="text-sm font-medium text-foreground block mb-3">
+                  Días antes del viaje
+                </Label>
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => {
+                      if (preferences.reminderDaysBefore > 1) {
+                        handleDaysChange(preferences.reminderDaysBefore - 1);
+                      }
+                    }}
+                    disabled={isPending || preferences.reminderDaysBefore <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <div className="flex-1 text-center">
+                    <span className="text-lg font-semibold text-foreground">
+                      {preferences.reminderDaysBefore}
+                    </span>
+                    <span className="text-sm text-muted-foreground ml-2">
+                      {preferences.reminderDaysBefore === 1 ? "día" : "días"}
+                    </span>
                   </div>
-                  <div className="mt-3 p-3 rounded-md bg-background/50 border border-border/50">
-                    <p className="text-xs text-muted-foreground">
-                      <strong className="text-foreground">Nota:</strong> Esta funcionalidad estará disponible 
-                      cuando se migre a un plan que permita múltiples cron jobs o se implemente un servicio externo.
-                    </p>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => {
+                      if (preferences.reminderDaysBefore < 7) {
+                        handleDaysChange(preferences.reminderDaysBefore + 1);
+                      }
+                    }}
+                    disabled={isPending || preferences.reminderDaysBefore >= 7}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
-                <Switch
-                  id="reminderEnabled"
-                  checked={false}
-                  disabled={true}
-                  className="shrink-0 mt-1"
-                />
+                <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                  Recibirás un recordatorio {preferences.reminderDaysBefore === 1 
+                    ? "1 día antes" 
+                    : `${preferences.reminderDaysBefore} días antes`} de que comience tu viaje.
+                  </p>
               </div>
-            </div>
+            )}
           </div>
         </div>
-        */}
 
         {/* Botón Guardar */}
         {hasChanges && (

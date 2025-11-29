@@ -11,11 +11,13 @@ Esta guía te ayudará a configurar recordatorios automáticos usando [cron-job.
 ## 🔧 Paso 1: Configurar Variable de Entorno
 
 1. Genera un secreto seguro:
+
    ```bash
    openssl rand -base64 32
    ```
 
 2. Agrega la variable `CRON_SECRET` a tu archivo `.env`:
+
    ```env
    CRON_SECRET=tu-secreto-generado-aqui
    ```
@@ -36,31 +38,38 @@ Esta guía te ayudará a configurar recordatorios automáticos usando [cron-job.
 2. Completa el formulario con los siguientes valores:
 
    **Título:**
+
    ```
    Shop Trip - Procesar Recordatorios
    ```
 
    **URL:**
+
    ```
    https://tu-dominio.com/api/reminders/process
    ```
+
    > Reemplaza `tu-dominio.com` con tu dominio real (ej: `shoptrip.app`)
 
    **Método HTTP:**
+
    ```
    POST
    ```
 
    **Headers (Headers personalizados):**
    Agrega estos headers:
+
    ```
    Authorization: Bearer TU_CRON_SECRET_AQUI
    Content-Type: application/json
    ```
+
    > Reemplaza `TU_CRON_SECRET_AQUI` con el valor de `CRON_SECRET` que configuraste
 
    **Alternativa usando header personalizado:**
    Si prefieres usar un header personalizado, también puedes usar:
+
    ```
    X-Cron-Job-Token: TU_CRON_SECRET_AQUI
    ```
@@ -95,6 +104,7 @@ curl -X POST https://tu-dominio.com/api/reminders/process \
 ```
 
 Deberías recibir una respuesta como:
+
 ```json
 {
   "success": true,
@@ -123,6 +133,7 @@ Deberías recibir una respuesta como:
 ### Ver Logs de Ejecución
 
 En cron-job.org puedes ver:
+
 - Historial de ejecuciones
 - Códigos de respuesta HTTP
 - Tiempo de ejecución
@@ -131,6 +142,7 @@ En cron-job.org puedes ver:
 ### Ver Logs de la Aplicación
 
 Revisa los logs de tu aplicación para ver:
+
 - Cuántos recordatorios se procesaron
 - Cuántos se enviaron exitosamente
 - Cualquier error que ocurra
@@ -160,6 +172,7 @@ Revisa los logs de tu aplicación para ver:
 ### El cron job se ejecuta pero no procesa nada
 
 Esto es normal si:
+
 - No hay usuarios con recordatorios habilitados
 - No hay recordatorios pendientes
 - Todos los recordatorios ya fueron enviados
@@ -194,4 +207,3 @@ Si necesitas cambiar la frecuencia, aquí tienes algunos ejemplos:
 - [Documentación de cron-job.org](https://cron-job.org/en/help/)
 - [Formato de cron](https://crontab.guru/)
 - [Documentación de recordatorios](./RECORDATORIOS_SETUP.md)
-

@@ -77,8 +77,12 @@ export const createTripAction = async (
 
       // Crear fechas como fechas locales para evitar problemas de zona horaria
       // Cuando viene "YYYY-MM-DD" del input, agregamos "T00:00:00" para que se interprete como hora local
-      const startDate = data.startDate ? new Date(data.startDate + 'T00:00:00') : null;
-      const endDate = data.endDate ? new Date(data.endDate + 'T00:00:00') : null;
+      const startDate = data.startDate
+        ? new Date(data.startDate + "T00:00:00")
+        : null;
+      const endDate = data.endDate
+        ? new Date(data.endDate + "T00:00:00")
+        : null;
 
       // Obtener organización activa para asociar el viaje
       const activeOrganizationId = await getActiveOrganizationId();
@@ -97,7 +101,11 @@ export const createTripAction = async (
       // Enviar notificación en tiempo real
       try {
         const { notifyTripCreated } = await import("@/lib/notifications");
-        await notifyTripCreated(tripId, data.name, session.user.name || "Usuario");
+        await notifyTripCreated(
+          tripId,
+          data.name,
+          session.user.name || "Usuario"
+        );
       } catch (error) {
         console.error("Error sending trip creation notification:", error);
         // No fallar la creación del viaje si falla la notificación
@@ -113,11 +121,13 @@ export const createTripAction = async (
             .from(notificationPreferences)
             .where(eq(notificationPreferences.userId, session.user.id))
             .limit(1);
-          
+
           if (prefs.length > 0 && prefs[0].reminderEnabled) {
             const reminderDate = new Date(startDate);
-            reminderDate.setDate(reminderDate.getDate() - prefs[0].reminderDaysBefore);
-            
+            reminderDate.setDate(
+              reminderDate.getDate() - prefs[0].reminderDaysBefore
+            );
+
             // Solo crear recordatorio si la fecha es futura
             if (reminderDate > new Date()) {
               await createReminderAction(
@@ -260,7 +270,7 @@ export const updateTripAction = async (
   return withValidation(formData, createTripSchema, async (data) => {
     try {
       const tripId = formData.get("tripId") as string;
-      
+
       if (!tripId) {
         return await failure("El ID del viaje es requerido");
       }
@@ -293,14 +303,20 @@ export const updateTripAction = async (
           tripId
         );
         if (userRole !== "owner" && userRole !== "admin") {
-          return await failure("Solo los propietarios y administradores pueden editar viajes");
+          return await failure(
+            "Solo los propietarios y administradores pueden editar viajes"
+          );
         }
       }
 
       // Crear fechas como fechas locales para evitar problemas de zona horaria
       // Cuando viene "YYYY-MM-DD" del input, agregamos "T00:00:00" para que se interprete como hora local
-      const startDate = data.startDate ? new Date(data.startDate + 'T00:00:00') : null;
-      const endDate = data.endDate ? new Date(data.endDate + 'T00:00:00') : null;
+      const startDate = data.startDate
+        ? new Date(data.startDate + "T00:00:00")
+        : null;
+      const endDate = data.endDate
+        ? new Date(data.endDate + "T00:00:00")
+        : null;
 
       // Actualizar el viaje
       await db
@@ -336,12 +352,7 @@ export const updateTripAction = async (
       // Sincronizar recordatorios si cambió la fecha de inicio
       try {
         const { syncTripReminders } = await import("@/actions/reminders");
-        await syncTripReminders(
-          tripId,
-          session.user.id,
-          startDate,
-          data.name
-        );
+        await syncTripReminders(tripId, session.user.id, startDate, data.name);
       } catch (error) {
         console.error("Error syncing trip reminders:", error);
         // No fallar la acción si falla la sincronización de recordatorios
@@ -401,7 +412,9 @@ export async function deleteTripAction(
         tripId
       );
       if (userRole !== "owner") {
-        return await failure("Solo el propietario de la organización puede eliminar viajes");
+        return await failure(
+          "Solo el propietario de la organización puede eliminar viajes"
+        );
       }
     }
 

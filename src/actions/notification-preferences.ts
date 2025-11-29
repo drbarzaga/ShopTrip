@@ -25,7 +25,20 @@ export async function getNotificationPreferences(): Promise<NotificationPreferen
   try {
     const session = await getSession();
     if (!session) {
-      return null;
+      // Retornar valores por defecto si no hay sesión
+      return {
+        tripCreated: true,
+        tripUpdated: true,
+        tripDeleted: true,
+        itemCreated: true,
+        itemUpdated: true,
+        itemDeleted: true,
+        itemPurchased: true,
+        invitationReceived: true,
+        invitationAccepted: true,
+        reminderEnabled: false,
+        reminderDaysBefore: 1,
+      };
     }
 
     try {
@@ -60,7 +73,10 @@ export async function getNotificationPreferences(): Promise<NotificationPreferen
           });
         } catch (insertError) {
           // Si falla la inserción (tabla no existe), retornar valores por defecto
-          console.warn("[Notification Preferences] Could not create default preferences, table may not exist:", insertError);
+          console.warn(
+            "[Notification Preferences] Could not create default preferences, table may not exist:",
+            insertError
+          );
           return defaultPrefs;
         }
 
@@ -81,10 +97,16 @@ export async function getNotificationPreferences(): Promise<NotificationPreferen
         reminderEnabled: pref.reminderEnabled,
         reminderDaysBefore: pref.reminderDaysBefore,
       };
-    } catch (dbError: any) {
+    } catch (dbError: unknown) {
       // Si la tabla no existe, retornar valores por defecto
-      if (dbError?.code === "42P01" || dbError?.message?.includes("does not exist")) {
-        console.warn("[Notification Preferences] Table does not exist, returning defaults");
+      const error = dbError as { code?: string; message?: string };
+      if (
+        error?.code === "42P01" ||
+        error?.message?.includes("does not exist")
+      ) {
+        console.warn(
+          "[Notification Preferences] Table does not exist, returning defaults"
+        );
         return {
           tripCreated: true,
           tripUpdated: true,
@@ -165,6 +187,7 @@ export async function updateNotificationPreferencesAction(
     revalidatePath("/settings");
     return {
       success: true,
+      data: undefined as never,
       message: "Preferencias actualizadas correctamente",
     };
   } catch (error) {
@@ -175,4 +198,3 @@ export async function updateNotificationPreferencesAction(
     };
   }
 }
-

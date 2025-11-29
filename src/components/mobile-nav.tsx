@@ -1,13 +1,12 @@
 "use client";
 
-import { Plus, List, Bell } from "lucide-react";
+import { Plus, List, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CreateTripDialog } from "@/components/create-trip-dialog";
 import { CreateTripItemDialog } from "@/components/create-trip-item-dialog";
 import Link from "next/link";
 import { usePathname, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useNotifications } from "@/hooks/use-notifications";
 import { cn } from "@/lib/utils";
 
 export default function MobileNav() {
@@ -15,7 +14,6 @@ export default function MobileNav() {
   const params = useParams();
   const [tripId, setTripId] = useState<string | null>(null);
   const [isLoadingTripId, setIsLoadingTripId] = useState(false);
-  const { unreadCount } = useNotifications();
 
   // Detectar si estamos en una página de productos de un viaje
   const isTripDetailPage = pathname?.startsWith("/trips/") && pathname !== "/trips" && params?.slug;
@@ -94,24 +92,17 @@ export default function MobileNav() {
             <span className="text-xs font-medium">Viajes</span>
           </Button>
         </Link>
-        <Link href="/notifications" className="contents">
+        <Link href="/dashboard" className="contents">
           <Button
             variant="ghost"
             className={cn(
               "h-full rounded-none flex-col gap-1 hover:bg-accent touch-manipulation relative",
-              pathname === "/notifications" && "bg-accent text-accent-foreground"
+              pathname === "/dashboard" && "bg-accent text-accent-foreground"
             )}
-            aria-label="Notificaciones"
+            aria-label="Dashboard"
           >
-            <div className="relative">
-              <Bell className="h-5 w-5" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1 shadow-lg ring-2 ring-background">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </div>
-            <span className="text-xs font-medium">Notificaciones</span>
+            <LayoutDashboard className="h-5 w-5" />
+            <span className="text-xs font-medium">Dashboard</span>
           </Button>
         </Link>
       </div>

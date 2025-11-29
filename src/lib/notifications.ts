@@ -8,9 +8,13 @@ import { getActiveOrganizationId } from "@/lib/auth-server";
 export type NotificationType =
   | "trip_created"
   | "trip_updated"
+  | "trip_deleted"
   | "item_created"
   | "item_updated"
-  | "item_purchased";
+  | "item_deleted"
+  | "item_purchased"
+  | "invitation_received"
+  | "invitation_accepted";
 
 /**
  * Obtiene los usuarios que deberían recibir notificaciones para un viaje
@@ -53,6 +57,51 @@ export async function getUsersToNotifyForTrip(tripId: string): Promise<string[]>
 }
 
 /**
+ * Verifica si un usuario quiere recibir un tipo específico de notificación
+ */
+async function shouldSendNotification(
+  userId: string,
+  type: NotificationType
+): Promise<boolean> {
+  try {
+    const { notificationPreferences } = await import("@/db/schema");
+    const { eq } = await import("drizzle-orm");
+    
+    const prefs = await db
+      .select()
+      .from(notificationPreferences)
+      .where(eq(notificationPreferences.userId, userId))
+      .limit(1);
+
+    if (prefs.length === 0) {
+      // Por defecto, enviar todas las notificaciones
+      return true;
+    }
+
+    const pref = prefs[0];
+    
+    // Mapear tipos de notificación a preferencias
+    const preferenceMap: Record<NotificationType, boolean> = {
+      trip_created: pref.tripCreated,
+      trip_updated: pref.tripUpdated,
+      trip_deleted: pref.tripDeleted,
+      item_created: pref.itemCreated,
+      item_updated: pref.itemUpdated,
+      item_deleted: pref.itemDeleted,
+      item_purchased: pref.itemPurchased,
+      invitation_received: pref.invitationReceived,
+      invitation_accepted: pref.invitationAccepted,
+    };
+
+    return preferenceMap[type] ?? true;
+  } catch (error) {
+    console.error("[Notifications] Error checking preferences:", error);
+    // En caso de error, enviar la notificación por defecto
+    return true;
+  }
+}
+
+/**
  * Envía notificación usando OneSignal y la guarda en la base de datos
  */
 export async function createNotification(
@@ -64,6 +113,20 @@ export async function createNotification(
   itemId?: string
 ): Promise<void> {
   try {
+    // Filtrar usuarios según sus preferencias
+    const usersToNotify: string[] = [];
+    for (const userId of userIds) {
+      const shouldSend = await shouldSendNotification(userId, type);
+      if (shouldSend) {
+        usersToNotify.push(userId);
+      }
+    }
+
+    if (usersToNotify.length === 0) {
+      console.log(`[Notifications] No users want to receive ${type} notifications`);
+      return;
+    }
+
     const { sendOneSignalNotification } = await import("@/lib/onesignal-push");
     
     // Obtener el slug del viaje si hay tripId
@@ -88,7 +151,7 @@ export async function createNotification(
     }
     
     // Enviar notificación push usando OneSignal
-    const result = await sendOneSignalNotification(userIds, {
+    const result = await sendOneSignalNotification(usersToNotify, {
       title,
       body: message,
       data: {
@@ -107,7 +170,7 @@ export async function createNotification(
     
     // Guardar notificaciones en la base de datos para cada usuario
     try {
-      const notificationPromises = userIds.map((userId) => {
+      const notificationPromises = usersToNotify.map((userId) => {
         const notificationId = crypto.randomUUID();
         return db.insert(notification).values({
           id: notificationId,
@@ -122,7 +185,7 @@ export async function createNotification(
       });
       
       await Promise.all(notificationPromises);
-      console.log(`[Notifications] Saved ${userIds.length} notifications to database`);
+      console.log(`[Notifications] Saved ${usersToNotify.length} notifications to database`);
     } catch (dbError) {
       console.error("[Notifications] Error saving notifications to database:", dbError);
       // No fallar si falla guardar en BD, la notificación push ya se envió

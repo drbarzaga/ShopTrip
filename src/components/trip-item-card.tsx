@@ -111,7 +111,7 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
         className={`h-4 w-4 transition-all duration-300 ${
           purchased
             ? "text-green-600 dark:text-green-400"
-            : "text-muted-foreground group-hover:text-primary"
+            : "text-muted-foreground group-hover:text-primary group-active:text-primary"
         }`}
       />
     );
@@ -156,7 +156,7 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
 
   return (
     <Card
-      className={`group transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${
+      className={`group transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:shadow-md active:-translate-y-0.5 active:scale-[0.98] ${
         purchased
           ? "border-green-200 dark:border-green-800"
           : isRecent
@@ -168,12 +168,12 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Icono */}
           <div className="shrink-0">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${
+            <div className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-active:scale-110 group-active:rotate-3 ${
               purchased
-                ? "bg-green-100 dark:bg-green-900/40 group-hover:bg-green-200 dark:group-hover:bg-green-900/60"
-                : "bg-muted group-hover:bg-primary/10"
+                ? "bg-green-100 dark:bg-green-900/40 group-hover:bg-green-200 dark:group-hover:bg-green-900/60 group-active:bg-green-200 dark:group-active:bg-green-900/60"
+                : "bg-muted group-hover:bg-primary/10 group-active:bg-primary/10"
             }`}>
-              <div className="transition-transform duration-300 group-hover:-rotate-6">
+              <div className="transition-transform duration-300 group-hover:-rotate-6 group-active:-rotate-6">
                 {renderIcon()}
               </div>
             </div>

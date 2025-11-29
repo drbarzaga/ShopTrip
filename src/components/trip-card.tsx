@@ -32,13 +32,13 @@ function formatDate(date: Date | null): string {
 
 export function TripCard({ trip }: TripCardProps) {
   return (
-    <Card className="group transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+    <Card className="group transition-all duration-300 hover:shadow-md hover:-translate-y-1 active:shadow-md active:-translate-y-0.5 active:scale-[0.98]">
       <CardContent className="p-4 sm:p-6">
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Icono */}
           <div className="shrink-0">
-            <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg bg-muted transition-all duration-300 group-hover:bg-primary/10 group-hover:scale-110 group-hover:rotate-3">
-              <Plane className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground transition-all duration-300 group-hover:text-primary group-hover:-rotate-6" />
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg bg-muted transition-all duration-300 group-hover:bg-primary/10 group-hover:scale-110 group-hover:rotate-3 group-active:bg-primary/10 group-active:scale-110 group-active:rotate-3">
+              <Plane className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground transition-all duration-300 group-hover:text-primary group-hover:-rotate-6 group-active:text-primary group-active:-rotate-6" />
             </div>
           </div>
 
@@ -50,7 +50,7 @@ export function TripCard({ trip }: TripCardProps) {
                   {trip.name}
                 </h3>
               </div>
-              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:text-primary" />
+              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:text-primary group-active:translate-x-1 group-active:text-primary" />
             </div>
 
             {/* Información secundaria */}

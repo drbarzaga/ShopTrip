@@ -256,9 +256,70 @@ export const notification = pgTable(
 
 // -------------------------------- End of Notifications Table --------------------------------
 
+// -------------------------------- Notification Preferences Table --------------------------------
+
+export const notificationPreferences = pgTable(
+  "notification_preferences",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" })
+      .unique(),
+    tripCreated: boolean("trip_created").default(true).notNull(),
+    tripUpdated: boolean("trip_updated").default(true).notNull(),
+    tripDeleted: boolean("trip_deleted").default(true).notNull(),
+    itemCreated: boolean("item_created").default(true).notNull(),
+    itemUpdated: boolean("item_updated").default(true).notNull(),
+    itemDeleted: boolean("item_deleted").default(true).notNull(),
+    itemPurchased: boolean("item_purchased").default(true).notNull(),
+    invitationReceived: boolean("invitation_received").default(true).notNull(),
+    invitationAccepted: boolean("invitation_accepted").default(true).notNull(),
+    reminderEnabled: boolean("reminder_enabled").default(false).notNull(),
+    reminderDaysBefore: integer("reminder_days_before").default(1).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("notification_preferences_userId_idx").on(table.userId),
+  ]
+);
+
+// -------------------------------- End of Notification Preferences Table --------------------------------
+
+// -------------------------------- Reminders Table --------------------------------
+
+export const reminder = pgTable(
+  "reminder",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    tripId: text("trip_id")
+      .notNull()
+      .references(() => trip.id, { onDelete: "cascade" }),
+    reminderDate: timestamp("reminder_date").notNull(),
+    message: text("message"),
+    sent: boolean("sent").default(false).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("reminder_userId_idx").on(table.userId),
+    index("reminder_tripId_idx").on(table.tripId),
+    index("reminder_reminderDate_idx").on(table.reminderDate),
+    index("reminder_sent_idx").on(table.sent),
+  ]
+);
+
+// -------------------------------- End of Reminders Table --------------------------------
+
 // -------------------------------- Relations ---------------------------------------------------
 
-export const userRelations = relations(user, ({ many }) => ({
+export const userRelations = relations(user, ({ many, one }) => ({
   sessions: many(session),
   accounts: many(account),
   trips: many(trip),
@@ -266,6 +327,8 @@ export const userRelations = relations(user, ({ many }) => ({
   invitations: many(invitation),
   addedItems: many(tripItem, { relationName: "addedBy" }),
   purchasedItems: many(tripItem, { relationName: "purchasedBy" }),
+  notificationPreferences: one(notificationPreferences),
+  reminders: many(reminder),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -292,6 +355,7 @@ export const tripRelations = relations(trip, ({ one, many }) => ({
     references: [organization.id],
   }),
   items: many(tripItem),
+  reminders: many(reminder),
 }));
 
 export const tripItemRelations = relations(tripItem, ({ one }) => ({

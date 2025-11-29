@@ -103,6 +103,36 @@ export const createTripAction = async (
         // No fallar la creación del viaje si falla la notificación
       }
 
+      // Crear recordatorio automático si el usuario tiene recordatorios habilitados y hay fecha de inicio
+      if (startDate) {
+        try {
+          const { notificationPreferences } = await import("@/db/schema");
+          const { createReminderAction } = await import("@/actions/reminders");
+          const prefs = await db
+            .select()
+            .from(notificationPreferences)
+            .where(eq(notificationPreferences.userId, session.user.id))
+            .limit(1);
+          
+          if (prefs.length > 0 && prefs[0].reminderEnabled) {
+            const reminderDate = new Date(startDate);
+            reminderDate.setDate(reminderDate.getDate() - prefs[0].reminderDaysBefore);
+            
+            // Solo crear recordatorio si la fecha es futura
+            if (reminderDate > new Date()) {
+              await createReminderAction(
+                tripId,
+                reminderDate,
+                `Recordatorio: Tu viaje "${data.name}" comienza en ${prefs[0].reminderDaysBefore} día(s)`
+              );
+            }
+          }
+        } catch (error) {
+          console.error("Error creating reminder:", error);
+          // No fallar la creación del viaje si falla el recordatorio
+        }
+      }
+
       return await success(
         { id: tripId, slug: uniqueSlug },
         "¡Viaje creado exitosamente!"

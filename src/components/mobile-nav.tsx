@@ -50,6 +50,19 @@ export default function MobileNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden safe-area-inset-bottom">
       <div className="grid grid-cols-3 h-16">
+        <Link href="/dashboard" className="contents">
+          <Button
+            variant="ghost"
+            className={cn(
+              "h-full rounded-none flex-col gap-1 hover:bg-accent touch-manipulation relative",
+              pathname === "/dashboard" && "bg-accent text-accent-foreground"
+            )}
+            aria-label="Dashboard"
+          >
+            <LayoutDashboard className="h-5 w-5" />
+            <span className="text-xs font-medium">Dashboard</span>
+          </Button>
+        </Link>
         {isTripDetailPage && tripId ? (
           <CreateTripItemDialog
             tripId={tripId}
@@ -90,19 +103,6 @@ export default function MobileNav() {
           >
             <List className="h-5 w-5" />
             <span className="text-xs font-medium">Viajes</span>
-          </Button>
-        </Link>
-        <Link href="/dashboard" className="contents">
-          <Button
-            variant="ghost"
-            className={cn(
-              "h-full rounded-none flex-col gap-1 hover:bg-accent touch-manipulation relative",
-              pathname === "/dashboard" && "bg-accent text-accent-foreground"
-            )}
-            aria-label="Dashboard"
-          >
-            <LayoutDashboard className="h-5 w-5" />
-            <span className="text-xs font-medium">Dashboard</span>
           </Button>
         </Link>
       </div>

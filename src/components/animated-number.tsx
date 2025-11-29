@@ -8,7 +8,37 @@ import {
   useMotionValueEvent,
 } from "framer-motion";
 import type { Currency } from "@/lib/currency";
-import { formatCurrency } from "@/lib/currency";
+
+// Función helper para formatear moneda en el cliente (sin depender de Groq)
+function formatCurrencyClient(
+  amount: number,
+  currency: Currency = "UYU"
+): string {
+  const getCurrencySymbol = (curr: Currency): string => {
+    switch (curr) {
+      case "UYU":
+        return "$ UYU";
+      case "USD":
+        return "US$";
+      default:
+        return "$";
+    }
+  };
+
+  const symbol = getCurrencySymbol(currency);
+
+  if (currency === "UYU") {
+    return `${symbol}${amount.toLocaleString("es-UY", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    })}`;
+  }
+
+  return `${symbol}${amount.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
+}
 
 interface AnimatedNumberProps {
   readonly value: number;
@@ -63,14 +93,14 @@ export function AnimatedCurrency({
     stiffness: 100,
     duration: duration * 1000,
   });
-  const [display, setDisplay] = useState(formatCurrency(0, currency));
+  const [display, setDisplay] = useState(formatCurrencyClient(0, currency));
 
   useEffect(() => {
     motionValue.set(value);
   }, [motionValue, value]);
 
   useMotionValueEvent(spring, "change", (latest) => {
-    setDisplay(formatCurrency(latest, currency));
+    setDisplay(formatCurrencyClient(latest, currency));
   });
 
   return (

@@ -1,8 +1,8 @@
 "use server";
 
 import type { ActionState, ActionResult } from "@/types/actions";
-import type { SignInInput, SignUpInput } from "@/schemas/auth";
-import { signInSchema, signUpSchema } from "@/schemas/auth";
+import type { SignInInput, SignUpInput, ForgotPasswordInput, ResetPasswordInput } from "@/schemas/auth";
+import { signInSchema, signUpSchema, forgotPasswordSchema, resetPasswordSchema } from "@/schemas/auth";
 import { withValidation, success, failure } from "@/lib/actions/helpers";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -51,6 +51,61 @@ export const signUpAction = async (
       const message =
         (error as Error).message || "Ocurrió un error durante el registro";
       return await failure(message, undefined, { name, email });
+    }
+  });
+};
+
+export const forgotPasswordAction = async (
+  prevState: ActionResult<void> | null,
+  formData: FormData
+): Promise<ActionResult<void>> => {
+  return withValidation(formData, forgotPasswordSchema, async ({ email }) => {
+    try {
+      const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`;
+      
+      await auth.api.requestPasswordReset({
+        body: {
+          email,
+          redirectTo: resetUrl,
+        },
+      });
+
+      // Always return success to prevent email enumeration
+      return await success(
+        undefined as never,
+        "Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña."
+      );
+    } catch (error) {
+      // Always return success to prevent email enumeration
+      return await success(
+        undefined as never,
+        "Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña."
+      );
+    }
+  });
+};
+
+export const resetPasswordAction = async (
+  prevState: ActionResult<void> | null,
+  formData: FormData
+): Promise<ActionResult<void>> => {
+  return withValidation(formData, resetPasswordSchema, async ({ password, token }) => {
+    try {
+      await auth.api.resetPassword({
+        body: {
+          newPassword: password,
+          token,
+        },
+      });
+
+      return await success(
+        undefined as never,
+        "¡Contraseña restablecida exitosamente! Ya puedes iniciar sesión."
+      );
+    } catch (error) {
+      const message =
+        (error as Error).message || "El token es inválido o ha expirado. Por favor, solicita un nuevo enlace.";
+      return await failure(message);
     }
   });
 };

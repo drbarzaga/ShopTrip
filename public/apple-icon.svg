@@ -1,33 +1,25 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Fondo con gradiente azul-púrpura -->
-  <rect width="180" height="180" rx="40" fill="url(#gradient)"/>
+<svg width="180" height="180" viewBox="0 -12 204 204" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo con gradiente azul -->
+  <rect x="0" y="0" width="180" height="180" rx="40" fill="url(#planeGradientApple)"/>
   
-  <!-- Maleta/Valija estilizada con checkmark -->
-  <g transform="translate(22, 28)">
-    <!-- Sombra sutil -->
-    <rect x="34" y="45" width="102" height="102" rx="14" fill="black" opacity="0.1"/>
-    <!-- Cuerpo principal de la maleta -->
-    <rect x="28" y="40" width="102" height="102" rx="14" fill="white" opacity="0.98"/>
-    <!-- Tapa superior -->
-    <rect x="28" y="40" width="102" height="28" rx="14" fill="white" opacity="0.9"/>
-    <!-- Detalle de la tapa -->
-    <line x1="40" y1="50" x2="118" y2="50" stroke="url(#innerGradient)" stroke-width="6" opacity="0.3"/>
-    <!-- Interior con gradiente suave -->
-    <rect x="40" y="50" width="78" height="78" rx="8" fill="url(#innerGradient)"/>
-    <!-- Checkmark elegante y visible -->
-    <path d="M56 95l22 22 44-44" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.95"/>
+  <!-- Avión centrado -->
+  <g transform="translate(23, 23)">
+    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="white" opacity="0.98" transform="scale(3)"/>
+  </g>
+  
+  <!-- Checkmark verde que sobresale del borde superior derecho -->
+  <!-- Centro del círculo en la esquina (180, 0) -->
+  <g transform="translate(180, 0)">
+    <circle cx="0" cy="0" r="34" fill="white" opacity="0.98"/>
+    <circle cx="0" cy="0" r="31" fill="#22c55e" opacity="0.95"/>
+    <path d="M-14 0 L-6 8 L14 -14" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
   </g>
   
   <defs>
-    <linearGradient id="gradient" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+    <linearGradient id="planeGradientApple" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#3b82f6"/>
-      <stop offset="50%" stop-color="#6366f1"/>
-      <stop offset="100%" stop-color="#8b5cf6"/>
-    </linearGradient>
-    <linearGradient id="innerGradient" x1="40" y1="50" x2="118" y2="128" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#60a5fa" opacity="0.7"/>
-      <stop offset="100%" stop-color="#a78bfa" opacity="0.7"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
     </linearGradient>
   </defs>
 </svg>
-

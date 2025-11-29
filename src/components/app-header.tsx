@@ -23,7 +23,7 @@ export async function AppHeader() {
 
   // Obtener organizaciones del usuario y organización activa
   const organizations = await getUserOrganizations(session.user.id);
-  
+
   // Obtener organización activa de la sesión
   let activeOrganizationId: string | null = null;
   try {
@@ -43,11 +43,11 @@ export async function AppHeader() {
         <div className="px-4 py-3">
           {/* Primera fila: Logo y menú de usuario */}
           <div className="flex items-center justify-between mb-3 gap-2">
-            <Link 
-              href="/dashboard" 
+            <Link
+              href="/dashboard"
               className="flex items-center gap-2 hover:opacity-80 transition-opacity min-w-0 flex-1"
             >
-              <LogoIcon />
+              <LogoIcon className="h-9 w-9" />
               <h1 className="text-base font-semibold truncate">
                 {getAppName()}
               </h1>
@@ -72,18 +72,18 @@ export async function AppHeader() {
           </div>
         </div>
       </header>
-      
+
       {/* Header desktop */}
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 hidden md:block">
         <div className="container mx-auto px-6 py-3.5 max-w-7xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Link 
-                href="/dashboard" 
+              <Link
+                href="/dashboard"
                 className="flex items-center gap-2.5 hover:opacity-80 transition-all duration-200 group"
               >
                 <div className="transition-transform duration-200 group-hover:scale-105">
-                  <LogoIcon />
+                  <LogoIcon className="h-8 w-8 sm:h-10 sm:w-10" />
                 </div>
                 <h1 className="text-lg font-semibold truncate bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
                   {getAppName()}
@@ -116,4 +116,3 @@ export async function AppHeader() {
     </>
   );
 }
-

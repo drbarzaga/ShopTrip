@@ -57,14 +57,6 @@ function RegisterForm() {
               <Label htmlFor="pwd" className="text-sm">
                 Contraseña
               </Label>
-              <Button asChild variant="link" size="sm">
-                <Link
-                  href="#"
-                  className="link intent-info variant-ghost text-sm"
-                >
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </Button>
             </div>
             <Input
               type="password"

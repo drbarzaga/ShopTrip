@@ -3,15 +3,94 @@
 import { LogoIcon } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import { Mail, Lock } from "lucide-react";
+
 import { getAppName } from "@/lib/utils";
 import GoogleButton from "@/components/shared/google-button";
+import { startTransition, useActionState, useEffect } from "react";
+import { actions } from "@/actions";
+import { ActionResult } from "@/types/actions";
+import { SignInInput, signInSchema } from "@/schemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+const INITIAL_STATE: ActionResult<{ email: string; password: string }> = {
+  success: false,
+  message: "",
+  fieldErrors: {},
+  formData: {},
+};
 
 function LoginForm() {
+  const router = useRouter();
+  const [formState, formAction, isPending] = useActionState(
+    actions.auth.signInAction,
+    INITIAL_STATE
+  );
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors: clientErrors },
+    setError,
+    clearErrors,
+  } = useForm<SignInInput>({
+    resolver: zodResolver(signInSchema),
+    mode: "onBlur",
+    defaultValues: {
+      email: formState.data?.email ?? "",
+      password: "",
+    },
+  });
+
+  function onSubmit(data: SignInInput) {
+    const formData = new FormData();
+    formData.append("email", data.email);
+    formData.append("password", data.password);
+    startTransition(() => {
+      formAction(formData);
+    });
+  }
+
+  useEffect(() => {
+    if (formState.success) {
+      clearErrors();
+      return;
+    }
+
+    const fieldErrors = formState.fieldErrors;
+    if (fieldErrors) {
+      Object.entries(fieldErrors).forEach(([field, messages]) => {
+        if (messages?.[0]) {
+          setError(field as keyof SignInInput, {
+            type: "server",
+            message: messages[0].toString(),
+          });
+        }
+      });
+    } else {
+      clearErrors();
+    }
+  }, [formState.success, formState, setError, clearErrors]);
+
+  useEffect(() => {
+    if (formState.message) {
+      toast[formState.success ? "success" : "error"](formState.message);
+    }
+
+    if (formState.success) {
+      router.push("/dashboard");
+    }
+  }, [formState, router]);
+
   return (
     <form
-      action=""
+      noValidate
+      onSubmit={handleSubmit(onSubmit)}
       className="bg-muted m-auto h-fit w-full max-w-sm overflow-hidden rounded-[calc(var(--radius)+.125rem)] border shadow-md shadow-zinc-950/5 dark:[--color-muted:var(--color-zinc-900)]"
     >
       <div className="bg-card -m-px rounded-[calc(var(--radius)+.125rem)] border p-8 pb-6">
@@ -36,33 +115,59 @@ function LoginForm() {
 
         <div className="mt-6 space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email" className="block text-sm">
-              Correo Electrónico
-            </Label>
-            <Input type="email" required name="email" id="email" />
+            <Field>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="email"
+                  required
+                  id="email"
+                  disabled={isPending}
+                  {...register("email")}
+                  aria-invalid={!!clientErrors.email}
+                  className="pl-10"
+                />
+              </div>
+              <FieldError>
+                {clientErrors.email?.message ||
+                  (!formState.success &&
+                    formState.fieldErrors?.email?.[0]?.toString())}
+              </FieldError>
+            </Field>
           </div>
 
           <div className="space-y-0.5">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="pwd" className="text-sm">
-                Contraseña
-              </Label>
-              <Button asChild variant="link" size="sm">
-                <Link
-                  href="/forgot-password"
-                  className="link intent-info variant-ghost text-sm"
-                >
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </Button>
-            </div>
-            <Input
-              type="password"
-              required
-              name="pwd"
-              id="pwd"
-              className="input sz-md variant-mixed"
-            />
+            <Field>
+              <div className="flex items-center justify-between">
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <Button asChild variant="link" size="sm">
+                  <Link
+                    href="/forgot-password"
+                    className="link intent-info variant-ghost text-sm"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                </Button>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="password"
+                  required
+                  id="password"
+                  disabled={isPending}
+                  {...register("password")}
+                  aria-invalid={!!clientErrors.password}
+                  className="pl-10"
+                />
+              </div>
+              <FieldError>
+                {clientErrors.password?.message ||
+                  (!formState.success &&
+                    formState.fieldErrors?.password?.[0]?.toString())}
+              </FieldError>
+            </Field>
           </div>
 
           <Button className="w-full">Iniciar sesión</Button>

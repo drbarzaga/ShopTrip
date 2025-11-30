@@ -32,8 +32,8 @@ function formatDate(date: Date | null): string {
 
 export function TripCard({ trip }: TripCardProps) {
   return (
-    <Card className="group transition-all duration-300 hover:shadow-md hover:-translate-y-1 active:shadow-md active:-translate-y-0.5 active:scale-[0.98]">
-      <CardContent className="p-4 sm:p-6">
+    <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 active:shadow-md active:-translate-y-0.5 active:scale-[0.98]">
+      <CardContent className="relative p-4 sm:p-6">
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Icono */}
           <div className="shrink-0">
@@ -87,7 +87,7 @@ export function TripCard({ trip }: TripCardProps) {
         {/* Link para navegación */}
         <Link
           href={`/trips/${trip.slug}`}
-          className="absolute inset-0 z-0"
+          className="absolute inset-0 z-10"
           aria-label={`Ver detalles de ${trip.name}`}
         />
       </CardContent>

@@ -1,36 +1,177 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ShopTrip 🛫
 
-## Getting Started
+**ShopTrip** es una aplicación web moderna diseñada para ayudarte a organizar las compras de tus viajes. Crea listas de artículos, rastrea tus gastos y mantén todo organizado antes y durante tus viajes.
 
-First, run the development server:
+![ShopTrip Logo](screenshots/dashboard-final.png)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Características Principales
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- 🔐 **Autenticación Completa**: Registro, inicio de sesión, recuperación y restablecimiento de contraseña
+- 📝 **Gestión de Viajes**: Crea y organiza tus viajes con fechas, destinos y detalles
+- 🛍️ **Listas de Compras**: Agrega artículos a tus viajes con descripciones, precios y cantidades
+- 📊 **Dashboard Intuitivo**: Visualiza estadísticas de tus viajes y gastos
+- 🎨 **Interfaz Moderna**: Diseño limpio y responsive con soporte para temas claro/oscuro
+- 🔔 **Notificaciones**: Sistema de notificaciones para mantenerte al día
+- 👥 **Organizaciones**: Colabora con otros usuarios en viajes compartidos
+- 🤖 **IA Integrada**: Crea viajes y artículos usando inteligencia artificial
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Tecnologías Utilizadas
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Frontend**: Next.js 16, React, TypeScript
+- **Estilos**: Tailwind CSS, shadcn/ui
+- **Autenticación**: Better Auth
+- **Base de Datos**: PostgreSQL con Drizzle ORM
+- **Email**: Resend con React Email
+- **Notificaciones**: Sonner (toasts)
+- **Iconos**: Lucide React
 
-## Learn More
+## 📸 Capturas de Pantalla
 
-To learn more about Next.js, take a look at the following resources:
+### Autenticación
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Página de Login
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+![Login Page](screenshots/login-page.png)
+Inicia sesión en tu cuenta de ShopTrip con tu correo electrónico y contraseña.
 
-## Deploy on Vercel
+#### Registro Exitoso
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+![Register Success](screenshots/register-success.png)
+Después de registrarte, recibirás un correo de confirmación para activar tu cuenta.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+#### Recuperación de Contraseña
+
+![Forgot Password](screenshots/forgot-password-page.png)
+Solicita un enlace para restablecer tu contraseña si la olvidaste.
+
+![Forgot Password Success](screenshots/forgot-password-success.png)
+Confirma que el enlace de recuperación ha sido enviado a tu correo.
+
+### Dashboard
+
+#### Dashboard Vacío
+
+![Dashboard Empty](screenshots/dashboard-empty.png)
+Vista inicial del dashboard cuando aún no has creado ningún viaje.
+
+#### Dashboard con Viaje
+
+![Dashboard with Trip](screenshots/dashboard-with-trip.png)
+Dashboard mostrando un viaje creado con estadísticas y progreso.
+
+#### Dashboard Completo
+
+![Dashboard Final](screenshots/dashboard-final.png)
+Vista completa del dashboard con viajes, estadísticas y progreso general.
+
+### Gestión de Viajes
+
+#### Página de Detalles del Viaje
+
+![Trip Detail Page](screenshots/trip-detail-page.png)
+Vista detallada de un viaje con información completa y opciones de edición.
+
+#### Viaje con Artículos
+
+![Trip Detail with Items](screenshots/trip-detail-with-items.png)
+Lista de artículos agregados al viaje con detalles de precios y cantidades.
+
+## 🛠️ Instalación y Configuración
+
+### Prerrequisitos
+
+- Node.js 22.15.0 o superior
+- npm, yarn, pnpm o bun
+- PostgreSQL (o una base de datos compatible)
+
+### Pasos de Instalación
+
+1. **Clona el repositorio**
+
+   ```bash
+   git clone https://github.com/tu-usuario/shop-trip.git
+   cd shop-trip
+   ```
+
+2. **Instala las dependencias**
+
+   ```bash
+   npm install
+   # o
+   yarn install
+   # o
+   pnpm install
+   ```
+
+3. **Configura las variables de entorno**
+
+   Copia el archivo `.env.example` en la raíz del proyecto y renómbralo a `.env`.
+
+4. **Configura la base de datos**
+
+   ```bash
+   npm run db:push
+   ```
+
+5. **Inicia el servidor de desarrollo**
+
+   ```bash
+   npm run dev
+   ```
+
+6. **Abre tu navegador**
+
+   Visita [http://localhost:3000](http://localhost:3000) para ver la aplicación.
+
+## 📦 Scripts Disponibles
+
+- `npm run dev` - Inicia el servidor de desarrollo
+- `npm run build` - Construye la aplicación para producción
+- `npm run start` - Inicia el servidor de producción
+- `npm run db:push` - Sincroniza el esquema de la base de datos
+- `npm run db:studio` - Abre Drizzle Studio para gestionar la base de datos
+
+## 🌐 Despliegue
+
+### Vercel (Recomendado)
+
+La forma más fácil de desplegar ShopTrip es usando [Vercel](https://vercel.com):
+
+1. Conecta tu repositorio de GitHub a Vercel
+2. Configura las variables de entorno en el panel de Vercel
+3. Vercel detectará automáticamente Next.js y desplegará tu aplicación
+
+### Otros Proveedores
+
+ShopTrip puede desplegarse en cualquier plataforma que soporte Next.js:
+
+- Netlify
+- Railway
+- Render
+- AWS Amplify
+- DigitalOcean App Platform
+
+## 🤝 Contribuir
+
+Las contribuciones son bienvenidas! Por favor:
+
+1. Haz fork del proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📝 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+
+## 👨‍💻 Autor
+
+**Dayan Perez Barzaga**
+
+- Email: dayan.perez9012+1@gmail.com
+- GitHub: [@drbarzaga](https://github.com/drbarzaga)
+
+---
+
+Hecho con ❤️ usando Next.js y TypeScript

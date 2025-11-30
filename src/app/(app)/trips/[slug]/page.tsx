@@ -1,7 +1,73 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-server";
+import type { Metadata } from "next";
 
 export const dynamic = 'force-dynamic';
+
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const session = await getSession();
+  
+  if (!session) {
+    return {
+      title: "Shop Trip",
+    };
+  }
+
+  try {
+    const tripData = await getTripBySlug(slug, session.user.id);
+    
+    if (!tripData) {
+      return {
+        title: "Shop Trip",
+      };
+    }
+
+    const title = `${tripData.name} | Shop Trip`;
+    const description = tripData.destination
+      ? `Viaje a ${tripData.destination} - Organiza tus compras con Shop Trip`
+      : `Organiza las compras para tu viaje ${tripData.name}`;
+
+    const ogImageUrl = `/api/og?title=${encodeURIComponent(tripData.name)}&description=${encodeURIComponent(description)}`;
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        url: `${baseUrl}/trips/${slug}`,
+        siteName: "Shop Trip",
+        images: [
+          {
+            url: ogImageUrl,
+            width: 1200,
+            height: 630,
+            alt: tripData.name,
+          },
+        ],
+        type: "website",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: [ogImageUrl],
+      },
+    };
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return {
+      title: "Shop Trip",
+    };
+  }
+}
 import { getTripBySlug, canUserDeleteTrip } from "@/actions/trips";
 import { getTripItems } from "@/lib/trip-items";
 import { getUserRoleInTripOrganization } from "@/actions/trip-items";

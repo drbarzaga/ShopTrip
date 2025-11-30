@@ -16,11 +16,40 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
   title: "Shop Trip | Organiza las compras de tu viaje",
   description:
-    "A simple tool to manage and organize the items you need to buy for your trip",
+    "Organiza las compras de tus viajes de forma inteligente. Crea listas, rastrea gastos y mantén todo organizado antes y durante tus viajes.",
   manifest: "/manifest.json",
+  metadataBase: new URL(baseUrl),
+  openGraph: {
+    title: "Shop Trip | Organiza las compras de tu viaje",
+    description:
+      "Organiza las compras de tus viajes de forma inteligente. Crea listas, rastrea gastos y mantén todo organizado antes y durante tus viajes.",
+    url: baseUrl,
+    siteName: "Shop Trip",
+    images: [
+      {
+        url: "/api/og?title=Shop Trip&description=Organiza las compras de tus viajes de forma inteligente",
+        width: 1200,
+        height: 630,
+        alt: "Shop Trip - Organiza las compras de tu viaje",
+      },
+    ],
+    locale: "es_ES",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Shop Trip | Organiza las compras de tu viaje",
+    description:
+      "Organiza las compras de tus viajes de forma inteligente. Crea listas, rastrea gastos y mantén todo organizado antes y durante tus viajes.",
+    images: [
+      "/api/og?title=Shop Trip&description=Organiza las compras de tus viajes de forma inteligente",
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

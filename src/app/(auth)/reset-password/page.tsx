@@ -3,42 +3,99 @@
 import { LogoIcon } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { getAppName } from "@/lib/utils";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useFormState } from "react-dom";
-import { resetPasswordAction } from "@/actions/auth";
-import { useEffect, Suspense, useState } from "react";
-import type { ActionResult } from "@/types/actions";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Lock, CheckCircle2, Eye, EyeOff } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useState,
+  Suspense,
+} from "react";
+import { ActionResult } from "@/types/actions";
+import { ResetPasswordInput, resetPasswordSchema } from "@/schemas";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "@/lib/toast";
+import { resetPasswordAction } from "@/actions/auth";
 
-function ResetPasswordForm() {
-  const router = useRouter();
+const INITIAL_STATE: ActionResult<void> = {
+  success: false,
+  message: "",
+  fieldErrors: {},
+  formData: {},
+};
+
+function ResetPasswordFormContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const error = searchParams.get("error");
-  const [state, formAction] = useFormState<ActionResult<void> | null, FormData>(
+
+  const [formState, formAction, isPending] = useActionState(
     resetPasswordAction,
-    null
+    INITIAL_STATE
   );
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const isPending = false;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors: clientErrors },
+    setError,
+    clearErrors,
+    watch,
+  } = useForm<ResetPasswordInput>({
+    resolver: zodResolver(resetPasswordSchema),
+    mode: "onBlur",
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+      token: token || "",
+    },
+  });
+
+  function onSubmit(data: ResetPasswordInput) {
+    const formData = new FormData();
+    formData.append("password", data.password);
+    formData.append("confirmPassword", data.confirmPassword);
+    formData.append("token", data.token);
+    startTransition(() => {
+      formAction(formData);
+    });
+  }
 
   useEffect(() => {
-    if (state?.success) {
-      // Redirect to login after successful reset
-      const timer = setTimeout(() => {
-        router.push("/login");
-      }, 3000);
-      return () => clearTimeout(timer);
+    if (formState.success) {
+      clearErrors();
+      return;
     }
-  }, [state, router]);
 
-  // If no token or error in URL, show error
+    const fieldErrors = formState.fieldErrors;
+    if (fieldErrors) {
+      Object.entries(fieldErrors).forEach(([field, messages]) => {
+        if (messages?.[0]) {
+          setError(field as keyof ResetPasswordInput, {
+            type: "server",
+            message: messages[0].toString(),
+          });
+        }
+      });
+    } else {
+      clearErrors();
+    }
+  }, [formState.success, formState, setError, clearErrors]);
+
+  useEffect(() => {
+    if (formState.message && !formState.success) {
+      toast.error(formState.message);
+    }
+  }, [formState]);
+
+  // Si no hay token o hay error en la URL, mostrar error
   if (!token || error === "INVALID_TOKEN") {
     return (
       <div className="flex min-h-screen w-full items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-background via-muted/10 to-background relative overflow-hidden">
@@ -69,7 +126,8 @@ function ResetPasswordForm() {
     );
   }
 
-  if (state?.success) {
+  // Mostrar pantalla de confirmación si el restablecimiento fue exitoso
+  if (formState.success) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-background via-muted/10 to-background relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -90,11 +148,11 @@ function ResetPasswordForm() {
                 ¡Contraseña Restablecida!
               </h1>
               <p className="text-sm text-muted-foreground/80 mb-6">
-                {state.message ||
+                {formState.message ||
                   "Tu contraseña ha sido restablecida exitosamente."}
               </p>
               <p className="text-xs text-muted-foreground mb-6">
-                Serás redirigido al inicio de sesión en unos segundos...
+                Ya puedes iniciar sesión con tu nueva contraseña.
               </p>
               <Button asChild className="w-full">
                 <Link href="/login">Ir al inicio de sesión</Link>
@@ -106,12 +164,8 @@ function ResetPasswordForm() {
     );
   }
 
-  const passwordsMatch = password === confirmPassword && password.length > 0;
-  const passwordError = confirmPassword.length > 0 && !passwordsMatch;
-
   return (
     <div className="flex min-h-screen w-full items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-background via-muted/10 to-background relative overflow-hidden">
-      {/* Efectos de fondo decorativos */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
         <div
@@ -120,11 +174,12 @@ function ResetPasswordForm() {
         ></div>
       </div>
       <form
-        action={formAction}
+        noValidate
+        onSubmit={handleSubmit(onSubmit)}
         className="relative w-full max-w-sm bg-card/70 backdrop-blur-2xl overflow-hidden rounded-3xl border-2 border-border/40 shadow-2xl shadow-black/10 dark:shadow-black/30 animate-in slide-up"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-white/20 dark:from-white/5 dark:via-transparent dark:to-white/5"></div>
-        <input type="hidden" name="token" value={token} />
+        <input type="hidden" {...register("token")} value={token || ""} />
         <div className="relative bg-card/90 backdrop-blur-sm -m-px rounded-3xl border-2 border-border/30 p-8 sm:p-10 pb-8">
           <div className="text-center animate-in slide-down">
             <Link
@@ -146,21 +201,19 @@ function ResetPasswordForm() {
           </div>
 
           <div className="mt-6 space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="password" className="block text-sm">
-                Nueva Contraseña
-              </Label>
+            <Field>
+              <FieldLabel htmlFor="password">Nueva Contraseña</FieldLabel>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   required
-                  name="password"
                   id="password"
+                  disabled={isPending}
+                  {...register("password")}
+                  aria-invalid={!!clientErrors.password}
                   className="pl-10 pr-10"
                   minLength={6}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
@@ -174,25 +227,31 @@ function ResetPasswordForm() {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <FieldError>
+                {clientErrors.password?.message ||
+                  (!formState.success &&
+                    formState.fieldErrors?.password?.[0]?.toString())}
+              </FieldError>
+              <p className="text-xs text-muted-foreground mt-1">
                 Mínimo 6 caracteres
               </p>
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="block text-sm">
+            <Field>
+              <FieldLabel htmlFor="confirmPassword">
                 Confirmar Contraseña
-              </Label>
+              </FieldLabel>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type={showConfirmPassword ? "text" : "password"}
                   required
                   id="confirmPassword"
-                  className={`pl-10 pr-10 ${passwordError ? "border-destructive" : ""}`}
+                  disabled={isPending}
+                  {...register("confirmPassword")}
+                  aria-invalid={!!clientErrors.confirmPassword}
+                  className="pl-10 pr-10"
                   minLength={6}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
                 <button
                   type="button"
@@ -206,21 +265,17 @@ function ResetPasswordForm() {
                   )}
                 </button>
               </div>
-              {passwordError && (
-                <p className="text-xs text-destructive">
-                  Las contraseñas no coinciden
-                </p>
-              )}
-            </div>
-
-            {state && !state.success && (
-              <p className="text-sm text-destructive">{state.message}</p>
-            )}
+              <FieldError>
+                {clientErrors.confirmPassword?.message ||
+                  (!formState.success &&
+                    formState.fieldErrors?.confirmPassword?.[0]?.toString())}
+              </FieldError>
+            </Field>
 
             <Button
               className="w-full shadow-md hover:shadow-lg transition-all duration-200"
               type="submit"
-              disabled={isPending || !passwordsMatch || password.length < 6}
+              disabled={isPending}
             >
               {isPending ? "Restableciendo..." : "Restablecer Contraseña"}
             </Button>
@@ -239,7 +294,7 @@ function ResetPasswordForm() {
   );
 }
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   return (
     <Suspense
       fallback={
@@ -250,7 +305,9 @@ export default function ResetPasswordPage() {
         </div>
       }
     >
-      <ResetPasswordForm />
+      <ResetPasswordFormContent />
     </Suspense>
   );
 }
+
+export default ResetPasswordForm;

@@ -40,8 +40,14 @@ function RegisterForm() {
     resolver: zodResolver(signUpSchema),
     mode: "onBlur",
     defaultValues: {
-      name: formState.formData?.name as string ?? "",
-      email: formState.formData?.email as string ?? "",
+      name:
+        ((!formState.success &&
+          "formData" in formState &&
+          formState.formData?.name) as string) ?? "",
+      email:
+        ((!formState.success &&
+          "formData" in formState &&
+          formState.formData?.email) as string) ?? "",
       password: "",
     },
   });
@@ -95,7 +101,7 @@ function RegisterForm() {
                 <LogoIcon className="relative h-12 w-12 sm:h-16 sm:w-16" />
               </div>
             </div>
-            
+
             <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-green-500/10 flex items-center justify-center">
               <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
             </div>
@@ -103,13 +109,14 @@ function RegisterForm() {
             <h1 className="mb-3 text-xl font-bold bg-linear-to-r from-foreground via-foreground/80 to-foreground/60 bg-clip-text text-transparent">
               ¡Cuenta creada exitosamente!
             </h1>
-            
+
             <p className="text-sm text-muted-foreground/80 mb-6">
               {formState.message || "Tu cuenta ha sido creada exitosamente."}
             </p>
 
             <p className="text-sm text-muted-foreground/80 mb-6">
-              Revisa tu correo electrónico para activar tu cuenta y comenzar a usar {getAppName()}.
+              Revisa tu correo electrónico para activar tu cuenta y comenzar a
+              usar {getAppName()}.
             </p>
 
             <Button asChild className="w-full">

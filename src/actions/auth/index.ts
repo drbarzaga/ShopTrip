@@ -104,7 +104,14 @@ export const resetPasswordAction = async (
   return withValidation(
     formData,
     resetPasswordSchema,
-    async ({ password, token }) => {
+    async ({ password, token, confirmPassword }) => {
+      // Validar que las contraseñas coincidan (ya validado por zod, pero por seguridad)
+      if (password !== confirmPassword) {
+        return await failure("Las contraseñas no coinciden", undefined, {
+          confirmPassword: ["Las contraseñas no coinciden"],
+        });
+      }
+
       try {
         await auth.api.resetPassword({
           body: {

@@ -21,13 +21,21 @@ export const forgotPasswordSchema = z.object({
   email: z.string().min(1, "El correo electrónico es requerido").email("Formato de correo inválido"),
 });
 
-export const resetPasswordSchema = z.object({
-  password: z
-    .string()
-    .min(1, "La contraseña es requerida")
-    .min(6, "La contraseña debe tener al menos 6 caracteres"),
-  token: z.string().min(1, "El token es requerido"),
-});
+export const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(1, "La contraseña es requerida")
+      .min(6, "La contraseña debe tener al menos 6 caracteres"),
+    confirmPassword: z
+      .string()
+      .min(1, "La confirmación de contraseña es requerida"),
+    token: z.string().min(1, "El token es requerido"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
+  });
 
 export type SignInInput = z.infer<typeof signInSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;

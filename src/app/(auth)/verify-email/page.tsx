@@ -17,7 +17,7 @@ export default async function VerifyEmailPage({
 
   try {
     const headersList = await headers();
-    
+
     // Verificar el email usando Better Auth
     const result = await auth.api.verifyEmail({
       query: {
@@ -26,7 +26,7 @@ export default async function VerifyEmailPage({
       headers: headersList,
     });
 
-    if (result?.user) {
+    if (result?.status) {
       // Si autoSignInAfterVerification está habilitado, el usuario ya está autenticado
       // Redirigir al dashboard
       redirect("/dashboard?verified=true");
@@ -39,4 +39,3 @@ export default async function VerifyEmailPage({
     redirect("/login?error=verification_failed");
   }
 }
-

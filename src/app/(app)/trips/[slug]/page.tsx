@@ -24,6 +24,7 @@ import { DeleteTripDialog } from "@/components/delete-trip-dialog";
 import { RefreshButton } from "@/components/refresh-button";
 import { TripStatsCards } from "@/components/trip-stats-cards";
 import { CreateTripItemDialog } from "@/components/create-trip-item-dialog";
+import { TripDaysRemainingBadge } from "@/components/trip-days-remaining-badge";
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
@@ -148,28 +149,45 @@ export default async function TripDetailPage({
               )}
             </div>
           </div>
-          {tripData.destination && (
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2">
-              <MapPin className="h-4 w-4 shrink-0" />
-              <span className="truncate">{tripData.destination}</span>
+          {/* Primera línea: Ubicación y Días restantes */}
+          <div className="flex items-center justify-between gap-2 mb-2">
+            {tripData.destination ? (
+              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4 shrink-0" />
+                <span className="truncate">{tripData.destination}</span>
+              </div>
+            ) : (
+              <div />
+            )}
+            {/* Días restantes - derecha en móvil */}
+            <div className="sm:hidden">
+              <TripDaysRemainingBadge startDate={tripData.startDate} />
             </div>
-          )}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm text-muted-foreground">
-            {tripData.startDate && (
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4 shrink-0" />
-                <span>{formatDate(tripData.startDate)}</span>
-              </div>
-            )}
-            {tripData.endDate && tripData.startDate && (
-              <span className="hidden sm:inline">→</span>
-            )}
-            {tripData.endDate && (
-              <div className="flex items-center gap-1.5">
-                <Calendar className="h-4 w-4 shrink-0" />
-                <span>{formatDate(tripData.endDate)}</span>
-              </div>
-            )}
+          </div>
+          {/* Segunda línea: Fechas y Días restantes (web) */}
+          <div className="flex items-center justify-between sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 text-sm text-muted-foreground">
+            {/* Fechas - en móvil: inicio izquierda, fin derecha */}
+            <div className="flex items-center justify-between sm:flex-row sm:items-center sm:gap-4 sm:justify-start flex-1">
+              {tripData.startDate && (
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 shrink-0" />
+                  <span>{formatDate(tripData.startDate)}</span>
+                </div>
+              )}
+              {tripData.endDate && tripData.startDate && (
+                <span className="hidden sm:inline">→</span>
+              )}
+              {tripData.endDate && (
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 shrink-0" />
+                  <span>{formatDate(tripData.endDate)}</span>
+                </div>
+              )}
+            </div>
+            {/* Días restantes - alineado a la derecha en web */}
+            <div className="hidden sm:block">
+              <TripDaysRemainingBadge startDate={tripData.startDate} />
+            </div>
           </div>
         </div>
 

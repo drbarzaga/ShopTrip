@@ -51,9 +51,12 @@ export const signUpAction = async (
           body: { name, email, password },
         });
 
+        // Better Auth enviará automáticamente el email de verificación
+        // gracias a la configuración emailVerification.sendOnSignUp: true
+
         return await success(
           { redirectTo: redirectTo || undefined },
-          "¡Cuenta creada exitosamente!"
+          "¡Cuenta creada exitosamente! Revisa tu correo para activar tu cuenta."
         );
       } catch (error) {
         const message =

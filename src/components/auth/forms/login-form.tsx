@@ -16,7 +16,7 @@ import { SignInInput, signInSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 const INITIAL_STATE: ActionResult<{ email: string; password: string }> = {
   success: false,

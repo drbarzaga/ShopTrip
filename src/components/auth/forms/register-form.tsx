@@ -89,6 +89,14 @@ function RegisterForm() {
     }
   }, [formState]);
 
+  useEffect(() => {
+    // Trackear registro exitoso
+    if (formState.success) {
+      const { analytics } = require("@/lib/analytics");
+      analytics.signUp("email");
+    }
+  }, [formState.success]);
+
   // Mostrar pantalla de confirmación si el registro fue exitoso
   if (formState.success) {
     return (

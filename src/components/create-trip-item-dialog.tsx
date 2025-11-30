@@ -49,6 +49,11 @@ export function CreateTripItemDialog({
       setState(result);
 
       if (result.success && result.data) {
+        // Trackear creación de artículo
+        const formDataObj = Object.fromEntries(formData.entries());
+        const { analytics } = require("@/lib/analytics");
+        analytics.createItem(tripId);
+        
         toast.success("Artículo agregado", {
           description: "El artículo ha sido agregado a tu lista.",
         });
@@ -73,6 +78,11 @@ export function CreateTripItemDialog({
       setState(result);
 
       if (result.success && result.data) {
+        // Trackear creación de artículo con IA
+        const { analytics } = require("@/lib/analytics");
+        analytics.useAICreateItem();
+        analytics.createItem(tripId);
+        
         toast.success("Artículo agregado", {
           description: "El artículo ha sido creado con IA y agregado a tu lista.",
         });

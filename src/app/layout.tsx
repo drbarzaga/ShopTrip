@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PWASplashScreen } from "@/components/pwa-splash-screen";
+import { AnalyticsProvider } from "@/components/analytics-provider";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -163,6 +164,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <AnalyticsProvider />
           {children}
           <Toaster position="bottom-right" />
         </ThemeProvider>

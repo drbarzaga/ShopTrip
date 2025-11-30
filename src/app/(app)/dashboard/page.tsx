@@ -15,6 +15,7 @@ import {
 import { DashboardTripDialog } from "@/components/dashboard-trip-dialog";
 import { TripCard } from "@/components/trip-card";
 import Link from "next/link";
+import { TrackDashboardView } from "./track-view";
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +43,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
+      <TrackDashboardView />
       <div className="container mx-auto py-4 px-4 max-w-4xl sm:py-6 sm:px-6">
         {/* Header */}
         <div className="mb-6">

@@ -80,7 +80,13 @@ export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <form action={handleSignOut}>
+        <form
+          action={async () => {
+            const { analytics } = await import("@/lib/analytics");
+            analytics.logout();
+            await handleSignOut();
+          }}
+        >
           <DropdownMenuItem asChild>
             <button
               type="submit"

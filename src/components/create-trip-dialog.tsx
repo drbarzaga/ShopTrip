@@ -49,6 +49,11 @@ export function CreateTripDialog({
       setState(result);
 
       if (result.success && result.data) {
+        // Trackear creación de viaje
+        const formDataObj = Object.fromEntries(formData.entries());
+        const { analytics } = require("@/lib/analytics");
+        analytics.createTrip(formDataObj.name as string);
+        
         toast.success("Viaje creado exitosamente", {
           description: "Tu nuevo viaje ha sido agregado.",
         });
@@ -76,6 +81,11 @@ export function CreateTripDialog({
       setState(result);
 
       if (result.success && result.data) {
+        // Trackear creación de viaje con IA
+        const { analytics } = require("@/lib/analytics");
+        analytics.useAICreateTrip();
+        analytics.createTrip();
+        
         toast.success("Viaje creado exitosamente", {
           description: "Tu nuevo viaje ha sido creado con IA.",
         });

@@ -91,6 +91,7 @@ import { RefreshButton } from "@/components/refresh-button";
 import { TripStatsCards } from "@/components/trip-stats-cards";
 import { CreateTripItemDialog } from "@/components/create-trip-item-dialog";
 import { TripDaysRemainingBadge } from "@/components/trip-days-remaining-badge";
+import { TrackTripView } from "./track-view";
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
@@ -173,6 +174,7 @@ export default async function TripDetailPage({
 
   return (
     <div className="min-h-screen bg-background pb-16">
+      <TrackTripView tripId={tripData.id} tripName={tripData.name} />
       <div className="container mx-auto py-4 px-4 max-w-2xl sm:py-6 sm:px-6">
         {/* Breadcrumbs */}
         <Breadcrumbs 

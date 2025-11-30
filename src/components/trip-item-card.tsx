@@ -124,6 +124,12 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
     startTransition(async () => {
       const result = await toggleItemPurchasedAction(item.id, checked);
       if (result.success) {
+        // Trackear compra de artículo
+        if (checked) {
+          const { analytics } = require("@/lib/analytics");
+          analytics.purchaseItem(item.tripId, item.name);
+        }
+        
         toast.success(checked ? "Artículo marcado como comprado" : "Artículo desmarcado", {
           description: checked 
             ? `${item.name} ha sido marcado como comprado.`

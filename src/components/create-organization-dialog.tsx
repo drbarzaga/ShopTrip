@@ -49,6 +49,10 @@ export function CreateOrganizationDialog({
       setState(result);
 
       if (result.success && result.data) {
+        // Trackear creación de organización
+        const { analytics } = require("@/lib/analytics");
+        analytics.createOrganization();
+        
         toast.success("Organización creada", {
           description: "Tu nueva organización ha sido creada exitosamente.",
         });

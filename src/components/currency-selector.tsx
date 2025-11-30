@@ -31,6 +31,10 @@ export function CurrencySelector({ initialCurrency }: CurrencySelectorProps) {
     startTransition(async () => {
       const result = await updatePreferredCurrencyAction(newCurrency);
       if (result.success) {
+        // Trackear cambio de moneda
+        const { analytics } = require("@/lib/analytics");
+        analytics.changeCurrency(newCurrency);
+        
         setMessage("Moneda actualizada exitosamente");
         router.refresh();
       } else {

@@ -83,6 +83,9 @@ function LoginForm() {
     }
 
     if (formState.success) {
+      // Trackear login exitoso
+      const { analytics } = require("@/lib/analytics");
+      analytics.login("email");
       router.push("/dashboard");
     }
   }, [formState, router]);

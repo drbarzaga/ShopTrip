@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-server";
 import type { Metadata } from "next";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
@@ -13,7 +13,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const session = await getSession();
-  
+
   if (!session) {
     return {
       title: "Shop Trip",
@@ -22,7 +22,7 @@ export async function generateMetadata({
 
   try {
     const tripData = await getTripBySlug(slug, session.user.id);
-    
+
     if (!tripData) {
       return {
         title: "Shop Trip",
@@ -76,12 +76,7 @@ import { getUserPreferredCurrency } from "@/actions/settings";
 import { convertCurrency } from "@/lib/currency";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft,
-  MapPin,
-  Calendar,
-  ShoppingCart,
-} from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import { ItemsList } from "@/components/items-list";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -92,6 +87,8 @@ import { TripStatsCards } from "@/components/trip-stats-cards";
 import { CreateTripItemDialog } from "@/components/create-trip-item-dialog";
 import { TripDaysRemainingBadge } from "@/components/trip-days-remaining-badge";
 import { TrackTripView } from "./track-view";
+import { AISuggestionsBanner } from "@/components/ai-suggestions-banner";
+import { getTripSuggestionsBySlug } from "@/actions/ai/suggestions";
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
@@ -128,17 +125,23 @@ export default async function TripDetailPage({
   }
 
   const items = await getTripItems(tripData.id);
-  
+
   // Obtener el rol del usuario en la organización del viaje
-  const userRole = await getUserRoleInTripOrganization(session.user.id, tripData.id);
+  const userRole = await getUserRoleInTripOrganization(
+    session.user.id,
+    tripData.id
+  );
   const canEdit = userRole === "owner" || userRole === "admin";
   const canDelete = await canUserDeleteTrip(session.user.id, tripData.id);
+
+  // Obtener sugerencias de IA para este viaje
+  const suggestions = await getTripSuggestionsBySlug(slug);
 
   const purchasedItems = items.filter((item) => item.purchased).length;
   const totalSpent = items
     .filter((item) => item.purchased)
     .reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
-  
+
   // Obtener moneda preferida y convertir si es necesario
   const preferredCurrency = await getUserPreferredCurrency();
   let convertedTotalSpent = totalSpent;
@@ -149,17 +152,18 @@ export default async function TripDetailPage({
       console.error("Error converting currency:", error);
     }
   }
-  
+
   // Formatear todos los precios de una vez en el servidor
   const { formatMultipleCurrencies } = await import("@/lib/format-currency");
   const itemPrices = items.map((item) => {
-    const totalPrice = item.price !== null && item.quantity
-      ? item.price * item.quantity
-      : (item.price ?? 0);
+    const totalPrice =
+      item.price !== null && item.quantity
+        ? item.price * item.quantity
+        : (item.price ?? 0);
     return totalPrice;
   });
   const itemUnitPrices = items.map((item) => item.price ?? 0);
-  
+
   const [formattedPrices, formattedUnitPrices] = await Promise.all([
     formatMultipleCurrencies(itemPrices),
     formatMultipleCurrencies(itemUnitPrices),
@@ -177,13 +181,13 @@ export default async function TripDetailPage({
       <TrackTripView tripId={tripData.id} tripName={tripData.name} />
       <div className="container mx-auto py-4 px-4 max-w-2xl sm:py-6 sm:px-6">
         {/* Breadcrumbs */}
-        <Breadcrumbs 
+        <Breadcrumbs
           items={[
             { label: "Mis Viajes", href: "/trips" },
-            { label: tripData.name }
-          ]} 
+            { label: tripData.name },
+          ]}
         />
-        
+
         {/* Header */}
         <div className="mb-6">
           <Link href="/trips">
@@ -267,12 +271,24 @@ export default async function TripDetailPage({
           currency={preferredCurrency}
         />
 
+        {/* AI Suggestions Banner - Solo se muestra si hay destino y fecha definidos */}
+        {suggestions.length > 0 &&
+          tripData.destination &&
+          tripData.startDate && (
+            <AISuggestionsBanner suggestions={suggestions} />
+          )}
+
         {/* Items List */}
-        <div className="space-y-4">
+        <div className="space-y-4 mt-4">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Artículos</h2>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+              Artículos
+            </h2>
             {canEdit && (
-              <CreateTripItemDialog tripId={tripData.id} className="hidden md:inline-flex" />
+              <CreateTripItemDialog
+                tripId={tripData.id}
+                className="hidden md:inline-flex"
+              />
             )}
           </div>
 
@@ -284,12 +300,19 @@ export default async function TripDetailPage({
                   Aún no hay artículos. Agrega tu primer artículo para comenzar.
                 </p>
                 {canEdit && (
-                  <CreateTripItemDialog tripId={tripData.id} className="hidden md:inline-flex" />
+                  <CreateTripItemDialog
+                    tripId={tripData.id}
+                    className="hidden md:inline-flex"
+                  />
                 )}
               </CardContent>
             </Card>
           ) : (
-            <ItemsList items={itemsWithFormattedPrices} tripId={tripData.id} canEdit={canEdit} />
+            <ItemsList
+              items={itemsWithFormattedPrices}
+              tripId={tripData.id}
+              canEdit={canEdit}
+            />
           )}
         </div>
       </div>

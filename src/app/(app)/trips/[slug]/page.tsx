@@ -23,6 +23,7 @@ import { EditTripDialog } from "@/components/edit-trip-dialog";
 import { DeleteTripDialog } from "@/components/delete-trip-dialog";
 import { RefreshButton } from "@/components/refresh-button";
 import { TripStatsCards } from "@/components/trip-stats-cards";
+import { CreateTripItemDialog } from "@/components/create-trip-item-dialog";
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
@@ -182,15 +183,23 @@ export default async function TripDetailPage({
 
         {/* Items List */}
         <div className="space-y-4">
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Artículos</h2>
+          <div className="flex items-center justify-between gap-4">
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Artículos</h2>
+            {canEdit && (
+              <CreateTripItemDialog tripId={tripData.id} className="hidden md:inline-flex" />
+            )}
+          </div>
 
           {items.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center p-8 sm:p-12 text-center">
                 <ShoppingCart className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-4" />
-                <p className="text-sm text-muted-foreground">
-                  Aún no hay artículos. Usa el botón de abajo para agregar tu primer artículo.
+                <p className="text-sm text-muted-foreground mb-4">
+                  Aún no hay artículos. Agrega tu primer artículo para comenzar.
                 </p>
+                {canEdit && (
+                  <CreateTripItemDialog tripId={tripData.id} className="hidden md:inline-flex" />
+                )}
               </CardContent>
             </Card>
           ) : (

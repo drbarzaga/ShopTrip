@@ -14,12 +14,18 @@ function isMobile(): boolean {
  * Wrapper para toast que solo funciona en web (no móvil)
  */
 export const toast = {
-  success: (message: string, options?: Parameters<typeof sonnerToast.success>[1]) => {
+  success: (
+    message: string,
+    options?: Parameters<typeof sonnerToast.success>[1]
+  ) => {
     if (!isMobile()) {
       return sonnerToast.success(message, options);
     }
   },
-  error: (message: string, options?: Parameters<typeof sonnerToast.error>[1]) => {
+  error: (
+    message: string,
+    options?: Parameters<typeof sonnerToast.error>[1]
+  ) => {
     if (!isMobile()) {
       return sonnerToast.error(message, options);
     }
@@ -29,17 +35,23 @@ export const toast = {
       return sonnerToast.info(message, options);
     }
   },
-  warning: (message: string, options?: Parameters<typeof sonnerToast.warning>[1]) => {
+  warning: (
+    message: string,
+    options?: Parameters<typeof sonnerToast.warning>[1]
+  ) => {
     if (!isMobile()) {
       return sonnerToast.warning(message, options);
     }
   },
-  message: (message: string, options?: Parameters<typeof sonnerToast.message>[1]) => {
+  message: (
+    message: string,
+    options?: Parameters<typeof sonnerToast.message>[1]
+  ) => {
     if (!isMobile()) {
       return sonnerToast.message(message, options);
     }
   },
-  promise: <T,>(
+  promise: <T>(
     promise: Promise<T>,
     options: Parameters<typeof sonnerToast.promise>[1]
   ) => {
@@ -47,7 +59,10 @@ export const toast = {
       return sonnerToast.promise(promise, options);
     }
   },
-  custom: (jsx: React.ReactNode, options?: Parameters<typeof sonnerToast.custom>[1]) => {
+  custom: (
+    jsx: Parameters<typeof sonnerToast.custom>[0],
+    options?: Parameters<typeof sonnerToast.custom>[1]
+  ) => {
     if (!isMobile()) {
       return sonnerToast.custom(jsx, options);
     }
@@ -57,10 +72,12 @@ export const toast = {
       return sonnerToast.dismiss(toastId);
     }
   },
-  loading: (message: string, options?: Parameters<typeof sonnerToast.loading>[1]) => {
+  loading: (
+    message: string,
+    options?: Parameters<typeof sonnerToast.loading>[1]
+  ) => {
     if (!isMobile()) {
       return sonnerToast.loading(message, options);
     }
   },
 };
-

@@ -2,7 +2,7 @@
 
 import { getAppName } from "../utils";
 import { resend, FROM_EMAIL } from "./resend";
-import { InvitationEmail } from "./templates/invitation";
+import { InvitationEmail } from "@/components/email/templates/invitation";
 import { render } from "@react-email/render";
 
 interface SendInvitationEmailParams {

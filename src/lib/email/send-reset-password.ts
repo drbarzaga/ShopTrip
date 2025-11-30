@@ -2,7 +2,7 @@
 
 import { getAppName } from "../utils";
 import { resend, FROM_EMAIL } from "./resend";
-import { ResetPasswordEmail } from "./templates/reset-password";
+import { ResetPasswordEmail } from "@/components/email/templates/reset-password";
 import { render } from "@react-email/render";
 
 interface SendResetPasswordEmailParams {

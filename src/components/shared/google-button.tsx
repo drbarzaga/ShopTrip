@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 import { authClient } from "@/lib/auth-client";
 
 interface GoogleButtonProps {
-  redirectTo?: string | null;
+  readonly redirectTo?: string | null;
 }
 
 export default function GoogleButton({ redirectTo }: GoogleButtonProps) {

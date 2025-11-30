@@ -64,7 +64,7 @@ export function TripCard({ trip }: TripCardProps) {
   
   return (
     <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 active:shadow-md active:-translate-y-0.5 active:scale-[0.98]">
-      <CardContent className="relative p-4 sm:p-6">
+      <CardContent className={`relative p-4 sm:p-6 ${daysRemaining !== null ? 'sm:pb-6' : ''}`}>
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Icono */}
           <div className="shrink-0">
@@ -87,9 +87,47 @@ export function TripCard({ trip }: TripCardProps) {
             {/* Información secundaria */}
             <div className="flex flex-col gap-2">
               {trip.destination && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{trip.destination}</span>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{trip.destination}</span>
+                  </div>
+                  {/* Días restantes en móvil - al lado de la localización */}
+                  {daysRemaining !== null && (
+                    <Badge
+                      variant="outline"
+                      className={`text-xs font-medium whitespace-nowrap sm:hidden ${
+                        daysRemaining < 0
+                          ? "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
+                          : daysRemaining === 0
+                            ? "border-orange-300/50 bg-orange-100/80 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300"
+                            : daysRemaining <= 7
+                              ? "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                              : "border-primary/30 bg-primary/10 text-primary"
+                      }`}
+                    >
+                      {formatDaysRemaining(daysRemaining)}
+                    </Badge>
+                  )}
+                </div>
+              )}
+              {/* Si no hay destino, mostrar días restantes en móvil aquí */}
+              {!trip.destination && daysRemaining !== null && (
+                <div className="sm:hidden">
+                  <Badge
+                    variant="outline"
+                    className={`text-xs font-medium whitespace-nowrap ${
+                      daysRemaining < 0
+                        ? "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
+                        : daysRemaining === 0
+                          ? "border-orange-300/50 bg-orange-100/80 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300"
+                          : daysRemaining <= 7
+                            ? "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                            : "border-primary/30 bg-primary/10 text-primary"
+                    }`}
+                  >
+                    {formatDaysRemaining(daysRemaining)}
+                  </Badge>
                 </div>
               )}
               {(trip.startDate || trip.endDate) && (
@@ -115,12 +153,12 @@ export function TripCard({ trip }: TripCardProps) {
           </div>
         </div>
 
-        {/* Días restantes - Parte inferior derecha */}
+        {/* Días restantes - Parte inferior derecha (solo en desktop) */}
         {daysRemaining !== null && (
-          <div className="absolute bottom-4 right-4 z-20">
+          <div className="hidden sm:block absolute bottom-4 right-4 z-20">
             <Badge
               variant="outline"
-              className={`text-xs font-medium ${
+              className={`text-xs font-medium whitespace-nowrap ${
                 daysRemaining < 0
                   ? "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
                   : daysRemaining === 0

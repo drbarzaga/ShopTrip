@@ -205,9 +205,7 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                     >
                       <Sparkles className="h-3 w-3" />
                       <span>
-                        {isNew
-                          ? "Creado recientemente"
-                          : "Editado recientemente"}
+                        {isNew ? "Nuevo" : "Editado"}
                       </span>
                     </Badge>
                   )}

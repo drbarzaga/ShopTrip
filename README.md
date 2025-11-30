@@ -32,7 +32,7 @@
 #### Página de Login
 
 ![Login Page](screenshots/login-page.png)
-Inicia sesión en tu cuenta de ShopTrip con tu correo electrónico y contraseña.
+Inicia sesión en tu cuenta de ShopTrip con tu correo electrónico y contraseña o usando Google
 
 #### Registro Exitoso
 

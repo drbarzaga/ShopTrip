@@ -32,13 +32,15 @@ export async function sendWelcomeEmail({
     // Construir la URL absoluta del logo
     // Asegurarse de que la URL sea accesible públicamente
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
-    
+
     if (!baseUrl) {
-      console.warn("NEXT_PUBLIC_APP_URL no está configurado. El logo puede no aparecer en el email.");
+      console.warn(
+        "NEXT_PUBLIC_APP_URL no está configurado. El logo puede no aparecer en el email."
+      );
     }
-    
+
     const logoUrl = baseUrl ? `${baseUrl}/icon.png` : null;
-    
+
     // Log para debugging
     console.log("Logo URL:", logoUrl);
     console.log("Base URL:", baseUrl);
@@ -55,7 +57,7 @@ export async function sendWelcomeEmail({
     const { data, error } = await resend.emails.send({
       from: `${getAppName()} <${FROM_EMAIL}>`,
       to: [to],
-      subject: `¡Bienvenido a ${getAppName()}!`,
+      subject: `¡Bienvenido a ${getAppName()} ✈️!`,
       html: emailHtml,
     });
 
@@ -70,4 +72,3 @@ export async function sendWelcomeEmail({
     return { success: false, error };
   }
 }
-

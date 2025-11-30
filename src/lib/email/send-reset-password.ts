@@ -51,4 +51,3 @@ export async function sendResetPasswordEmail({
     return { success: false, error };
   }
 }
-

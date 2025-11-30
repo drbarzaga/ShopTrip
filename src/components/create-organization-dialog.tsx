@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -48,12 +49,19 @@ export function CreateOrganizationDialog({
       setState(result);
 
       if (result.success && result.data) {
+        toast.success("Organización creada", {
+          description: "Tu nueva organización ha sido creada exitosamente.",
+        });
         setOpen(false);
         setState(null);
         if (onSuccess) {
           onSuccess();
         }
         router.refresh();
+      } else {
+        toast.error("Error al crear organización", {
+          description: result.message || "Por favor, intenta nuevamente.",
+        });
       }
     });
   };

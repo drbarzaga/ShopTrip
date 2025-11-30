@@ -525,3 +525,105 @@ a {
     outline-offset: 2px;
   }
 }
+
+/* Estilos personalizados para Sonner Toaster - Usando colores del tema */
+[data-sonner-toast] {
+  background: var(--card) !important;
+  color: var(--card-foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+  font-family: var(--font-geist-sans) !important;
+}
+
+.dark [data-sonner-toast] {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2) !important;
+}
+
+/* Notificaciones de éxito - usando colores del tema */
+[data-sonner-toast][data-type="success"] {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--card-foreground) !important;
+}
+
+/* Notificaciones de error - usando colores del tema */
+[data-sonner-toast][data-type="error"] {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--card-foreground) !important;
+}
+
+/* Notificaciones de info - usando colores del tema */
+[data-sonner-toast][data-type="info"] {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--card-foreground) !important;
+}
+
+/* Notificaciones de warning - usando colores del tema */
+[data-sonner-toast][data-type="warning"] {
+  background: var(--card) !important;
+  border-color: var(--border) !important;
+  color: var(--card-foreground) !important;
+}
+
+[data-sonner-toast] [data-description] {
+  color: var(--muted-foreground) !important;
+  opacity: 0.9;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+[data-sonner-toast] [data-title] {
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: var(--foreground) !important;
+}
+
+/* Iconos de las notificaciones usan el color del tema */
+/* Aplicar color a todos los SVG dentro del toast */
+[data-sonner-toast] svg,
+[data-sonner-toast] [data-icon] svg {
+  color: var(--primary) !important;
+}
+
+/* Aplicar fill y stroke usando currentColor para que hereden el color */
+[data-sonner-toast] svg path,
+[data-sonner-toast] svg circle,
+[data-sonner-toast] svg rect,
+[data-sonner-toast] svg line,
+[data-sonner-toast] svg polyline,
+[data-sonner-toast] svg polygon {
+  fill: currentColor !important;
+  stroke: currentColor !important;
+}
+
+/* Notificaciones de éxito - verde */
+[data-sonner-toast][data-type="success"] svg,
+[data-sonner-toast][data-type="success"] [data-icon] svg {
+  color: oklch(0.5 0.2 142) !important;
+}
+
+.dark [data-sonner-toast][data-type="success"] svg,
+.dark [data-sonner-toast][data-type="success"] [data-icon] svg {
+  color: oklch(0.65 0.2 142) !important;
+}
+
+/* Notificaciones de error - destructive */
+[data-sonner-toast][data-type="error"] svg,
+[data-sonner-toast][data-type="error"] [data-icon] svg {
+  color: var(--destructive) !important;
+}
+
+/* Notificaciones de info - primary del tema */
+[data-sonner-toast][data-type="info"] svg,
+[data-sonner-toast][data-type="info"] [data-icon] svg {
+  color: var(--primary) !important;
+}
+
+/* Notificaciones de warning - accent */
+[data-sonner-toast][data-type="warning"] svg,
+[data-sonner-toast][data-type="warning"] [data-icon] svg {
+  color: var(--accent) !important;
+}

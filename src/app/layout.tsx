@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PWASplashScreen } from "@/components/pwa-splash-screen";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -134,6 +135,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster position="bottom-right" />
         </ThemeProvider>
       </body>
     </html>

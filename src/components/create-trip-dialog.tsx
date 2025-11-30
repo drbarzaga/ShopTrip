@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -48,6 +49,9 @@ export function CreateTripDialog({
       setState(result);
 
       if (result.success && result.data) {
+        toast.success("Viaje creado exitosamente", {
+          description: "Tu nuevo viaje ha sido agregado.",
+        });
         setOpen(false);
         setState(null);
         
@@ -58,6 +62,10 @@ export function CreateTripDialog({
         } else {
           router.refresh();
         }
+      } else {
+        toast.error("Error al crear viaje", {
+          description: result.message || "Por favor, intenta nuevamente.",
+        });
       }
     });
   };
@@ -68,6 +76,9 @@ export function CreateTripDialog({
       setState(result);
 
       if (result.success && result.data) {
+        toast.success("Viaje creado exitosamente", {
+          description: "Tu nuevo viaje ha sido creado con IA.",
+        });
         setOpen(false);
         setState(null);
         
@@ -78,6 +89,10 @@ export function CreateTripDialog({
         } else {
           router.refresh();
         }
+      } else {
+        toast.error("Error al crear viaje", {
+          description: result.message || "Por favor, intenta nuevamente.",
+        });
       }
     });
   };

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { deleteTripAction } from "@/actions/trips";
@@ -36,10 +37,16 @@ export function DeleteTripDialog({
     startTransition(async () => {
       const result = await deleteTripAction(tripId);
       if (result.success) {
+        toast.success("Viaje eliminado", {
+          description: `El viaje "${tripName}" ha sido eliminado permanentemente.`,
+        });
         setDeleteDialogOpen(false);
         // Redirigir a la lista de viajes después de eliminar
         router.push("/trips");
       } else {
+        toast.error("Error al eliminar viaje", {
+          description: result.message || "Por favor, intenta nuevamente.",
+        });
         setIsDeleting(false);
       }
     });

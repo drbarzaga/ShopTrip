@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -123,10 +124,18 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
     startTransition(async () => {
       const result = await toggleItemPurchasedAction(item.id, checked);
       if (result.success) {
+        toast.success(checked ? "Artículo marcado como comprado" : "Artículo desmarcado", {
+          description: checked 
+            ? `${item.name} ha sido marcado como comprado.`
+            : `${item.name} ha sido desmarcado.`,
+        });
         router.refresh();
       } else {
         // Revertir el estado si falla
         setPurchased(!checked);
+        toast.error("Error al actualizar artículo", {
+          description: result.message || "Por favor, intenta nuevamente.",
+        });
       }
     });
   };
@@ -136,9 +145,15 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
     startTransition(async () => {
       const result = await deleteTripItemAction(item.id);
       if (result.success) {
+        toast.success("Artículo eliminado", {
+          description: `"${item.name}" ha sido eliminado de tu lista.`,
+        });
         setDeleteDialogOpen(false);
         router.refresh();
       } else {
+        toast.error("Error al eliminar artículo", {
+          description: result.message || "Por favor, intenta nuevamente.",
+        });
         setIsDeleting(false);
       }
     });

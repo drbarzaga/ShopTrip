@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -51,6 +52,9 @@ export function EditTripItemDialog({
       setState(result);
 
       if (result.success && result.data) {
+        toast.success("Artículo actualizado", {
+          description: "Los cambios han sido guardados correctamente.",
+        });
         setOpen(false);
         setState(null);
         if (onSuccess) {
@@ -58,6 +62,10 @@ export function EditTripItemDialog({
         } else {
           router.refresh();
         }
+      } else {
+        toast.error("Error al actualizar artículo", {
+          description: result.message || "Por favor, intenta nuevamente.",
+        });
       }
     });
   };

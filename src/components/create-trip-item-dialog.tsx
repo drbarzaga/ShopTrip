@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -48,6 +49,9 @@ export function CreateTripItemDialog({
       setState(result);
 
       if (result.success && result.data) {
+        toast.success("Artículo agregado", {
+          description: "El artículo ha sido agregado a tu lista.",
+        });
         setOpen(false);
         setState(null);
         if (onSuccess) {
@@ -55,6 +59,10 @@ export function CreateTripItemDialog({
         } else {
           router.refresh();
         }
+      } else {
+        toast.error("Error al agregar artículo", {
+          description: result.message || "Por favor, intenta nuevamente.",
+        });
       }
     });
   };
@@ -65,6 +73,9 @@ export function CreateTripItemDialog({
       setState(result);
 
       if (result.success && result.data) {
+        toast.success("Artículo agregado", {
+          description: "El artículo ha sido creado con IA y agregado a tu lista.",
+        });
         setOpen(false);
         setState(null);
         if (onSuccess) {
@@ -72,6 +83,10 @@ export function CreateTripItemDialog({
         } else {
           router.refresh();
         }
+      } else {
+        toast.error("Error al agregar artículo", {
+          description: result.message || "Por favor, intenta nuevamente.",
+        });
       }
     });
   };

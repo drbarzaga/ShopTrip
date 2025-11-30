@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -53,10 +54,18 @@ export function InviteMemberDialog({
       setState(result);
 
       if (result.success) {
+        const email = formData.get("email") as string;
+        toast.success("Invitación enviada", {
+          description: `Se ha enviado una invitación a ${email}.`,
+        });
         setOpen(false);
         setState(null);
         setRole("member");
         router.refresh();
+      } else {
+        toast.error("Error al enviar invitación", {
+          description: result.message || "Por favor, intenta nuevamente.",
+        });
       }
     });
   };

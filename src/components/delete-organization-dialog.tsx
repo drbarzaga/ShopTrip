@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -38,9 +39,16 @@ export function DeleteOrganizationDialog({
       setState(result);
 
       if (result.success) {
+        toast.success("Organización eliminada", {
+          description: `"${organizationName}" ha sido eliminada permanentemente.`,
+        });
         setOpen(false);
         router.refresh();
         setState(null);
+      } else {
+        toast.error("Error al eliminar organización", {
+          description: result.message || "Por favor, intenta nuevamente.",
+        });
       }
     });
   };

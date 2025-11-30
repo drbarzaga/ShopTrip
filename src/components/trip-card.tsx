@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { ArrowRight, MapPin, Calendar, Plane } from "lucide-react";
 
 interface TripCardProps {
@@ -30,7 +31,37 @@ function formatDate(date: Date | null): string {
   }).format(new Date(year, month, day));
 }
 
+function getDaysUntilTrip(startDate: Date | null): number | null {
+  if (!startDate) return null;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const tripDate = new Date(startDate);
+  tripDate.setHours(0, 0, 0, 0);
+  
+  const diffTime = tripDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays;
+}
+
+function formatDaysRemaining(days: number): string {
+  if (days < 0) {
+    return `Hace ${Math.abs(days)} día${Math.abs(days) !== 1 ? 's' : ''}`;
+  }
+  if (days === 0) {
+    return "Hoy";
+  }
+  if (days === 1) {
+    return "Mañana";
+  }
+  return `${days} días restantes`;
+}
+
 export function TripCard({ trip }: TripCardProps) {
+  const daysRemaining = getDaysUntilTrip(trip.startDate);
+  
   return (
     <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 active:shadow-md active:-translate-y-0.5 active:scale-[0.98]">
       <CardContent className="relative p-4 sm:p-6">
@@ -83,6 +114,26 @@ export function TripCard({ trip }: TripCardProps) {
             </div>
           </div>
         </div>
+
+        {/* Días restantes - Parte inferior derecha */}
+        {daysRemaining !== null && (
+          <div className="absolute bottom-4 right-4 z-20">
+            <Badge
+              variant="outline"
+              className={`text-xs font-medium ${
+                daysRemaining < 0
+                  ? "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
+                  : daysRemaining === 0
+                    ? "border-orange-300/50 bg-orange-100/80 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300"
+                    : daysRemaining <= 7
+                      ? "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                      : "border-primary/30 bg-primary/10 text-primary"
+              }`}
+            >
+              {formatDaysRemaining(daysRemaining)}
+            </Badge>
+          </div>
+        )}
 
         {/* Link para navegación */}
         <Link

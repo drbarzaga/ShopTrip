@@ -526,6 +526,13 @@ a {
   }
 }
 
+/* Ocultar Toaster en móvil */
+@media (max-width: 768px) {
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+}
+
 /* Estilos personalizados para Sonner Toaster - Usando colores del tema */
 [data-sonner-toast] {
   background: var(--card) !important;

@@ -8,6 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { analytics } from "@/lib/analytics";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LogOut, Building2, Mail, LayoutDashboard, Settings } from "lucide-react";
@@ -82,7 +83,6 @@ export function UserMenu({ userName, userEmail, userImage }: UserMenuProps) {
         <DropdownMenuSeparator />
         <form
           action={async () => {
-            const { analytics } = await import("@/lib/analytics");
             analytics.logout();
             await handleSignOut();
           }}

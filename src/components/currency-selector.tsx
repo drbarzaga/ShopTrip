@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { analytics } from "@/lib/analytics";
 import {
   Select,
   SelectContent,
@@ -32,7 +33,6 @@ export function CurrencySelector({ initialCurrency }: CurrencySelectorProps) {
       const result = await updatePreferredCurrencyAction(newCurrency);
       if (result.success) {
         // Trackear cambio de moneda
-        const { analytics } = require("@/lib/analytics");
         analytics.changeCurrency(newCurrency);
         
         setMessage("Moneda actualizada exitosamente");

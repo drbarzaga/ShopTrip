@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
+import { analytics } from "@/lib/analytics";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -42,6 +43,7 @@ interface TripItemCardProps {
     formattedPrice?: string; // Precio total ya formateado
     formattedUnitPrice?: string; // Precio unitario ya formateado
   };
+  tripId?: string;
   canEdit?: boolean;
 }
 
@@ -88,7 +90,11 @@ function isRecentItem(
   return { isRecent, isNew, isEdited };
 }
 
-export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
+export function TripItemCard({
+  item,
+  tripId,
+  canEdit = true,
+}: TripItemCardProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -125,16 +131,18 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
       const result = await toggleItemPurchasedAction(item.id, checked);
       if (result.success) {
         // Trackear compra de artículo
-        if (checked) {
-          const { analytics } = require("@/lib/analytics");
-          analytics.purchaseItem(item.tripId, item.name);
+        if (checked && tripId) {
+          analytics.purchaseItem(tripId, item.name);
         }
-        
-        toast.success(checked ? "Artículo marcado como comprado" : "Artículo desmarcado", {
-          description: checked 
-            ? `${item.name} ha sido marcado como comprado.`
-            : `${item.name} ha sido desmarcado.`,
-        });
+
+        toast.success(
+          checked ? "Artículo marcado como comprado" : "Artículo desmarcado",
+          {
+            description: checked
+              ? `${item.name} ha sido marcado como comprado.`
+              : `${item.name} ha sido desmarcado.`,
+          }
+        );
         router.refresh();
       } else {
         // Revertir el estado si falla
@@ -189,11 +197,13 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Icono */}
           <div className="shrink-0">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-active:scale-110 group-active:rotate-3 ${
-              purchased
-                ? "bg-green-100 dark:bg-green-900/40 group-hover:bg-green-200 dark:group-hover:bg-green-900/60 group-active:bg-green-200 dark:group-active:bg-green-900/60"
-                : "bg-muted group-hover:bg-primary/10 group-active:bg-primary/10"
-            }`}>
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-active:scale-110 group-active:rotate-3 ${
+                purchased
+                  ? "bg-green-100 dark:bg-green-900/40 group-hover:bg-green-200 dark:group-hover:bg-green-900/60 group-active:bg-green-200 dark:group-active:bg-green-900/60"
+                  : "bg-muted group-hover:bg-primary/10 group-active:bg-primary/10"
+              }`}
+            >
               <div className="transition-transform duration-300 group-hover:-rotate-6 group-active:-rotate-6">
                 {renderIcon()}
               </div>
@@ -225,9 +235,7 @@ export function TripItemCard({ item, canEdit = true }: TripItemCardProps) {
                       }`}
                     >
                       <Sparkles className="h-3 w-3" />
-                      <span>
-                        {isNew ? "Nuevo" : "Editado"}
-                      </span>
+                      <span>{isNew ? "Nuevo" : "Editado"}</span>
                     </Badge>
                   )}
                 </div>

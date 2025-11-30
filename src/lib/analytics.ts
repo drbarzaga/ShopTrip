@@ -139,5 +139,13 @@ export const analytics = {
   enableNotifications: () => {
     trackEvent("enable_notifications");
   },
+  
+  // Función genérica para eventos personalizados
+  trackEvent: (eventName: string, eventParams?: Record<string, unknown>) => {
+    if (typeof window === "undefined" || !window.gtag) {
+      return;
+    }
+    window.gtag("event", eventName, eventParams);
+  },
 };
 

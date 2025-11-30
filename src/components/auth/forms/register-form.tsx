@@ -16,6 +16,7 @@ import { SignUpInput, signUpSchema } from "@/schemas";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/lib/toast";
+import { analytics } from "@/lib/analytics";
 
 const INITIAL_STATE: ActionResult<{ redirectTo?: string }> = {
   success: false,
@@ -92,7 +93,6 @@ function RegisterForm() {
   useEffect(() => {
     // Trackear registro exitoso
     if (formState.success) {
-      const { analytics } = require("@/lib/analytics");
       analytics.signUp("email");
     }
   }, [formState.success]);

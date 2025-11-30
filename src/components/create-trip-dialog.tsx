@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
+import { analytics } from "@/lib/analytics";
 import {
   Dialog,
   DialogContent,
@@ -51,7 +52,6 @@ export function CreateTripDialog({
       if (result.success && result.data) {
         // Trackear creación de viaje
         const formDataObj = Object.fromEntries(formData.entries());
-        const { analytics } = require("@/lib/analytics");
         analytics.createTrip(formDataObj.name as string);
         
         toast.success("Viaje creado exitosamente", {
@@ -82,7 +82,6 @@ export function CreateTripDialog({
 
       if (result.success && result.data) {
         // Trackear creación de viaje con IA
-        const { analytics } = require("@/lib/analytics");
         analytics.useAICreateTrip();
         analytics.createTrip();
         

@@ -25,10 +25,11 @@ interface Item {
 
 interface ItemsListProps {
   items: Item[];
+  tripId?: string;
   canEdit?: boolean;
 }
 
-export function ItemsList({ items, canEdit = true }: ItemsListProps) {
+export function ItemsList({ items, tripId, canEdit = true }: ItemsListProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredItems = useMemo(() => {
@@ -91,7 +92,7 @@ export function ItemsList({ items, canEdit = true }: ItemsListProps) {
       ) : (
         <div className="space-y-2">
           {filteredItems.map((item) => (
-            <TripItemCard key={item.id} item={item} canEdit={canEdit} />
+            <TripItemCard key={item.id} item={item} tripId={tripId} canEdit={canEdit} />
           ))}
         </div>
       )}

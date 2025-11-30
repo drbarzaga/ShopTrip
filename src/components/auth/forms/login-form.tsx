@@ -17,6 +17,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
+import { analytics } from "@/lib/analytics";
 
 const INITIAL_STATE: ActionResult<{ email: string; password: string }> = {
   success: false,
@@ -84,7 +85,6 @@ function LoginForm() {
 
     if (formState.success) {
       // Trackear login exitoso
-      const { analytics } = require("@/lib/analytics");
       analytics.login("email");
       router.push("/dashboard");
     }

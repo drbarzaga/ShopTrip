@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
+import { analytics } from "@/lib/analytics";
 import {
   Dialog,
   DialogContent,
@@ -50,7 +51,6 @@ export function CreateOrganizationDialog({
 
       if (result.success && result.data) {
         // Trackear creación de organización
-        const { analytics } = require("@/lib/analytics");
         analytics.createOrganization();
         
         toast.success("Organización creada", {

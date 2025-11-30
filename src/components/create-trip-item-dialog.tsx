@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
+import { analytics } from "@/lib/analytics";
 import {
   Dialog,
   DialogContent,
@@ -50,8 +51,6 @@ export function CreateTripItemDialog({
 
       if (result.success && result.data) {
         // Trackear creación de artículo
-        const formDataObj = Object.fromEntries(formData.entries());
-        const { analytics } = require("@/lib/analytics");
         analytics.createItem(tripId);
         
         toast.success("Artículo agregado", {
@@ -79,7 +78,6 @@ export function CreateTripItemDialog({
 
       if (result.success && result.data) {
         // Trackear creación de artículo con IA
-        const { analytics } = require("@/lib/analytics");
         analytics.useAICreateItem();
         analytics.createItem(tripId);
         

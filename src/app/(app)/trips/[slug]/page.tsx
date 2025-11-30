@@ -289,7 +289,7 @@ export default async function TripDetailPage({
               </CardContent>
             </Card>
           ) : (
-            <ItemsList items={itemsWithFormattedPrices} canEdit={canEdit} />
+            <ItemsList items={itemsWithFormattedPrices} tripId={tripData.id} canEdit={canEdit} />
           )}
         </div>
       </div>

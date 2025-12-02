@@ -78,7 +78,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Calendar, ShoppingCart } from "lucide-react";
 import Link from "next/link";
-import { ItemsList } from "@/components/items-list";
+import { TripItemsWrapper } from "@/components/trip-items-wrapper";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { EditTripDialog } from "@/components/edit-trip-dialog";
 import { DeleteTripDialog } from "@/components/delete-trip-dialog";
@@ -308,7 +308,7 @@ export default async function TripDetailPage({
               </CardContent>
             </Card>
           ) : (
-            <ItemsList
+            <TripItemsWrapper
               items={itemsWithFormattedPrices}
               tripId={tripData.id}
               canEdit={canEdit}

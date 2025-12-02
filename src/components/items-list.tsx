@@ -31,13 +31,32 @@ interface ItemsListProps {
   canEdit?: boolean;
   view?: ViewMode;
   onViewChange?: (view: ViewMode) => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
+  searchInputId?: string;
 }
 
 const VIEW_STORAGE_KEY = "trip-items-view-mode";
 
-export function ItemsList({ items, tripId, canEdit = true }: ItemsListProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [view, setView] = useState<ViewMode>("list");
+export function ItemsList({ 
+  items, 
+  tripId, 
+  canEdit = true,
+  view: externalView,
+  onViewChange: externalOnViewChange,
+  searchQuery: externalSearchQuery,
+  onSearchChange: externalOnSearchChange,
+  searchInputId = "trip-items-search",
+}: ItemsListProps) {
+  const [internalSearchQuery, setInternalSearchQuery] = useState("");
+  const [internalView, setInternalView] = useState<ViewMode>("list");
+  
+  // Usar estado externo si se proporciona, sino usar interno
+  const searchQuery = externalSearchQuery ?? internalSearchQuery;
+  const view = externalView ?? internalView;
+  
+  const setSearchQuery = externalOnSearchChange ?? setInternalSearchQuery;
+  const setView = externalOnViewChange ?? setInternalView;
 
   // Cargar preferencia de vista desde localStorage
   useEffect(() => {
@@ -74,7 +93,7 @@ export function ItemsList({ items, tripId, canEdit = true }: ItemsListProps) {
     <div className="space-y-3">
       {/* Buscador */}
       {items.length > 0 && (
-        <div className="relative">
+        <div id={searchInputId} className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"

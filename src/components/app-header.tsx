@@ -13,6 +13,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { getAppName } from "@/lib/utils";
 import { LogoIcon } from "@/components/shared/logo";
+import { HeaderDesktop } from "@/components/header-desktop";
 
 export async function AppHeader() {
   const session = await getSession();
@@ -74,45 +75,13 @@ export async function AppHeader() {
       </header>
 
       {/* Header desktop */}
-      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 hidden md:block">
-        <div className="container mx-auto px-6 py-3.5 max-w-7xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2.5 hover:opacity-80 transition-all duration-200 group"
-              >
-                <div className="transition-transform duration-200 group-hover:scale-105">
-                  <LogoIcon className="h-8 w-8 sm:h-10 sm:w-10" />
-                </div>
-                <h1 className="text-lg font-semibold truncate bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-                  {getAppName()}
-                </h1>
-              </Link>
-            </div>
-            <div className="flex items-center gap-2">
-              <OrganizationSelector
-                organizations={organizations}
-                activeOrganizationId={activeOrganizationId}
-              />
-              <Link href="/trips">
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <Plane className="h-4 w-4" />
-                  <span>Mis Viajes</span>
-                </Button>
-              </Link>
-              <NotificationsDropdown />
-              <ThemeSelector />
-              <ThemeToggle />
-              <UserMenu
-                userName={session.user.name}
-                userEmail={session.user.email}
-                userImage={session.user.image}
-              />
-            </div>
-          </div>
-        </div>
-      </header>
+      <HeaderDesktop
+        organizations={organizations}
+        activeOrganizationId={activeOrganizationId}
+        userName={session.user.name}
+        userEmail={session.user.email}
+        userImage={session.user.image}
+      />
     </>
   );
 }

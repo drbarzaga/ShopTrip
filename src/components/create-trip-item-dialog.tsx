@@ -46,15 +46,20 @@ export function CreateTripItemDialog({
     formData.append("tripId", tripId);
     
     startTransition(async () => {
-      const result = await createTripItemAction(state, formData);
+      // Usar wrapper offline que detecta automáticamente si estamos offline
+      const { createTripItemOfflineWrapper } = await import("@/lib/offline/wrappers");
+      const result = await createTripItemOfflineWrapper(state, formData);
       setState(result);
 
       if (result.success && result.data) {
         // Trackear creación de artículo
         analytics.createItem(tripId);
         
+        const isOffline = result.message?.includes("offline") || false;
         toast.success("Artículo agregado", {
-          description: "El artículo ha sido agregado a tu lista.",
+          description: isOffline
+            ? "Guardado offline. Se sincronizará cuando recuperes la conexión."
+            : "El artículo ha sido agregado a tu lista.",
         });
         setOpen(false);
         setState(null);

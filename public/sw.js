@@ -41,11 +41,52 @@ self.addEventListener("activate", function (event) {
 
 // Interceptar requests y servir desde cache si está disponible
 self.addEventListener("fetch", function (event) {
+  // Solo cachear requests GET para recursos estáticos
+  if (event.request.method !== "GET") {
+    return; // Dejar que las requests POST/PUT/DELETE pasen directamente
+  }
+
+  // Estrategia: Network First, luego Cache
+  // Para la app shell (HTML, CSS, JS), usar cache primero
+  // Para datos de API, intentar network primero
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Retornar desde cache si está disponible, sino hacer fetch
-      return response || fetch(event.request);
-    })
+    fetch(event.request)
+      .then((response) => {
+        // Si la respuesta es exitosa, cachearla
+        if (response.status === 200) {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            // Solo cachear recursos estáticos, no datos dinámicos
+            const url = new URL(event.request.url);
+            if (
+              url.pathname.startsWith("/_next/static") ||
+              url.pathname.startsWith("/icon") ||
+              url.pathname.startsWith("/apple-icon") ||
+              url.pathname === "/manifest.json"
+            ) {
+              cache.put(event.request, responseToCache);
+            }
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        // Si falla la red, intentar servir desde cache
+        return caches.match(event.request).then((response) => {
+          if (response) {
+            return response;
+          }
+          // Si no hay cache y estamos offline, retornar una respuesta básica para la app
+          if (event.request.destination === "document") {
+            return new Response("Offline - App no disponible", {
+              status: 503,
+              statusText: "Service Unavailable",
+              headers: { "Content-Type": "text/plain" },
+            });
+          }
+          throw new Error("No cache available");
+        });
+      })
   );
 });
 

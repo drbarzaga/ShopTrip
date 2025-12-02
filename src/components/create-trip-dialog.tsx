@@ -46,7 +46,9 @@ export function CreateTripDialog({
 
   const handleSubmit = async (formData: FormData) => {
     startTransition(async () => {
-      const result = await createTripAction(state, formData);
+      // Usar wrapper offline que detecta automáticamente si estamos offline
+      const { createTripOfflineWrapper } = await import("@/lib/offline/wrappers");
+      const result = await createTripOfflineWrapper(state, formData);
       setState(result);
 
       if (result.success && result.data) {
@@ -54,15 +56,19 @@ export function CreateTripDialog({
         const formDataObj = Object.fromEntries(formData.entries());
         analytics.createTrip(formDataObj.name as string);
         
+        const isOffline = result.message?.includes("offline") || false;
         toast.success("Viaje creado exitosamente", {
-          description: "Tu nuevo viaje ha sido agregado.",
+          description: isOffline
+            ? "Guardado offline. Se sincronizará cuando recuperes la conexión."
+            : "Tu nuevo viaje ha sido agregado.",
         });
         setOpen(false);
         setState(null);
         
         if (onSuccess) {
           onSuccess();
-        } else if (redirectOnSuccess) {
+        } else if (redirectOnSuccess && !isOffline) {
+          // Solo redirigir si está online (los datos offline se mostrarán en la lista)
           router.push(`/trips/${result.data.slug}`);
         } else {
           router.refresh();

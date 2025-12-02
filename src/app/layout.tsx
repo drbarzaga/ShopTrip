@@ -4,6 +4,7 @@ import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 import { PWASplashScreen } from "@/components/pwa-splash-screen";
 import { AnalyticsProvider } from "@/components/analytics-provider";
+import { OfflineProvider } from "@/components/offline-provider";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -165,7 +166,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AnalyticsProvider />
-          {children}
+          <OfflineProvider>
+            {children}
+          </OfflineProvider>
           <Toaster position="bottom-right" />
         </ThemeProvider>
       </body>

@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, MapPin, Calendar, Plane } from "lucide-react";
 import type { ViewMode } from "@/components/view-selector";
 import { cn } from "@/lib/utils";
+import { useCityImage } from "@/hooks/use-city-image";
 
 interface TripCardProps {
   readonly trip: {
@@ -64,6 +66,7 @@ function formatDaysRemaining(days: number): string {
 
 export function TripCard({ trip, view = "list" }: TripCardProps) {
   const daysRemaining = getDaysUntilTrip(trip.startDate);
+  const { imageUrl, isLoading: imageLoading } = useCityImage(trip.destination);
   
   // Vista compacta
   if (view === "compact") {
@@ -111,18 +114,46 @@ export function TripCard({ trip, view = "list" }: TripCardProps) {
   // Vista grid
   if (view === "grid") {
     return (
-      <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-        <CardContent className="p-4 flex flex-col gap-3">
+      <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 overflow-hidden">
+        {/* Imagen de fondo */}
+        {imageUrl && (
+          <div className="absolute inset-0 z-0">
+            <Image
+              src={imageUrl}
+              alt={trip.destination || trip.name}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+            {/* Overlay oscuro para mejor legibilidad */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
+          </div>
+        )}
+        <CardContent className="p-4 flex flex-col gap-3 relative z-10">
           <div className="flex items-center justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted transition-all duration-300 group-hover:bg-primary/10 group-hover:scale-110">
-              <Plane className="h-6 w-6 text-muted-foreground transition-all duration-300 group-hover:text-primary" />
-            </div>
+            {imageUrl ? (
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
+                <Plane className="h-6 w-6 text-white transition-all duration-300 group-hover:text-primary" />
+              </div>
+            ) : (
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted transition-all duration-300 group-hover:bg-primary/10 group-hover:scale-110">
+                <Plane className="h-6 w-6 text-muted-foreground transition-all duration-300 group-hover:text-primary" />
+              </div>
+            )}
           </div>
           <div className="text-center">
-            <h3 className="text-base font-semibold mb-2 line-clamp-2">{trip.name}</h3>
+            <h3 className={cn(
+              "text-base font-semibold mb-2 line-clamp-2",
+              imageUrl && "text-white drop-shadow-lg"
+            )}>
+              {trip.name}
+            </h3>
             {trip.destination && (
-              <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground mb-2">
-                <MapPin className="h-3.5 w-3.5 shrink-0" />
+              <div className={cn(
+                "flex items-center justify-center gap-1.5 text-sm mb-2",
+                imageUrl ? "text-white/90" : "text-muted-foreground"
+              )}>
+                <MapPin className={cn("h-3.5 w-3.5 shrink-0", imageUrl && "text-white")} />
                 <span className="truncate">{trip.destination}</span>
               </div>
             )}
@@ -131,13 +162,14 @@ export function TripCard({ trip, view = "list" }: TripCardProps) {
                 variant="outline"
                 className={cn(
                   "text-xs font-medium",
+                  imageUrl && "bg-white/10 backdrop-blur-sm border-white/30 text-white",
                   daysRemaining < 0
-                    ? "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
+                    ? !imageUrl && "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
                     : daysRemaining === 0
-                      ? "border-orange-300/50 bg-orange-100/80 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300"
+                      ? !imageUrl && "border-orange-300/50 bg-orange-100/80 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300"
                       : daysRemaining <= 7
-                        ? "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-                        : "border-primary/30 bg-primary/10 text-primary"
+                        ? !imageUrl && "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                        : !imageUrl && "border-primary/30 bg-primary/10 text-primary"
                 )}
               >
                 {formatDaysRemaining(daysRemaining)}
@@ -157,19 +189,47 @@ export function TripCard({ trip, view = "list" }: TripCardProps) {
   // Vista cards (optimizada para móvil)
   if (view === "cards") {
     return (
-      <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md">
-        <CardContent className="p-4 sm:p-6">
+      <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md overflow-hidden">
+        {/* Imagen de fondo */}
+        {imageUrl && (
+          <div className="absolute inset-0 z-0">
+            <Image
+              src={imageUrl}
+              alt={trip.destination || trip.name}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+            {/* Overlay oscuro para mejor legibilidad */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+          </div>
+        )}
+        <CardContent className="p-4 sm:p-6 relative z-10">
           <div className="flex items-start gap-4 mb-4">
             <div className="shrink-0">
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted transition-all duration-300 group-hover:bg-primary/10">
-                <Plane className="h-6 w-6 text-muted-foreground transition-all duration-300 group-hover:text-primary" />
-              </div>
+              {imageUrl ? (
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 group-hover:bg-white/20">
+                  <Plane className="h-6 w-6 text-white transition-all duration-300 group-hover:text-primary" />
+                </div>
+              ) : (
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted transition-all duration-300 group-hover:bg-primary/10">
+                  <Plane className="h-6 w-6 text-muted-foreground transition-all duration-300 group-hover:text-primary" />
+                </div>
+              )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold mb-2">{trip.name}</h3>
+              <h3 className={cn(
+                "text-lg font-semibold mb-2",
+                imageUrl && "text-white drop-shadow-lg"
+              )}>
+                {trip.name}
+              </h3>
               {trip.destination && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                  <MapPin className="h-4 w-4 shrink-0" />
+                <div className={cn(
+                  "flex items-center gap-2 text-sm mb-2",
+                  imageUrl ? "text-white/90" : "text-muted-foreground"
+                )}>
+                  <MapPin className={cn("h-4 w-4 shrink-0", imageUrl && "text-white")} />
                   <span>{trip.destination}</span>
                 </div>
               )}
@@ -177,17 +237,20 @@ export function TripCard({ trip, view = "list" }: TripCardProps) {
           </div>
           
           {(trip.startDate || trip.endDate) && (
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
+            <div className={cn(
+              "flex flex-wrap items-center gap-x-4 gap-y-2 text-sm mb-4",
+              imageUrl ? "text-white/80" : "text-muted-foreground"
+            )}>
               {trip.startDate && (
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4 shrink-0" />
+                  <Calendar className={cn("h-4 w-4 shrink-0", imageUrl && "text-white")} />
                   <span>{formatDate(trip.startDate)}</span>
                 </div>
               )}
               {trip.endDate && trip.startDate && <span>→</span>}
               {trip.endDate && (
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4 shrink-0" />
+                  <Calendar className={cn("h-4 w-4 shrink-0", imageUrl && "text-white")} />
                   <span>{formatDate(trip.endDate)}</span>
                 </div>
               )}
@@ -200,18 +263,22 @@ export function TripCard({ trip, view = "list" }: TripCardProps) {
                 variant="outline"
                 className={cn(
                   "text-xs font-medium",
+                  imageUrl && "bg-white/10 backdrop-blur-sm border-white/30 text-white",
                   daysRemaining < 0
-                    ? "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
+                    ? !imageUrl && "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
                     : daysRemaining === 0
-                      ? "border-orange-300/50 bg-orange-100/80 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300"
+                      ? !imageUrl && "border-orange-300/50 bg-orange-100/80 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300"
                       : daysRemaining <= 7
-                        ? "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-                        : "border-primary/30 bg-primary/10 text-primary"
+                        ? !imageUrl && "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                        : !imageUrl && "border-primary/30 bg-primary/10 text-primary"
                 )}
               >
                 {formatDaysRemaining(daysRemaining)}
               </Badge>
-              <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:text-primary" />
+              <ArrowRight className={cn(
+                "h-4 w-4 transition-transform duration-300 group-hover:translate-x-1",
+                imageUrl ? "text-white group-hover:text-primary" : "text-muted-foreground group-hover:text-primary"
+              )} />
             </div>
           )}
 
@@ -227,8 +294,22 @@ export function TripCard({ trip, view = "list" }: TripCardProps) {
 
   // Vista lista (por defecto)
   return (
-    <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 active:shadow-md active:-translate-y-0.5 active:scale-[0.98]">
-      <CardContent className={cn("relative p-4 sm:p-6", daysRemaining !== null && 'sm:pb-6')}>
+    <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 active:shadow-md active:-translate-y-0.5 active:scale-[0.98] overflow-hidden">
+      {/* Imagen de fondo (solo en desktop para vista lista) */}
+      {imageUrl && (
+        <div className="hidden sm:block absolute inset-0 z-0 w-48">
+          <Image
+            src={imageUrl}
+            alt={trip.destination || trip.name}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="192px"
+          />
+          {/* Overlay para mejor legibilidad */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
+        </div>
+      )}
+      <CardContent className={cn("relative p-4 sm:p-6", daysRemaining !== null && 'sm:pb-6', imageUrl && 'sm:pl-56')}>
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Icono */}
           <div className="shrink-0">

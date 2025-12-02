@@ -89,6 +89,7 @@ import { TripDaysRemainingBadge } from "@/components/trip-days-remaining-badge";
 import { TrackTripView } from "./track-view";
 import { AISuggestionsBanner } from "@/components/ai-suggestions-banner";
 import { getTripSuggestionsBySlug } from "@/actions/ai/suggestions";
+import { TripCityImage } from "@/components/trip-city-image";
 
 function formatDate(date: Date | null): string {
   if (!date) return "No establecida";
@@ -197,9 +198,12 @@ export default async function TripDetailPage({
             </Button>
           </Link>
           <div className="flex items-start justify-between gap-3 sm:gap-4 mb-3">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex-1 min-w-0">
-              {tripData.name}
-            </h1>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <TripCityImage destination={tripData.destination} size="md" />
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex-1 min-w-0">
+                {tripData.name}
+              </h1>
+            </div>
             <div className="flex items-center gap-2 shrink-0">
               <RefreshButton />
               {canEdit && (

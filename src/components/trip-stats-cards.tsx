@@ -19,15 +19,15 @@ export function TripStatsCards({
   currency,
 }: TripStatsCardsProps) {
   return (
-    <div className="grid gap-3 grid-cols-2 sm:gap-4 mb-6">
+    <div className="grid gap-3 grid-cols-2 sm:gap-4 mb-6 [&>*]:min-w-0">
       {/* Total Gastado - Primero */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-4 sm:p-6">
-          <CardTitle className="text-xs sm:text-sm font-medium">Total Gastado</CardTitle>
-          <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+          <CardTitle className="text-xs sm:text-sm font-medium min-w-0 flex-1">Total Gastado</CardTitle>
+          <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-primary shrink-0 ml-2" />
         </CardHeader>
-        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-          <div className="text-xl sm:text-2xl font-bold">
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0 min-w-0 overflow-hidden">
+          <div className="text-lg sm:text-xl lg:text-2xl font-bold break-words leading-tight">
             <AnimatedCurrency value={totalSpent} currency={currency} />
           </div>
         </CardContent>

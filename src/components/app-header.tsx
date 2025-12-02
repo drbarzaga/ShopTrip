@@ -1,9 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth-server";
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ThemeSelector } from "@/components/theme-selector";
-import { Plane } from "lucide-react";
 import Link from "next/link";
 import { OrganizationSelector } from "@/components/organization-selector";
 import { UserMenu } from "@/components/user-menu";
@@ -79,8 +77,8 @@ export async function AppHeader() {
         organizations={organizations}
         activeOrganizationId={activeOrganizationId}
         userName={session.user.name}
-        userEmail={session.user.email}
-        userImage={session.user.image}
+        userEmail={session.user.email ?? null}
+        userImage={session.user.image ?? null}
       />
     </>
   );

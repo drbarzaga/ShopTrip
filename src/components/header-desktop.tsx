@@ -17,6 +17,8 @@ interface HeaderDesktopProps {
     id: string;
     name: string;
     slug: string;
+    logo: string | null;
+    role: string | null;
   }>;
   activeOrganizationId: string | null;
   userName: string;
@@ -48,10 +50,10 @@ export function HeaderDesktop({
               </h1>
             </Link>
           </div>
-          
+
           {/* Buscador sticky en el centro */}
           <HeaderStickySearch />
-          
+
           <div className="flex items-center gap-2 flex-1 justify-end">
             <OrganizationSelector
               organizations={organizations}
@@ -77,4 +79,3 @@ export function HeaderDesktop({
     </header>
   );
 }
-

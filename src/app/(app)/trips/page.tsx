@@ -20,7 +20,7 @@ export default async function TripsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      <div className="container mx-auto py-4 px-4 max-w-2xl sm:py-6 sm:px-6">
+      <div className="container mx-auto py-4 px-4 max-w-2xl lg:max-w-4xl xl:max-w-5xl sm:py-6 sm:px-6">
         {/* Breadcrumbs */}
         <Breadcrumbs items={[{ label: "Mis Viajes" }]} />
         

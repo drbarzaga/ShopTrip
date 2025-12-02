@@ -24,7 +24,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      <div className="container mx-auto py-6 sm:py-8 px-4 sm:px-6 max-w-5xl">
+      <div className="container mx-auto py-6 sm:py-8 px-4 sm:px-6 max-w-5xl lg:max-w-6xl xl:max-w-7xl">
         {/* Breadcrumbs */}
         <Breadcrumbs items={[{ label: "Configuración" }]} />
 

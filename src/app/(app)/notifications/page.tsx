@@ -15,7 +15,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl">
+      <div className="container mx-auto py-4 sm:py-6 px-3 sm:px-4 max-w-2xl lg:max-w-4xl xl:max-w-5xl">
         <Breadcrumbs
           items={[
             { label: "Dashboard", href: "/dashboard" },

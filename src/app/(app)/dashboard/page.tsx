@@ -44,7 +44,7 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-background pb-16">
       <TrackDashboardView />
-      <div className="container mx-auto py-4 px-4 max-w-4xl sm:py-6 sm:px-6">
+      <div className="container mx-auto py-4 px-4 max-w-4xl lg:max-w-6xl xl:max-w-7xl sm:py-6 sm:px-6">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2">Dashboard</h1>

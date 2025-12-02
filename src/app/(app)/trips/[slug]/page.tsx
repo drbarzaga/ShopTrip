@@ -280,7 +280,7 @@ export default async function TripDetailPage({
 
         {/* Items List */}
         <div className="space-y-4 mt-4">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
               Artículos
             </h2>

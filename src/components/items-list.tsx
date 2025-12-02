@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { TripItemCard } from "@/components/trip-item-card";
+import { ViewSelector, type ViewMode } from "@/components/view-selector";
+import { cn } from "@/lib/utils";
 
 interface Item {
   id: string;
@@ -27,10 +29,33 @@ interface ItemsListProps {
   items: Item[];
   tripId?: string;
   canEdit?: boolean;
+  view?: ViewMode;
+  onViewChange?: (view: ViewMode) => void;
 }
+
+const VIEW_STORAGE_KEY = "trip-items-view-mode";
 
 export function ItemsList({ items, tripId, canEdit = true }: ItemsListProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [view, setView] = useState<ViewMode>("list");
+
+  // Cargar preferencia de vista desde localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedView = localStorage.getItem(VIEW_STORAGE_KEY) as ViewMode;
+      if (savedView && ["list", "grid", "compact", "cards"].includes(savedView)) {
+        setView(savedView);
+      }
+    }
+  }, []);
+
+  // Guardar preferencia de vista en localStorage
+  const handleViewChange = (newView: ViewMode) => {
+    setView(newView);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(VIEW_STORAGE_KEY, newView);
+    }
+  };
 
   const filteredItems = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -71,6 +96,15 @@ export function ItemsList({ items, tripId, canEdit = true }: ItemsListProps) {
           )}
         </div>
       )}
+      
+      {/* Selector de vista - siempre visible cuando hay items */}
+      {items.length > 0 && (
+        <div className="flex items-center gap-3 py-2 px-1">
+          <span className="text-sm font-medium text-foreground whitespace-nowrap">Vista:</span>
+          <ViewSelector view={view} onViewChange={handleViewChange} />
+        </div>
+      )}
+
 
       {/* Lista de items */}
       {filteredItems.length === 0 ? (
@@ -90,9 +124,25 @@ export function ItemsList({ items, tripId, canEdit = true }: ItemsListProps) {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-2">
+        <div
+          className={cn(
+            view === "grid"
+              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+              : view === "cards"
+                ? "grid grid-cols-1 sm:grid-cols-2 gap-4"
+                : view === "compact"
+                  ? "space-y-1.5"
+                  : "space-y-2"
+          )}
+        >
           {filteredItems.map((item) => (
-            <TripItemCard key={item.id} item={item} tripId={tripId} canEdit={canEdit} />
+            <TripItemCard
+              key={item.id}
+              item={item}
+              tripId={tripId}
+              canEdit={canEdit}
+              view={view}
+            />
           ))}
         </div>
       )}

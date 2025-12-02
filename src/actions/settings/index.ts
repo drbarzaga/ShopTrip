@@ -2,21 +2,19 @@
 
 import { db } from "@/db";
 import { user } from "@/db/schema";
-import { success, failure } from "@/lib/actions/helpers";
-import type { ActionResult } from "@/types/actions";
-import { getSession } from "@/lib/auth-server";
-import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
+import { getSession } from "@/lib/auth-server";
 import type { Currency } from "@/lib/currency";
 
 /**
- * Obtiene la moneda preferida del usuario
+ * Obtiene la moneda preferida del usuario actual
  */
 export async function getUserPreferredCurrency(): Promise<Currency> {
   try {
     const session = await getSession();
-    if (!session) {
-      return "UYU"; // Valor por defecto
+    
+    if (!session?.user?.id) {
+      return "UYU"; // Valor por defecto si no hay sesión
     }
 
     const userData = await db
@@ -25,33 +23,45 @@ export async function getUserPreferredCurrency(): Promise<Currency> {
       .where(eq(user.id, session.user.id))
       .limit(1);
 
-    if (userData.length === 0) {
-      return "UYU";
+    if (userData.length === 0 || !userData[0].preferredCurrency) {
+      return "UYU"; // Valor por defecto
     }
 
     const currency = userData[0].preferredCurrency as Currency;
-    return currency === "USD" ? "USD" : "UYU";
+    // Validar que sea una moneda válida
+    if (currency === "UYU" || currency === "USD") {
+      return currency;
+    }
+
+    return "UYU"; // Valor por defecto si no es válida
   } catch (error) {
     console.error("Error getting user preferred currency:", error);
-    return "UYU";
+    return "UYU"; // Valor por defecto en caso de error
   }
 }
 
 /**
- * Actualiza la moneda preferida del usuario
+ * Actualiza la moneda preferida del usuario actual
  */
 export async function updatePreferredCurrencyAction(
   currency: Currency
-): Promise<ActionResult<void>> {
+): Promise<{ success: boolean; message?: string }> {
   try {
     const session = await getSession();
-    if (!session) {
-      redirect("/login");
+
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        message: "No se encontró la sesión del usuario",
+      };
     }
 
     // Validar que la moneda sea válida
     if (currency !== "UYU" && currency !== "USD") {
-      return await failure("Moneda no válida");
+      return {
+        success: false,
+        message: "Moneda no válida",
+      };
     }
 
     await db
@@ -59,16 +69,15 @@ export async function updatePreferredCurrencyAction(
       .set({ preferredCurrency: currency })
       .where(eq(user.id, session.user.id));
 
-    return await success(undefined, "Moneda actualizada exitosamente");
+    return {
+      success: true,
+      message: "Moneda preferida actualizada exitosamente",
+    };
   } catch (error) {
     console.error("Error updating preferred currency:", error);
-    const message =
-      (error as Error).message || "Ocurrió un error al actualizar la moneda";
-    return await failure(message);
+    return {
+      success: false,
+      message: "Error al actualizar la moneda preferida",
+    };
   }
 }
-
-
-
-
-

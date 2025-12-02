@@ -4,10 +4,9 @@ import { getSession } from "@/lib/auth-server";
 export const dynamic = 'force-dynamic';
 import { getTrips } from "@/actions/trips";
 import { CreateTripDialog } from "@/components/create-trip-dialog";
-import { Card, CardContent } from "@/components/ui/card";
 import { MapPin } from "lucide-react";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { TripCard } from "@/components/trip-card";
+import { TripsList } from "@/components/trips-list";
 
 export default async function TripsPage() {
   const session = await getSession();
@@ -33,34 +32,23 @@ export default async function TripsPage() {
         </div>
 
         {/* Trips List */}
-        {trips.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center p-8 sm:p-12 text-center">
-              <MapPin className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Aún no hay viajes</h3>
-              <p className="text-sm text-muted-foreground mb-6 max-w-sm">
-                Crea tu primer viaje para comenzar a planificar tu aventura
-              </p>
-              <CreateTripDialog />
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {trips.map((trip) => (
-              <TripCard
-                key={trip.id}
-                trip={{
-                  id: trip.id,
-                  name: trip.name,
-                  slug: trip.slug,
-                  destination: trip.destination,
-                  startDate: trip.startDate,
-                  endDate: trip.endDate,
-                }}
-              />
-            ))}
-          </div>
-        )}
+        <TripsList
+          trips={trips.map((trip) => ({
+            id: trip.id,
+            name: trip.name,
+            slug: trip.slug,
+            destination: trip.destination,
+            startDate: trip.startDate,
+            endDate: trip.endDate,
+          }))}
+          emptyState={{
+            icon: <MapPin className="h-12 w-12 text-muted-foreground mb-4" />,
+            title: "Aún no hay viajes",
+            description: "Crea tu primer viaje para comenzar a planificar tu aventura",
+            action: <CreateTripDialog />,
+          }}
+          storageKey="trips-page"
+        />
       </div>
     </div>
   );

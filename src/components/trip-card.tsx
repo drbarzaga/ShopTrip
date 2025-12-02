@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, MapPin, Calendar, Plane } from "lucide-react";
+import type { ViewMode } from "@/components/view-selector";
+import { cn } from "@/lib/utils";
 
 interface TripCardProps {
   readonly trip: {
@@ -14,6 +16,7 @@ interface TripCardProps {
     readonly startDate: Date | null;
     readonly endDate: Date | null;
   };
+  view?: ViewMode;
 }
 
 function formatDate(date: Date | null): string {
@@ -59,12 +62,173 @@ function formatDaysRemaining(days: number): string {
   return `${days} días restantes`;
 }
 
-export function TripCard({ trip }: TripCardProps) {
+export function TripCard({ trip, view = "list" }: TripCardProps) {
   const daysRemaining = getDaysUntilTrip(trip.startDate);
   
+  // Vista compacta
+  if (view === "compact") {
+    return (
+      <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md">
+        <CardContent className="p-3">
+          <div className="flex items-center gap-3">
+            <div className="shrink-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted transition-all duration-300 group-hover:bg-primary/10">
+                <Plane className="h-4 w-4 text-muted-foreground transition-all duration-300 group-hover:text-primary" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-medium truncate">{trip.name}</h3>
+            </div>
+            {daysRemaining !== null && (
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-xs font-medium whitespace-nowrap shrink-0",
+                  daysRemaining < 0
+                    ? "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
+                    : daysRemaining === 0
+                      ? "border-orange-300/50 bg-orange-100/80 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300"
+                      : daysRemaining <= 7
+                        ? "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                        : "border-primary/30 bg-primary/10 text-primary"
+                )}
+              >
+                {formatDaysRemaining(daysRemaining)}
+              </Badge>
+            )}
+            <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:text-primary" />
+          </div>
+          <Link
+            href={`/trips/${trip.slug}`}
+            className="absolute inset-0 z-10"
+            aria-label={`Ver detalles de ${trip.name}`}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Vista grid
+  if (view === "grid") {
+    return (
+      <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+        <CardContent className="p-4 flex flex-col gap-3">
+          <div className="flex items-center justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted transition-all duration-300 group-hover:bg-primary/10 group-hover:scale-110">
+              <Plane className="h-6 w-6 text-muted-foreground transition-all duration-300 group-hover:text-primary" />
+            </div>
+          </div>
+          <div className="text-center">
+            <h3 className="text-base font-semibold mb-2 line-clamp-2">{trip.name}</h3>
+            {trip.destination && (
+              <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground mb-2">
+                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{trip.destination}</span>
+              </div>
+            )}
+            {daysRemaining !== null && (
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-xs font-medium",
+                  daysRemaining < 0
+                    ? "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
+                    : daysRemaining === 0
+                      ? "border-orange-300/50 bg-orange-100/80 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300"
+                      : daysRemaining <= 7
+                        ? "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                        : "border-primary/30 bg-primary/10 text-primary"
+                )}
+              >
+                {formatDaysRemaining(daysRemaining)}
+              </Badge>
+            )}
+          </div>
+          <Link
+            href={`/trips/${trip.slug}`}
+            className="absolute inset-0 z-10"
+            aria-label={`Ver detalles de ${trip.name}`}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Vista cards (optimizada para móvil)
+  if (view === "cards") {
+    return (
+      <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="shrink-0">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted transition-all duration-300 group-hover:bg-primary/10">
+                <Plane className="h-6 w-6 text-muted-foreground transition-all duration-300 group-hover:text-primary" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold mb-2">{trip.name}</h3>
+              {trip.destination && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                  <MapPin className="h-4 w-4 shrink-0" />
+                  <span>{trip.destination}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {(trip.startDate || trip.endDate) && (
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground mb-4">
+              {trip.startDate && (
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 shrink-0" />
+                  <span>{formatDate(trip.startDate)}</span>
+                </div>
+              )}
+              {trip.endDate && trip.startDate && <span>→</span>}
+              {trip.endDate && (
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-4 w-4 shrink-0" />
+                  <span>{formatDate(trip.endDate)}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {daysRemaining !== null && (
+            <div className="flex items-center justify-between">
+              <Badge
+                variant="outline"
+                className={cn(
+                  "text-xs font-medium",
+                  daysRemaining < 0
+                    ? "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
+                    : daysRemaining === 0
+                      ? "border-orange-300/50 bg-orange-100/80 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300"
+                      : daysRemaining <= 7
+                        ? "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
+                        : "border-primary/30 bg-primary/10 text-primary"
+                )}
+              >
+                {formatDaysRemaining(daysRemaining)}
+              </Badge>
+              <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:text-primary" />
+            </div>
+          )}
+
+          <Link
+            href={`/trips/${trip.slug}`}
+            className="absolute inset-0 z-10"
+            aria-label={`Ver detalles de ${trip.name}`}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Vista lista (por defecto)
   return (
     <Card className="group relative cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 active:shadow-md active:-translate-y-0.5 active:scale-[0.98]">
-      <CardContent className={`relative p-4 sm:p-6 ${daysRemaining !== null ? 'sm:pb-6' : ''}`}>
+      <CardContent className={cn("relative p-4 sm:p-6", daysRemaining !== null && 'sm:pb-6')}>
         <div className="flex items-start gap-3 sm:gap-4">
           {/* Icono */}
           <div className="shrink-0">
@@ -96,7 +260,8 @@ export function TripCard({ trip }: TripCardProps) {
                   {daysRemaining !== null && (
                     <Badge
                       variant="outline"
-                      className={`text-xs font-medium whitespace-nowrap sm:hidden ${
+                      className={cn(
+                        "text-xs font-medium whitespace-nowrap sm:hidden",
                         daysRemaining < 0
                           ? "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
                           : daysRemaining === 0
@@ -104,7 +269,7 @@ export function TripCard({ trip }: TripCardProps) {
                             : daysRemaining <= 7
                               ? "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
                               : "border-primary/30 bg-primary/10 text-primary"
-                      }`}
+                      )}
                     >
                       {formatDaysRemaining(daysRemaining)}
                     </Badge>
@@ -116,7 +281,8 @@ export function TripCard({ trip }: TripCardProps) {
                 <div className="sm:hidden">
                   <Badge
                     variant="outline"
-                    className={`text-xs font-medium whitespace-nowrap ${
+                    className={cn(
+                      "text-xs font-medium whitespace-nowrap",
                       daysRemaining < 0
                         ? "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
                         : daysRemaining === 0
@@ -124,7 +290,7 @@ export function TripCard({ trip }: TripCardProps) {
                           : daysRemaining <= 7
                             ? "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
                             : "border-primary/30 bg-primary/10 text-primary"
-                    }`}
+                    )}
                   >
                     {formatDaysRemaining(daysRemaining)}
                   </Badge>
@@ -158,7 +324,8 @@ export function TripCard({ trip }: TripCardProps) {
           <div className="hidden sm:block absolute bottom-4 right-4 z-20">
             <Badge
               variant="outline"
-              className={`text-xs font-medium whitespace-nowrap ${
+              className={cn(
+                "text-xs font-medium whitespace-nowrap",
                 daysRemaining < 0
                   ? "border-muted-foreground/30 bg-muted/50 text-muted-foreground"
                   : daysRemaining === 0
@@ -166,7 +333,7 @@ export function TripCard({ trip }: TripCardProps) {
                     : daysRemaining <= 7
                       ? "border-blue-300/50 bg-blue-100/80 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
                       : "border-primary/30 bg-primary/10 text-primary"
-              }`}
+              )}
             >
               {formatDaysRemaining(daysRemaining)}
             </Badge>

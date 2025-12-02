@@ -5,7 +5,6 @@ import { getRecentTrips } from "@/lib/trips";
 import { getUserPreferredCurrency } from "@/actions/settings";
 import { convertCurrency } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { DashboardProgress } from "@/components/dashboard-progress";
 import { DashboardStatsCards } from "@/components/dashboard-stats-cards";
 import {
@@ -13,7 +12,7 @@ import {
   Plane,
 } from "lucide-react";
 import { DashboardTripDialog } from "@/components/dashboard-trip-dialog";
-import { TripCard } from "@/components/trip-card";
+import { TripsList } from "@/components/trips-list";
 import Link from "next/link";
 import { TrackDashboardView } from "./track-view";
 
@@ -89,35 +88,23 @@ export default async function DashboardPage() {
             </Link>
           </div>
 
-          {recentTrips.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center p-8 sm:p-12 text-center">
-                <Plane className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-4" />
-                <h3 className="text-base sm:text-lg font-semibold mb-2">Aún no hay viajes</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground mb-6 max-w-md">
-                  Comienza a organizar tus listas de compras creando tu primer
-                  viaje. Agrega artículos, rastrea compras y mantente organizado!
-                </p>
-                <DashboardTripDialog />
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {recentTrips.map((trip) => (
-                <TripCard
-                  key={trip.id}
-                  trip={{
-                    id: trip.id,
-                    name: trip.name,
-                    slug: trip.slug,
-                    destination: trip.destination,
-                    startDate: trip.startDate,
-                    endDate: trip.endDate,
-                  }}
-                />
-              ))}
-            </div>
-          )}
+          <TripsList
+            trips={recentTrips.map((trip) => ({
+              id: trip.id,
+              name: trip.name,
+              slug: trip.slug,
+              destination: trip.destination,
+              startDate: trip.startDate,
+              endDate: trip.endDate,
+            }))}
+            emptyState={{
+              icon: <Plane className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mb-4" />,
+              title: "Aún no hay viajes",
+              description: "Comienza a organizar tus listas de compras creando tu primer viaje. Agrega artículos, rastrea compras y mantente organizado!",
+              action: <DashboardTripDialog />,
+            }}
+            storageKey="dashboard"
+          />
         </div>
       </div>
     </div>

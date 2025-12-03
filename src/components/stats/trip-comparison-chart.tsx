@@ -107,62 +107,7 @@ export function TripComparisonChart({
   data,
   currency,
 }: Readonly<TripComparisonChartProps>) {
-  // Datos de prueba cuando no hay datos reales
-  const mockData: TripExpenseData[] = [
-    {
-      tripName: "Viaje a París - Vacaciones de Verano",
-      totalSpent: currency === "USD" ? 125 : 12500,
-      itemCount: 45,
-      purchasedCount: 38,
-    },
-    {
-      tripName: "Compras de Supermercado Semanal",
-      totalSpent: currency === "USD" ? 85 : 8500,
-      itemCount: 32,
-      purchasedCount: 32,
-    },
-    {
-      tripName: "Viaje a Nueva York - Negocios",
-      totalSpent: currency === "USD" ? 189 : 18900,
-      itemCount: 28,
-      purchasedCount: 22,
-    },
-    {
-      tripName: "Compras Navideñas 2024",
-      totalSpent: currency === "USD" ? 152 : 15200,
-      itemCount: 67,
-      purchasedCount: 54,
-    },
-    {
-      tripName: "Viaje a Tokio - Aventura",
-      totalSpent: currency === "USD" ? 223 : 22300,
-      itemCount: 41,
-      purchasedCount: 35,
-    },
-    {
-      tripName: "Compras para Fiesta de Cumpleaños",
-      totalSpent: currency === "USD" ? 68 : 6800,
-      itemCount: 24,
-      purchasedCount: 24,
-    },
-    {
-      tripName: "Viaje a Barcelona - Fin de Semana",
-      totalSpent: currency === "USD" ? 112 : 11200,
-      itemCount: 19,
-      purchasedCount: 15,
-    },
-    {
-      tripName: "Compras de Electrodomésticos",
-      totalSpent: currency === "USD" ? 345 : 34500,
-      itemCount: 12,
-      purchasedCount: 10,
-    },
-  ];
-
-  // Usar datos de prueba si no hay datos reales
-  const displayData = data.length > 0 ? data : mockData;
-
-  const chartData = displayData.map((item) => ({
+  const chartData = data.map((item) => ({
     ...item,
     tripNameShort: truncateName(item.tripName),
   }));
@@ -184,9 +129,7 @@ export function TripComparisonChart({
       <CardHeader>
         <CardTitle>Comparación de Viajes</CardTitle>
         <CardDescription>
-          {data.length > 0
-            ? `Top ${chartData.length} viajes por gastos totales`
-            : "Datos de ejemplo - Comparación de viajes"}
+          Top {data.length} viajes por gastos totales
         </CardDescription>
         {chartData.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 pt-4 border-t border-border">

@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { formatCurrency } from "@/lib/currency";
-import type { Currency } from "@/types/settings";
+import type { Currency } from "@/lib/currency";
 import { TrendingUp } from "lucide-react";
 
 interface MonthlyExpenseData {

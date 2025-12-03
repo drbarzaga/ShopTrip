@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import {
   AreaChart,
   Area,
@@ -11,8 +17,8 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { formatCurrency } from "@/lib/format-currency";
-import type { Currency } from "@/types/settings";
+import { formatCurrency } from "@/lib/currency";
+import type { Currency } from "@/lib/currency";
 
 interface DailyExpenseData {
   date: string;
@@ -31,10 +37,7 @@ function formatDate(dateStr: string): string {
   return date.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
 }
 
-export function DailyExpenseTrend({
-  data,
-  currency,
-}: DailyExpenseTrendProps) {
+export function DailyExpenseTrend({ data, currency }: DailyExpenseTrendProps) {
   const chartData = data.map((item) => ({
     ...item,
     dateLabel: formatDate(item.date),
@@ -126,4 +129,3 @@ export function DailyExpenseTrend({
     </Card>
   );
 }
-

@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import {
   BarChart,
   Bar,
@@ -10,9 +16,10 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  type TooltipProps,
 } from "recharts";
-import { formatCurrency } from "@/lib/format-currency";
-import type { Currency } from "@/types/settings";
+import { formatCurrency } from "@/lib/currency";
+import type { Currency } from "@/lib/currency";
 
 interface TripExpenseData {
   tripName: string;
@@ -31,6 +38,30 @@ function truncateName(name: string, maxLength: number = 20): string {
   return name.substring(0, maxLength - 3) + "...";
 }
 
+interface CustomTooltipProps extends TooltipProps<number, string> {
+  currency: Currency;
+}
+
+function CustomTooltip({ active, payload, currency }: CustomTooltipProps) {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-background border border-border rounded-lg shadow-lg p-3">
+        <p className="text-sm font-medium mb-2">{data.tripName}</p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-medium">Gastos:</span>{" "}
+          {formatCurrency(data.totalSpent, currency)}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          <span className="font-medium">Artículos:</span> {data.itemCount} (
+          {data.purchasedCount} comprados)
+        </p>
+      </div>
+    );
+  }
+  return null;
+}
+
 export function TripComparisonChart({
   data,
   currency,
@@ -39,26 +70,6 @@ export function TripComparisonChart({
     ...item,
     tripNameShort: truncateName(item.tripName),
   }));
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-background border border-border rounded-lg shadow-lg p-3">
-          <p className="text-sm font-medium mb-2">{data.tripName}</p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium">Gastos:</span>{" "}
-            {formatCurrency(data.totalSpent, currency)}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium">Artículos:</span> {data.itemCount} (
-            {data.purchasedCount} comprados)
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <Card>
@@ -98,7 +109,7 @@ export function TripComparisonChart({
                   return value.toString();
                 }}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip currency={currency} />} />
               <Legend />
               <Bar
                 dataKey="totalSpent"
@@ -113,4 +124,3 @@ export function TripComparisonChart({
     </Card>
   );
 }
-

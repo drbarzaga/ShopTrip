@@ -105,7 +105,31 @@ Lista de artículos agregados al viaje con detalles de precios y cantidades.
 
 3. **Configura las variables de entorno**
 
-   Copia el archivo `.env.example` en la raíz del proyecto y renómbralo a `.env`.
+   Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+
+   ```env
+   # Base de datos
+   DATABASE_URL=postgresql://usuario:password@localhost:5432/shop_trip
+
+   # Better Auth
+   BETTER_AUTH_SECRET=tu-secret-key-aqui
+   BETTER_AUTH_URL=http://localhost:3000
+
+   # Email (Resend)
+   RESEND_API_KEY=tu-resend-api-key
+
+   # Groq API (Opcional - para conversión de moneda y sugerencias IA)
+   # Si no se configura, se usarán valores por defecto para conversión de moneda
+   GROQ_API_KEY=tu-groq-api-key
+
+   # OneSignal (Opcional - para notificaciones push)
+   ONESIGNAL_APP_ID=tu-onesignal-app-id
+   ONESIGNAL_REST_API_KEY=tu-onesignal-rest-api-key
+   ```
+
+   **Nota**: `GROQ_API_KEY` es opcional. Si no se configura:
+   - La conversión de moneda usará valores por defecto aproximados
+   - Las sugerencias IA usarán sugerencias genéricas por defecto
 
 4. **Configura la base de datos**
 

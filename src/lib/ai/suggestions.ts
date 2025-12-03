@@ -2,9 +2,17 @@
 
 import { Groq } from "groq-sdk";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+/**
+ * Obtiene el cliente de Groq solo cuando se necesita
+ * Retorna null si no hay API key configurada
+ */
+function getGroqClient(): Groq | null {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey || apiKey.trim() === "") {
+    return null;
+  }
+  return new Groq({ apiKey });
+}
 
 export interface TripSuggestion {
   id: string;
@@ -31,6 +39,13 @@ export interface TripContext {
 export async function generateTripSuggestions(
   trip: TripContext
 ): Promise<TripSuggestion[]> {
+  const groq = getGroqClient();
+  if (!groq) {
+    // Si no hay API key, retornar sugerencias por defecto
+    console.warn("GROQ_API_KEY no configurada, usando sugerencias por defecto");
+    return getDefaultSuggestions(trip);
+  }
+
   try {
     const today = new Date();
     const daysUntil = trip.daysUntilTrip ?? 0;

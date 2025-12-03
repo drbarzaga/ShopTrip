@@ -1,8 +1,16 @@
 import { Groq } from "groq-sdk";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+/**
+ * Obtiene el cliente de Groq solo cuando se necesita
+ * Retorna null si no hay API key configurada
+ */
+function getGroqClient(): Groq | null {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey || apiKey.trim() === "") {
+    return null;
+  }
+  return new Groq({ apiKey });
+}
 
 export type Currency = "UYU" | "USD";
 
@@ -24,6 +32,19 @@ export async function getExchangeRate(
   // Si es la misma moneda, retornar 1
   if (from === to) {
     return 1;
+  }
+
+  const groq = getGroqClient();
+  if (!groq) {
+    // Si no hay API key, usar valores por defecto
+    console.warn("GROQ_API_KEY no configurada, usando valores por defecto");
+    if (from === "UYU" && to === "USD") {
+      return 0.025; // Aproximadamente 1 UYU = 0.025 USD
+    }
+    if (from === "USD" && to === "UYU") {
+      return 40; // Aproximadamente 1 USD = 40 UYU
+    }
+    throw new Error("GROQ_API_KEY no configurada y no hay valor por defecto para esta conversión");
   }
 
   try {

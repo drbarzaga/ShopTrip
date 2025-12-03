@@ -2,9 +2,17 @@
 
 import { Groq } from "groq-sdk";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+/**
+ * Obtiene el cliente de Groq solo cuando se necesita
+ * Retorna null si no hay API key configurada
+ */
+function getGroqClient(): Groq | null {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey || apiKey.trim() === "") {
+    return null;
+  }
+  return new Groq({ apiKey });
+}
 
 export interface TripFromPrompt {
   name: string;
@@ -26,6 +34,11 @@ export interface ItemFromPrompt {
 export async function createTripFromPrompt(
   prompt: string
 ): Promise<TripFromPrompt> {
+  const groq = getGroqClient();
+  if (!groq) {
+    throw new Error("GROQ_API_KEY no configurada. Por favor configura la variable de entorno GROQ_API_KEY.");
+  }
+
   try {
     const completion = await groq.chat.completions.create({
       messages: [
@@ -80,6 +93,11 @@ Responde SOLO con el JSON, sin texto adicional.`,
 export async function createItemFromPrompt(
   prompt: string
 ): Promise<ItemFromPrompt> {
+  const groq = getGroqClient();
+  if (!groq) {
+    throw new Error("GROQ_API_KEY no configurada. Por favor configura la variable de entorno GROQ_API_KEY.");
+  }
+
   try {
     const completion = await groq.chat.completions.create({
       messages: [

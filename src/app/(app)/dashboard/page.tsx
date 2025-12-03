@@ -15,6 +15,8 @@ import { DashboardTripDialog } from "@/components/dashboard-trip-dialog";
 import { TripsList } from "@/components/trips-list";
 import Link from "next/link";
 import { TrackDashboardView } from "./track-view";
+import { getMonthlyExpenseHistory } from "@/lib/stats/expense-history";
+import { MonthlyExpenseChart } from "@/components/stats/monthly-expense-chart";
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +30,25 @@ export default async function DashboardPage() {
   const stats = await getDashboardStats(session.user.id);
   const recentTrips = await getRecentTrips(session.user.id, 5);
   const preferredCurrency = await getUserPreferredCurrency();
+  
+  // Obtener datos para gráfico
+  const monthlyExpenses = await getMonthlyExpenseHistory(session.user.id, 6);
+  
+  // Convertir monedas si es necesario
+  let convertedMonthlyExpenses = monthlyExpenses;
+  if (preferredCurrency === "USD") {
+    convertedMonthlyExpenses = await Promise.all(
+      monthlyExpenses.map(async (expense) => {
+        try {
+          const converted = await convertCurrency(expense.total, "UYU", "USD");
+          return { ...expense, total: converted };
+        } catch (error) {
+          console.error("Error converting currency:", error);
+          return expense;
+        }
+      })
+    );
+  }
   
   // Convertir totalSpent si es necesario
   let convertedTotalSpent = stats.totalSpent;
@@ -67,8 +88,18 @@ export default async function DashboardPage() {
           totalItems={stats.totalItems}
         />
 
-        {/* Recent Trips */}
-        <div className="space-y-4">
+        {/* Compact Chart */}
+        {convertedMonthlyExpenses.length > 0 && (
+          <div className="mb-8">
+            <MonthlyExpenseChart
+              data={convertedMonthlyExpenses}
+              currency={preferredCurrency}
+            />
+          </div>
+        )}
+
+        {/* Recent Trips Section */}
+        <div className="space-y-6 mt-8 pt-8 border-t border-border">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-1">Viajes Recientes</h2>

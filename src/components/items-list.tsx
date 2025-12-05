@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Search, X } from "lucide-react";
+import { Search, X, CheckCircle2, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { TripItemCard } from "@/components/trip-item-card";
@@ -60,6 +60,7 @@ export function ItemsList({
   const [internalSearchQuery, setInternalSearchQuery] = useState("");
   const [internalView, setInternalView] = useState<ViewMode>("list");
   const [selectedUserId, setSelectedUserId] = useState<string>("all");
+  const [purchaseStatus, setPurchaseStatus] = useState<string>("all");
 
   // Usar estado externo si se proporciona, sino usar interno
   const searchQuery = externalSearchQuery ?? internalSearchQuery;
@@ -116,6 +117,13 @@ export function ItemsList({
   const filteredItems = useMemo(() => {
     let filtered = items;
 
+    // Filtrar por estado de compra (comprados/pendientes)
+    if (purchaseStatus === "purchased") {
+      filtered = filtered.filter((item) => item.purchased === true);
+    } else if (purchaseStatus === "pending") {
+      filtered = filtered.filter((item) => item.purchased === false);
+    }
+
     // Filtrar por usuario comprador
     if (selectedUserId !== "all") {
       filtered = filtered.filter((item) => item.purchasedBy === selectedUserId);
@@ -134,7 +142,7 @@ export function ItemsList({
     }
 
     return filtered;
-  }, [items, searchQuery, selectedUserId]);
+  }, [items, searchQuery, selectedUserId, purchaseStatus]);
 
   function getInitials(name: string | null | undefined): string {
     if (!name) return "U";
@@ -175,116 +183,197 @@ export function ItemsList({
             )}
           </div>
 
-          {/* Filtros: Usuario y Vista */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            {/* Filtro por usuario comprador */}
-            {usersWhoPurchased.length > 0 && (
+          {/* Filtros: Estado de compra, Usuario y Vista */}
+          <div className="flex flex-col gap-3">
+            {/* Primera fila: Filtros principales */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              {/* Filtro por estado de compra (comprados/pendientes) */}
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <span className="text-sm font-medium text-foreground whitespace-nowrap shrink-0 hidden sm:inline">
-                  Comprado por:
+                  Estado:
                 </span>
-                <Select
-                  value={selectedUserId}
-                  onValueChange={setSelectedUserId}
-                >
-                  <SelectTrigger className="w-full sm:w-[180px] h-9">
-                    <div className="flex items-center justify-between w-full gap-2">
-                      <SelectValue placeholder="Todos" />
-                      {selectedUserId === "all" ? (
-                        <Badge
-                          variant="secondary"
-                          className="h-5 px-1.5 text-xs font-medium shrink-0 sm:hidden"
-                        >
-                          {items.length}{" "}
-                          {items.length === 1 ? "producto" : "productos"}
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="secondary"
-                          className="h-5 px-1.5 text-xs font-medium shrink-0 sm:hidden"
-                        >
-                          {filteredItems.length}{" "}
-                          {filteredItems.length === 1
-                            ? "producto"
-                            : "productos"}
-                        </Badge>
-                      )}
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos los usuarios</SelectItem>
-                    {usersWhoPurchased.map((user) => {
-                      const userItemsCount = items.filter(
-                        (item) => item.purchasedBy === user.id
-                      ).length;
-                      return (
-                        <SelectItem key={user.id} value={user.id}>
-                          <span className="sr-only">
-                            {user.name || "Usuario sin nombre"}
-                          </span>
-                          {user.name || "Usuario sin nombre"}
-                          <div className="hidden [.radix-select-content_&]:flex items-center justify-between w-full gap-2 pointer-events-none">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <Avatar className="h-5 w-5 shrink-0">
-                                <AvatarImage src={user.image || undefined} />
-                                <AvatarFallback className="text-xs">
-                                  {getInitials(user.name)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="truncate">
-                                {user.name || "Usuario sin nombre"}
-                              </span>
-                            </div>
-                            <Badge
-                              variant="secondary"
-                              className="ml-2 h-5 px-1.5 text-xs font-medium shrink-0"
-                            >
-                              {userItemsCount}
-                            </Badge>
-                          </div>
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-                {selectedUserId === "all" ? (
-                  <Badge
-                    variant="secondary"
-                    className="h-7 px-2 text-xs font-medium shrink-0 hidden sm:inline-flex"
+                <div className="flex items-center gap-1.5 flex-1 sm:flex-initial">
+                  <Select
+                    value={purchaseStatus}
+                    onValueChange={setPurchaseStatus}
                   >
-                    {items.length}{" "}
-                    {items.length === 1 ? "producto" : "productos"}
-                  </Badge>
-                ) : (
-                  <>
-                    <span className="text-sm text-muted-foreground whitespace-nowrap shrink-0 hidden sm:inline">
-                      {filteredItems.length}{" "}
-                      {filteredItems.length === 1 ? "producto" : "productos"}
-                    </span>
+                    <SelectTrigger className="w-full sm:w-[140px] h-9">
+                      <div className="flex items-center gap-2 w-full">
+                        {purchaseStatus === "purchased" && (
+                          <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                        )}
+                        {purchaseStatus === "pending" && (
+                          <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
+                        )}
+                        <SelectValue placeholder="Todos" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">
+                        <div className="flex items-center gap-2">
+                          <span>Todos</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="purchased">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          <span>Comprados</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="pending">
+                        <div className="flex items-center gap-2">
+                          <Circle className="h-4 w-4 text-muted-foreground" />
+                          <span>Pendientes</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {purchaseStatus !== "all" && (
                     <Button
                       variant="ghost"
                       size="icon"
                       className="h-9 w-9 shrink-0"
-                      onClick={() => setSelectedUserId("all")}
-                      aria-label="Limpiar filtro de usuario"
+                      onClick={() => setPurchaseStatus("all")}
+                      aria-label="Limpiar filtro de estado"
                     >
                       <X className="h-4 w-4" />
                     </Button>
-                  </>
-                )}
+                  )}
+                </div>
               </div>
-            )}
 
-            {/* Selector de vista */}
-            <div className="flex items-center gap-3 sm:ml-auto w-full sm:w-auto">
-              <span className="text-sm font-medium text-foreground whitespace-nowrap shrink-0">
-                Vista:
-              </span>
-              <ViewSelector
-                view={view}
-                onViewChange={handleViewChange}
-                className="flex-1 sm:flex-initial"
-              />
+              {/* Filtro por usuario comprador */}
+              {usersWhoPurchased.length > 0 && (
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <span className="text-sm font-medium text-foreground whitespace-nowrap shrink-0 hidden sm:inline">
+                    Comprado por:
+                  </span>
+                  <Select
+                    value={selectedUserId}
+                    onValueChange={setSelectedUserId}
+                  >
+                    <SelectTrigger className="w-full sm:w-[180px] h-9">
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <SelectValue placeholder="Todos" />
+                        {selectedUserId === "all" ? (
+                          <Badge
+                            variant="secondary"
+                            className="h-5 px-1.5 text-xs font-medium shrink-0 sm:hidden"
+                          >
+                            {items.length}{" "}
+                            {items.length === 1 ? "producto" : "productos"}
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="secondary"
+                            className="h-5 px-1.5 text-xs font-medium shrink-0 sm:hidden"
+                          >
+                            {filteredItems.length}{" "}
+                            {filteredItems.length === 1
+                              ? "producto"
+                              : "productos"}
+                          </Badge>
+                        )}
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los usuarios</SelectItem>
+                      {usersWhoPurchased.map((user) => {
+                        const userItemsCount = items.filter(
+                          (item) => item.purchasedBy === user.id
+                        ).length;
+                        return (
+                          <SelectItem key={user.id} value={user.id}>
+                            <span className="sr-only">
+                              {user.name || "Usuario sin nombre"}
+                            </span>
+                            {user.name || "Usuario sin nombre"}
+                            <div className="hidden [.radix-select-content_&]:flex items-center justify-between w-full gap-2 pointer-events-none">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <Avatar className="h-5 w-5 shrink-0">
+                                  <AvatarImage src={user.image || undefined} />
+                                  <AvatarFallback className="text-xs">
+                                    {getInitials(user.name)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="truncate">
+                                  {user.name || "Usuario sin nombre"}
+                                </span>
+                              </div>
+                              <Badge
+                                variant="secondary"
+                                className="ml-2 h-5 px-1.5 text-xs font-medium shrink-0"
+                              >
+                                {userItemsCount}
+                              </Badge>
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  {selectedUserId === "all" ? (
+                    <Badge
+                      variant="secondary"
+                      className="h-7 px-2 text-xs font-medium shrink-0 hidden sm:inline-flex"
+                    >
+                      {items.length}{" "}
+                      {items.length === 1 ? "producto" : "productos"}
+                    </Badge>
+                  ) : (
+                    <>
+                      <span className="text-sm text-muted-foreground whitespace-nowrap shrink-0 hidden sm:inline">
+                        {filteredItems.length}{" "}
+                        {filteredItems.length === 1 ? "producto" : "productos"}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 shrink-0"
+                        onClick={() => setSelectedUserId("all")}
+                        aria-label="Limpiar filtro de usuario"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Selector de vista y contador */}
+            <div className="flex items-center justify-between gap-3 w-full sm:w-auto sm:ml-auto">
+              {/* Contador móvil */}
+              <div className="flex items-center gap-2 sm:hidden">
+                <Badge
+                  variant="secondary"
+                  className="h-7 px-2 text-xs font-medium"
+                >
+                  {filteredItems.length}{" "}
+                  {filteredItems.length === 1 ? "producto" : "productos"}
+                </Badge>
+              </div>
+              {/* Vista */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-foreground whitespace-nowrap shrink-0 hidden sm:inline">
+                  Vista:
+                </span>
+                <ViewSelector
+                  view={view}
+                  onViewChange={handleViewChange}
+                  className="flex-1 sm:flex-initial"
+                />
+              </div>
+              {/* Contador desktop - Solo cuando no hay filtro de usuario */}
+              {usersWhoPurchased.length === 0 && (
+                <Badge
+                  variant="secondary"
+                  className="h-7 px-2 text-xs font-medium shrink-0 hidden sm:inline-flex"
+                >
+                  {filteredItems.length}{" "}
+                  {filteredItems.length === 1 ? "producto" : "productos"}
+                </Badge>
+              )}
             </div>
           </div>
         </div>
@@ -298,13 +387,17 @@ export function ItemsList({
               <Search className="h-6 w-6 text-muted-foreground" />
             </div>
             <h3 className="text-sm font-semibold mb-1">
-              {searchQuery || selectedUserId !== "all"
+              {searchQuery ||
+              selectedUserId !== "all" ||
+              purchaseStatus !== "all"
                 ? "No se encontraron resultados"
                 : "No hay artículos"}
             </h3>
             <p className="text-sm text-muted-foreground">
-              {searchQuery || selectedUserId !== "all"
-                ? `No hay artículos que coincidan con los filtros seleccionados. Intenta con otros términos o cambia el filtro de usuario.`
+              {searchQuery ||
+              selectedUserId !== "all" ||
+              purchaseStatus !== "all"
+                ? `No hay artículos que coincidan con los filtros seleccionados. Intenta con otros términos o cambia los filtros.`
                 : "Comienza agregando tu primer artículo a la lista."}
             </p>
           </CardContent>

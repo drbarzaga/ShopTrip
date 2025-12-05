@@ -41,7 +41,7 @@ export function ViewSelector({
   ];
 
   return (
-    <div className={cn("flex items-center gap-1 rounded-lg bg-muted p-1 border border-border", className)}>
+    <div className={cn("flex items-center gap-1 rounded-lg bg-muted p-1 border border-border w-full sm:w-auto", className)}>
       {views.map(({ mode, icon: Icon, label }) => (
         <Button
           key={mode}
@@ -49,7 +49,7 @@ export function ViewSelector({
           size="sm"
           onClick={() => onViewChange(mode)}
           className={cn(
-            "h-8 px-3 sm:px-4 min-w-[40px]",
+            "h-8 flex-1 sm:flex-initial px-2 sm:px-4 min-w-0 sm:min-w-[40px]",
             view === mode
               ? "bg-background text-foreground shadow-sm border border-border"
               : "text-muted-foreground hover:text-foreground hover:bg-background/50"
